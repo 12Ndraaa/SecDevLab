@@ -103,7 +103,7 @@ return [
     */
 
     'batching' => [
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        'database' => env('DB_CONNECTION') ?: ((env('MYSQLHOST') || env('MYSQL_URL') || env('DB_HOST') || env('DB_URL') || str_starts_with((string) env('DATABASE_URL', ''), 'mysql')) ? 'mysql' : 'sqlite'),
         'table' => 'job_batches',
     ],
 
@@ -122,7 +122,7 @@ return [
 
     'failed' => [
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
-        'database' => env('DB_CONNECTION', 'sqlite'),
+        'database' => env('DB_CONNECTION') ?: ((env('MYSQLHOST') || env('MYSQL_URL') || env('DB_HOST') || env('DB_URL') || str_starts_with((string) env('DATABASE_URL', ''), 'mysql')) ? 'mysql' : 'sqlite'),
         'table' => 'failed_jobs',
     ],
 

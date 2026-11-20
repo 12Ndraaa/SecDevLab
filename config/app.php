@@ -52,7 +52,32 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => (static function (): string {
+        $appUrl = trim((string) env('APP_URL', ''));
+        if ($appUrl !== '') {
+            return rtrim($appUrl, '/');
+        }
+
+        $railwayDomain = trim((string) env('RAILWAY_PUBLIC_DOMAIN', ''));
+        $railwayDomain = rtrim((string) preg_replace('#^https?://#i', '', $railwayDomain), '/');
+
+        return $railwayDomain !== '' ? 'https://'.$railwayDomain : 'http://localhost';
+    })(),
+
+    'force_https' => (static function (): bool {
+        $forceHttps = env('FORCE_HTTPS');
+        if ($forceHttps !== null && $forceHttps !== '') {
+            return filter_var($forceHttps, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $railwayEnv = trim((string) env('RAILWAY_ENVIRONMENT', ''));
+        $railwayDomain = trim((string) env('RAILWAY_PUBLIC_DOMAIN', ''));
+        $appUrl = trim((string) env('APP_URL', ''));
+
+        return $railwayEnv !== ''
+            || $railwayDomain !== ''
+            || str_starts_with(strtolower($appUrl), 'https://');
+    })(),
 
     /*
     |--------------------------------------------------------------------------

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\CveArticle;
 use App\Models\User;
 use App\Services\TrickestCveImporter;
 use Illuminate\Console\Command;
@@ -14,6 +15,7 @@ class SyncTrickestCveCommand extends Command
         {--hot-only : Only import CVEs listed in hot_cves.csv}
         {--path= : Custom local trickest/cve directory path}
         {--no-clone : Skip git clone/pull and import directly from local directory}
+        {--only-if-count-lte= : Only run sync if cve_articles count is less than or equal to this threshold}
         {--repo=https://github.com/trickest/cve.git : Git repository URL}';
 
     protected $description = 'Sparse-clone selected years + hot_cves.csv from trickest/cve and import into cve_articles';
@@ -21,6 +23,26 @@ class SyncTrickestCveCommand extends Command
     public function handle(TrickestCveImporter $importer): int
     {
         @set_time_limit(0);
+
+        $countThreshold = $this->option('only-if-count-lte');
+        if ($countThreshold !== null && $countThreshold !== '') {
+            $parsedThreshold = filter_var($countThreshold, FILTER_VALIDATE_INT, [
+                'options' => ['min_range' => 0],
+            ]);
+            if ($parsedThreshold === false) {
+                $this->error('Invalid --only-if-count-lte value; expected a non-negative integer.');
+
+                return self::INVALID;
+            }
+
+            $threshold = (int) $parsedThreshold;
+            $currentCount = CveArticle::count();
+            if ($currentCount > $threshold) {
+                $this->info("Skipping trickest/cve sync: cve_articles already has {$currentCount} rows (> {$threshold}).");
+
+                return self::SUCCESS;
+            }
+        }
 
         $years = array_values(array_filter(array_map(
             static fn (string $y): int => (int) trim($y),

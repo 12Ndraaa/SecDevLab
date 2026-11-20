@@ -37,102 +37,125 @@ class TrickestCveImporter
         $cleanYears = $this->normalizeYears($years);
         $sparsePatterns = array_merge(['/hot_cves.csv'], array_map(static fn (int $y): string => "/{$y}", $cleanYears));
 
-        $gitDir = $dir.DIRECTORY_SEPARATOR.'.git';
-        $lockFile = $gitDir.DIRECTORY_SEPARATOR.'index.lock';
-        if (is_file($lockFile)) {
-            @unlink($lockFile);
-        }
+        $lockKey = md5(str_replace('\\', '/', rtrim($dir, '/\\')));
+        $lockPath = sys_get_temp_dir().DIRECTORY_SEPARATOR."secdevlab-trickest-clone-{$lockKey}.lock";
+        $lockHandle = @fopen($lockPath, 'c+');
+        if ($lockHandle !== false && ! @flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            @fclose($lockHandle);
 
-        // Replace broken partial clones (--filter=blob:none promisor) with a direct shallow clone
-        $gitConfig = $gitDir.DIRECTORY_SEPARATOR.'config';
-        if (is_file($gitConfig)) {
-            $cfgRaw = @file_get_contents($gitConfig);
-            if (is_string($cfgRaw) && (str_contains($cfgRaw, 'promisor = true') || str_contains($cfgRaw, 'partialclonefilter'))) {
-                $this->deleteDirectory($dir);
-            }
-        }
-
-        if (! is_dir($dir)) {
-            @mkdir($dir, 0775, true);
-        }
-
-        $alreadyCloned = is_dir($gitDir);
-        if (! $alreadyCloned) {
-            $clone = new Process([
-                'git',
-                'clone',
-                '--depth=1',
-                '--no-checkout',
-                $repoUrl,
-                $dir,
-            ], null, null, null, 1800);
-            $clone->run();
-
-            if (! $clone->isSuccessful()) {
-                return [
-                    'ok' => false,
-                    'path' => $dir,
-                    'message' => trim($clone->getErrorOutput() ?: $clone->getOutput() ?: 'Git clone failed.'),
-                ];
-            }
-        }
-
-        $sparse = new Process(
-            array_merge(['git', '-C', $dir, 'sparse-checkout', 'set', '--no-cone'], $sparsePatterns),
-            null,
-            null,
-            null,
-            120
-        );
-        $sparse->run();
-
-        if (! $sparse->isSuccessful()) {
             return [
                 'ok' => false,
                 'path' => $dir,
-                'message' => trim($sparse->getErrorOutput() ?: $sparse->getOutput() ?: 'Git sparse-checkout failed.'),
+                'message' => 'Another trickest/cve git sync is already in progress for this directory.',
             ];
         }
 
-        if ($alreadyCloned) {
-            $fetch = new Process(['git', '-C', $dir, 'fetch', '--depth=1', 'origin', 'HEAD'], null, null, null, 600);
-            $fetch->run();
-            if ($fetch->isSuccessful()) {
-                $reset = new Process(['git', '-C', $dir, 'reset', '--mixed', 'FETCH_HEAD'], null, null, null, 180);
-                $reset->run();
-            }
-        }
-
-        $targets = ['hot_cves.csv'];
-        foreach ($cleanYears as $y) {
-            $targets[] = (string) $y;
-        }
-
-        foreach ($targets as $target) {
-            $lsTree = new Process(['git', '-C', $dir, 'ls-tree', '--name-only', 'HEAD', '--', $target], null, null, null, 60);
-            $lsTree->run();
-            if (! $lsTree->isSuccessful() || trim($lsTree->getOutput()) === '') {
-                continue;
+        try {
+            $gitDir = $dir.DIRECTORY_SEPARATOR.'.git';
+            $lockFile = $gitDir.DIRECTORY_SEPARATOR.'index.lock';
+            if (is_file($lockFile)) {
+                @unlink($lockFile);
             }
 
-            $timeout = $target === 'hot_cves.csv' ? 120 : 900;
-            $checkout = new Process(['git', '-C', $dir, 'checkout', 'HEAD', '--', $target], null, null, null, $timeout);
-            $checkout->run();
+            // Replace broken partial clones (--filter=blob:none promisor) or half-cloned directories with a clean shallow clone
+            $gitConfig = $gitDir.DIRECTORY_SEPARATOR.'config';
+            if (is_file($gitConfig)) {
+                $cfgRaw = @file_get_contents($gitConfig);
+                if (is_string($cfgRaw) && (str_contains($cfgRaw, 'promisor = true') || str_contains($cfgRaw, 'partialclonefilter'))) {
+                    $this->deleteDirectory($dir);
+                }
+            }
+            if (is_dir($dir) && (! is_dir($gitDir) || ! is_file($gitDir.DIRECTORY_SEPARATOR.'HEAD'))) {
+                $this->deleteDirectory($dir);
+            }
 
-            if (! $checkout->isSuccessful()) {
+            if (! is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+
+            $alreadyCloned = is_dir($gitDir);
+            if (! $alreadyCloned) {
+                $clone = new Process([
+                    'git',
+                    'clone',
+                    '--depth=1',
+                    '--no-checkout',
+                    $repoUrl,
+                    $dir,
+                ], null, null, null, 1800);
+                $clone->run();
+
+                if (! $clone->isSuccessful()) {
+                    return [
+                        'ok' => false,
+                        'path' => $dir,
+                        'message' => trim($clone->getErrorOutput() ?: $clone->getOutput() ?: 'Git clone failed.'),
+                    ];
+                }
+            }
+
+            $sparse = new Process(
+                array_merge(['git', '-C', $dir, 'sparse-checkout', 'set', '--no-cone'], $sparsePatterns),
+                null,
+                null,
+                null,
+                120
+            );
+            $sparse->run();
+
+            if (! $sparse->isSuccessful()) {
                 return [
                     'ok' => false,
                     'path' => $dir,
-                    'message' => trim($checkout->getErrorOutput() ?: $checkout->getOutput() ?: "Git checkout failed on {$target}."),
+                    'message' => trim($sparse->getErrorOutput() ?: $sparse->getOutput() ?: 'Git sparse-checkout failed.'),
                 ];
             }
-        }
 
-        return [
-            'ok' => true,
-            'path' => $dir,
-            'message' => 'Sparse clone/update succeeded for years: '.implode(', ', $cleanYears),
-        ];
+            if ($alreadyCloned) {
+                $fetch = new Process(['git', '-C', $dir, 'fetch', '--depth=1', 'origin', 'HEAD'], null, null, null, 600);
+                $fetch->run();
+                if ($fetch->isSuccessful()) {
+                    $reset = new Process(['git', '-C', $dir, 'reset', '--mixed', 'FETCH_HEAD'], null, null, null, 180);
+                    $reset->run();
+                }
+            }
+
+            $targets = ['hot_cves.csv'];
+            foreach ($cleanYears as $y) {
+                $targets[] = (string) $y;
+            }
+
+            foreach ($targets as $target) {
+                $lsTree = new Process(['git', '-C', $dir, 'ls-tree', '--name-only', 'HEAD', '--', $target], null, null, null, 60);
+                $lsTree->run();
+                if (! $lsTree->isSuccessful() || trim($lsTree->getOutput()) === '') {
+                    continue;
+                }
+
+                $timeout = $target === 'hot_cves.csv' ? 120 : 900;
+                $checkout = new Process(['git', '-C', $dir, 'checkout', 'HEAD', '--', $target], null, null, null, $timeout);
+                $checkout->run();
+
+                if (! $checkout->isSuccessful()) {
+                    return [
+                        'ok' => false,
+                        'path' => $dir,
+                        'message' => trim($checkout->getErrorOutput() ?: $checkout->getOutput() ?: "Git checkout failed on {$target}."),
+                    ];
+                }
+            }
+
+            return [
+                'ok' => true,
+                'path' => $dir,
+                'message' => 'Sparse clone/update succeeded for years: '.implode(', ', $cleanYears),
+            ];
+        } finally {
+            if ($lockHandle !== false) {
+                @flock($lockHandle, LOCK_UN);
+                @fclose($lockHandle);
+            }
+        }
     }
 
     /**
