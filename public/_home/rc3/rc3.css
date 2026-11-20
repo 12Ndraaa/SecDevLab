@@ -1,0 +1,2033 @@
+
+.hifi-home *, .hifi-home *::before, .hifi-home *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.hifi-home, .hifi-home { margin: 0; padding: 0; }
+
+.hifi-home {
+  font-family: var(--ps-font-family-base);
+  font-size: var(--ps-font-size-16);
+  line-height: var(--ps-font-leading-normal);
+  color: var(--ps-color-text-default);
+  background: var(--ps-color-bg-default);
+  -webkit-font-smoothing: antialiased;
+}
+
+.hifi-home img { display: block; max-width: 100%; }
+
+.hifi-home a {
+  color: var(--ps-color-text-link);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.hifi-home a:hover { color: var(--ps-color-text-link-hover); }
+
+:root {
+  --ps-color-orange-1: #FF6633;
+  --ps-color-orange-2: #B86633;
+  --ps-color-orange-3: #FF7648;
+  --ps-color-orange-4: #FFB299;
+  --ps-color-orange-5: #FFD9CC;
+  --ps-color-orange-6: #FFF7F5;
+  --ps-color-pro-orange-1: #D4520A;
+  --ps-color-pro-orange-2: #A83E06;
+  --ps-color-pro-orange-3: #E06824;
+  --ps-color-pro-orange-4: #EFA882;
+  --ps-color-pro-orange-5: #F8D5BA;
+  --ps-color-pro-orange-6: #FEF5EE;
+  --ps-color-navy-1: #001350;
+  --ps-color-navy-2: #000023;
+  --ps-color-navy-3: #1A2461;
+  --ps-color-navy-4: #7F85A7;
+  --ps-color-navy-5: #BFC2D3;
+  --ps-color-navy-6: #CCCEDC;
+  --ps-color-navy-7: #D9DBE5;
+  --ps-color-navy-8: #E5E6ED;
+  --ps-color-navy-9: #F2F3F6;
+  --ps-color-enterprise-1: #0094FF;
+  --ps-color-enterprise-2: #0066CC;
+  --ps-color-enterprise-3: #1A9FFF;
+  --ps-color-enterprise-4: #7FC9FF;
+  --ps-color-enterprise-5: #BFE4FF;
+  --ps-color-enterprise-6: #F7F9FD;
+  --ps-color-community-1: #0A5468;
+  --ps-color-community-2: #0E728A;
+  --ps-color-community-3: #3AAFC2;
+  --ps-color-community-4: #7FD0DC;
+  --ps-color-community-5: #B3E8F0;
+  --ps-color-community-6: #E8F8FB;
+  --ps-color-purple-1: #3B0E8C;
+  --ps-color-purple-2: #5416BF;
+  --ps-color-purple-3: #6D28D9;
+  --ps-color-purple-4: #9366E8;
+  --ps-color-purple-5: #C4B5FD;
+  --ps-color-purple-6: #F5F3FF;
+  --ps-color-violet-1: #1E1060;
+  --ps-color-violet-2: #312AA0;
+  --ps-color-violet-3: #4B40D4;
+  --ps-color-violet-4: #6B5CF5;
+  --ps-color-violet-5: #A29BF9;
+  --ps-color-violet-6: #EEEEFF;
+  --ps-color-gray-1: #111827;
+  --ps-color-gray-2: #374151;
+  --ps-color-gray-3: #6B7280;
+  --ps-color-gray-4: #9CA3AF;
+  --ps-color-gray-5: #E5E7EB;
+  --ps-color-gray-6: #F9FAFB;
+  --ps-color-unicorn-pink: #FF69B4;
+  --ps-color-unicorn-purple: #9B59B6;
+  --ps-color-unicorn-lavender: #C084FC;
+  --ps-color-unicorn-teal: #2DD4BF;
+  --ps-color-unicorn-yellow: #FDE68A;
+  --ps-color-unicorn-bg: #1A0030;
+  --ps-color-neutral-1: #333332;
+  --ps-color-neutral-2: #262626;
+  --ps-color-neutral-3: #8C8D8E;
+  --ps-color-neutral-4: #CBD0D1;
+  --ps-color-neutral-5: #EBF0F2;
+  --ps-color-neutral-6: #F0F8FB;
+  --ps-color-white: #FFFFFF;
+  --ps-color-black: #000000;
+  --ps-color-red: #F32A4C;
+  --ps-color-bg-default: #FFFFFF;
+  --ps-color-bg-subtle: #F2F3F6;
+  --ps-color-bg-muted: #E5E6ED;
+  --ps-color-bg-overlay: #D9DBE5;
+  --ps-color-bg-dark: #000023;
+  --ps-color-bg-dark-alt: #001350;
+  --ps-color-bg-mid: #1A2461;
+  --ps-color-bg-brand: #FFF7F5;
+  --ps-color-text-default: #333332;
+
+  --ps-color-text-heading: #29170B;
+  --ps-color-text-muted: #7F85A7;
+  --ps-color-text-disabled: #BFC2D3;
+  --ps-color-text-on-dark: #FFFFFF;
+  --ps-color-text-on-brand: #FFFFFF;
+  --ps-color-text-link: #FF6633;
+  --ps-color-text-link-hover: #FF7648;
+  --ps-color-text-error: #F32A4C;
+  --ps-color-border-default: #D9DBE5;
+  --ps-color-border-subtle: #E5E6ED;
+  --ps-color-border-strong: #BFC2D3;
+  --ps-color-border-active: #7FC9FF;
+  --ps-color-border-brand: #FF6633;
+  --ps-color-border-error: #F32A4C;
+  --ps-color-action-primary: #FF6633;
+  --ps-color-action-primary-hover: #FF7648;
+  --ps-color-action-primary-active: #B86633;
+  --ps-color-action-primary-text: #FFFFFF;
+  --ps-color-action-primary-subtle: #FFF7F5;
+  --ps-color-action-secondary: transparent;
+  --ps-color-action-secondary-border: #000023;
+  --ps-color-action-secondary-text: #000023;
+  --ps-color-action-secondary-hover: #F2F3F6;
+  --ps-color-status-error: #F32A4C;
+  --ps-color-status-info: #0094FF;
+  --ps-color-status-info-bg: #F7F9FD;
+  --ps-color-status-error-bg: #FFF7F5;
+  --ps-color-product-enterprise: #0094FF;
+  --ps-color-product-enterprise-bg: #F7F9FD;
+  --ps-color-product-community: #7FD0DC;
+  --ps-color-product-community-bg: #F2F3F6;
+  --ps-duration-fast: 100ms;
+  --ps-duration-base: 200ms;
+  --ps-duration-slow: 300ms;
+  --ps-duration-slower: 500ms;
+  --ps-easing-default: ease;
+  --ps-easing-in: ease-in;
+  --ps-easing-out: ease-out;
+  --ps-easing-in-out: ease-in-out;
+  --ps-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ps-easing-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ps-easing-snappy: cubic-bezier(0.2, 0, 0, 1);
+  --ps-easing-linear: linear;
+  --ps-radius-none: 0px;
+  --ps-radius-xs: 0px;
+  --ps-radius-s: 0px;
+  --ps-radius-m: 0px;
+  --ps-radius-l: 0px;
+  --ps-radius-xl: 0px;
+  --ps-radius-2xl: 0px;
+  --ps-radius-pill: 9999px;
+  --ps-radius-full: 50%;
+  --ps-space-1: 0.0625rem;
+  --ps-space-2: 0.125rem;
+  --ps-space-4: 0.25rem;
+  --ps-space-8: 0.5rem;
+  --ps-space-12: 0.75rem;
+  --ps-space-16: 1rem;
+  --ps-space-20: 1.25rem;
+  --ps-space-24: 1.5rem;
+  --ps-space-32: 2rem;
+  --ps-space-40: 2.5rem;
+  --ps-space-48: 3rem;
+  --ps-space-64: 4rem;
+  --ps-space-80: 5rem;
+  --ps-space-96: 6rem;
+  --ps-space-128: 8rem;
+  --ps-space-component-padding-x: 1.5rem;
+  --ps-space-component-padding-y: 1rem;
+  --ps-space-component-gap: 1rem;
+  --ps-space-layout-gap: 2rem;
+  --ps-space-layout-section: 5rem;
+  --ps-layout-container-page: 1400px;
+  --ps-layout-container-content: 1200px;
+  --ps-layout-container-narrow: 800px;
+  --ps-layout-gutter: 1.5rem;
+  --ps-icon-size-s: 1rem;
+  --ps-icon-size-m: 1.5rem;
+  --ps-icon-size-l: 3rem;
+
+  --ps-font-family-base: 'Inter', Arial, sans-serif;
+  --ps-font-family-heading: 'Inter', Arial, sans-serif;
+  --ps-font-family-mono: 'Roboto Mono', monospace;
+  --ps-font-family-link: 'JetBrains Mono', Arial, sans-serif;
+  --ps-font-size-12: 0.75rem;
+  --ps-font-size-14: 0.875rem;
+  --ps-font-size-16: 1rem;
+  --ps-font-size-18: 1.125rem;
+  --ps-font-size-20: 1.25rem;
+  --ps-font-size-22: 1.375rem;
+  --ps-font-size-24: 1.5rem;
+  --ps-font-size-30: 1.875rem;
+  --ps-font-size-32: 2rem;
+  --ps-font-size-40: 2.5rem;
+  --ps-font-size-50: 3.125rem;
+  --ps-font-size-60: 3.75rem;
+  --ps-font-size-76: 4.75rem;
+  --ps-font-weight-regular: 400;
+  --ps-font-weight-semibold: 600;
+  --ps-font-weight-bold: 700;
+  --ps-font-leading-tighter: 1.1;
+  --ps-font-leading-tight: 1.25;
+  --ps-font-leading-normal: 1.5;
+  --ps-font-leading-relaxed: 1.625;
+  --ps-font-leading-loose: 1.75;
+  --ps-font-tracking-tight: -0.04em;
+  --ps-font-tracking-snug: -0.01em;
+  --ps-font-tracking-normal: 0em;
+  --ps-font-tracking-wide: 0.05em;
+  --ps-text-h1-size-mobile: 2.5rem;
+  --ps-text-h1-size-desktop: 3.75rem;
+  --ps-text-h1-weight: 700;
+  --ps-text-h1-leading: 1.25;
+  --ps-text-h1-tracking: -0.04em;
+  --ps-text-h2-size-mobile: 1.875rem;
+  --ps-text-h2-size-desktop: 2.5rem;
+  --ps-text-h2-weight: 700;
+  --ps-text-h2-leading: 1.25;
+  --ps-text-h2-tracking: -0.04em;
+  --ps-text-h3-size-mobile: 1.375rem;
+  --ps-text-h3-size-desktop: 2rem;
+  --ps-text-h3-weight: 700;
+  --ps-text-h3-leading: 1.25;
+  --ps-text-h3-tracking: -0.01em;
+  --ps-shadow-xs: 0px 0px 10px 0px rgba(0, 0, 35, 0.05);
+  --ps-shadow-s: 0px 0px 10px 0px rgba(0, 0, 35, 0.1);
+  --ps-shadow-m: 0px 0px 20px 0px rgba(0, 0, 35, 0.2);
+  --ps-shadow-card: 0px 6px 15px 0px rgba(0, 19, 80, 0.25);
+  --ps-shadow-brand: 0 4px 20px rgba(255, 103, 51, 0.3);
+  --ps-component-radius-button: 6px;
+  --ps-component-radius-card: 0px;
+  --ps-component-radius-input: 0px;
+  --ps-component-radius-badge: 0px;
+  --ps-component-radius-floating-nav: 0px;
+}
+
+.hifi-home .container {
+  width: 100%;
+  max-width: var(--ps-layout-container-content);
+  margin: 0 auto;
+  padding: 0 var(--ps-space-24);
+}
+
+@media (min-width: 1024px) {
+  .hifi-home .container { padding: 0 var(--ps-space-48); }
+}
+
+@media (max-width: 640px) {
+  .hifi-home .container { padding: 0 var(--ps-space-8); }
+}
+
+.hifi-home .section { padding: var(--ps-space-80) 0; }
+.hifi-home .section--compact { padding: var(--ps-space-48) 0; }
+.hifi-home .section--dark { background: var(--ps-color-bg-dark); }
+.hifi-home .section--subtle { background: var(--ps-color-bg-subtle); }
+
+.hifi-home h1, .hifi-home .h1 {
+  font-family: var(--ps-font-family-heading);
+  font-size: clamp(var(--ps-text-h1-size-mobile), 5vw, var(--ps-text-h1-size-desktop));
+  font-weight: var(--ps-text-h1-weight);
+  line-height: var(--ps-text-h1-leading);
+  letter-spacing: var(--ps-text-h1-tracking);
+  color: var(--ps-color-text-heading);
+}
+
+.hifi-home h2, .hifi-home .h2 {
+  font-family: var(--ps-font-family-heading);
+  font-size: clamp(var(--ps-text-h2-size-mobile), 3.5vw, var(--ps-text-h2-size-desktop));
+  font-weight: var(--ps-text-h2-weight);
+  line-height: var(--ps-text-h2-leading);
+  letter-spacing: var(--ps-text-h2-tracking);
+  color: var(--ps-color-text-heading);
+}
+
+.hifi-home h3, .hifi-home .h3 {
+  font-family: var(--ps-font-family-heading);
+  font-size: clamp(var(--ps-text-h3-size-mobile), 2vw, var(--ps-text-h3-size-desktop));
+  font-weight: var(--ps-text-h3-weight);
+  line-height: var(--ps-text-h3-leading);
+  letter-spacing: var(--ps-text-h3-tracking);
+  color: var(--ps-color-text-heading);
+}
+
+.hifi-home p { line-height: var(--ps-font-leading-relaxed); }
+
+.hifi-home .eyebrow {
+  font-size: var(--ps-font-size-12);
+  font-weight: var(--ps-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ps-font-tracking-wide);
+  color: var(--ps-color-text-muted);
+  margin-bottom: var(--ps-space-16);
+}
+
+.hifi-home .hifi-section-heading {
+  text-align: center;
+  max-width: 46ch;
+  margin: 0 auto var(--ps-space-8);
+  color: var(--ps-color-text-heading);
+  font-size: clamp(2.5rem, 4.5vw, 3.25rem);
+}
+
+.hifi-home .hifi-section-subtext {
+  text-align: center;
+  max-width: 60ch;
+  margin: 0 auto var(--ps-space-32);
+  font-size: var(--ps-font-size-20);
+  color: var(--ps-color-text-default);
+}
+
+.hifi-home .hifi-section-subtext__link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  font-family: var(--ps-font-family-link);
+  font-weight: var(--ps-font-weight-semibold);
+  white-space: nowrap;
+}
+
+.hifi-home .enterprise-trust-hifi__cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--ps-space-16);
+  margin-top: var(--ps-space-16);
+}
+
+.hifi-home .icon-chevron-right {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.hifi-home .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ps-space-8);
+  padding: var(--ps-space-component-padding-y) var(--ps-space-component-padding-x);
+  border-radius: var(--ps-component-radius-button, var(--ps-radius-pill));
+  font-family: var(--ps-font-family-base);
+  font-size: var(--ps-font-size-16);
+  font-weight: var(--ps-font-weight-semibold);
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  border: 2px solid transparent;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .hifi-home main .btn {
+    width: calc(var(--real-vw, 100vw) - 24px);
+    flex-shrink: 0;
+    margin-left: calc(50% - (var(--real-vw, 100vw) / 2) + 12px);
+    margin-right: calc(50% - (var(--real-vw, 100vw) / 2) + 12px);
+    justify-content: center;
+  }
+}
+
+.hifi-home .btn--primary {
+  background: var(--ps-color-action-primary);
+  color: var(--ps-color-action-primary-text);
+  border-color: var(--ps-color-action-primary);
+}
+.hifi-home .btn--primary:hover {
+  background: var(--ps-color-action-primary-hover);
+  border-color: var(--ps-color-action-primary-hover);
+  color: var(--ps-color-action-primary-text);
+}
+
+.hifi-home .btn--secondary {
+  background: var(--ps-color-action-secondary);
+  color: var(--ps-color-action-secondary-text);
+  border-color: var(--ps-color-action-secondary-border);
+}
+.hifi-home .btn--secondary:hover {
+  background: rgba(0, 0, 0, 0.07);
+  color: var(--ps-color-action-secondary-text);
+}
+
+.hifi-home .research-showcase-hifi__cta {
+  display: flex;
+  width: fit-content;
+  margin: var(--ps-space-16) auto var(--ps-space-48);
+}
+
+.hifi-home .ambassador-wall__cta {
+  display: flex;
+  width: fit-content;
+  margin: var(--ps-space-16) auto 0;
+
+}
+
+.hifi-home .site-nav {
+  background: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.hifi-home .site-nav .container {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  min-height: 64px;
+}
+
+.hifi-home .nav-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--ps-font-family-base);
+  font-size: var(--ps-font-size-18);
+  font-weight: var(--ps-font-weight-bold);
+  color: var(--ps-color-text-heading);
+  text-decoration: none;
+  flex-shrink: 0;
+  line-height: 1.2;
+}
+
+.hifi-home .nav-logo__mark {
+  display: block;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.hifi-home .nav-logo__wordmark {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.hifi-home .nav-ctas {
+  display: flex;
+  gap: var(--ps-space-8);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.hifi-home .nav-ctas .btn {
+  font-size: var(--ps-font-size-14);
+  padding: 0.5rem 1.125rem;
+  border-radius: var(--ps-radius-pill);
+}
+
+@media (max-width: 767px) {
+  .hifi-home .site-nav .container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: var(--ps-space-12) var(--ps-space-16);
+    min-height: auto;
+    gap: 0;
+  }
+  .hifi-home .nav-logo { flex: 1; }
+  .hifi-home .nav-ctas { order: 2; flex-shrink: 0; }
+  .hifi-home .nav-ctas .btn { font-size: 0.8125rem; padding: 0.375rem 0.875rem; }
+}
+
+.hifi-home .site-footer {
+  position: relative;
+  z-index: 1;
+  border-top: 2px solid var(--ps-color-orange-1);
+  padding: var(--ps-space-48) 0 var(--ps-space-32);
+}
+
+.hifi-home .footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps-space-32);
+}
+
+.hifi-home .footer-logo {
+  font-family: var(--ps-font-family-heading);
+  font-size: var(--ps-font-size-14);
+  font-weight: var(--ps-font-weight-bold);
+  color: var(--ps-color-text-muted);
+  text-decoration: none;
+}
+
+.hifi-home .footer-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--ps-space-32);
+}
+
+.hifi-home .footer-column__heading {
+  font-size: var(--ps-font-size-12);
+  font-weight: var(--ps-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--ps-font-tracking-wide);
+  color: var(--ps-color-text-heading);
+  margin-bottom: var(--ps-space-12);
+}
+
+.hifi-home .footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps-space-8);
+}
+
+.hifi-home .footer-links a {
+  font-size: var(--ps-font-size-14);
+  color: var(--ps-color-text-muted);
+  transition: color 0.15s;
+}
+
+.hifi-home .footer-links a:hover { color: var(--ps-color-text-heading); }
+
+.hifi-home .footer-copy {
+  font-size: var(--ps-font-size-12);
+  color: var(--ps-color-text-muted);
+  width: 100%;
+}
+
+.hifi-home .community-proof-hifi {
+  background: var(--ps-color-bg-subtle);
+  padding-top: 0;
+}
+
+.hifi-home .community-proof-hifi .ambassador-wall {
+  margin-top: 0;
+}
+
+.hifi-home .ambassador-wall {
+  position: relative;
+  width: 100%;
+  min-height: 900px;
+  overflow: visible;
+  margin: var(--ps-space-48) 0 var(--ps-space-32);
+}
+
+.hifi-home .ambassador-wall__text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  width: min(90%, 42rem);
+  text-align: center;
+}
+
+.hifi-home .ambassador-wall__update-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ps-space-8);
+  margin-bottom: var(--ps-space-16);
+}
+
+.hifi-home .ambassador-wall__update-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ps-space-8);
+  height: var(--ps-space-32);
+  padding: 0 var(--ps-space-16);
+  border: 1px solid var(--ps-color-border-default);
+  border-radius: var(--ps-radius-pill);
+  background: var(--ps-color-bg-default);
+  font-size: var(--ps-font-size-14);
+  font-weight: var(--ps-font-weight-semibold);
+  color: var(--ps-color-text-default);
+  cursor: help;
+}
+
+.hifi-home .ambassador-wall__update-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ps-space-32);
+  height: var(--ps-space-32);
+  flex-shrink: 0;
+  border: 1px solid var(--ps-color-border-default);
+  border-radius: 50%;
+  background: var(--ps-color-bg-default);
+  color: var(--ps-color-text-default);
+  transition: background-color 0.15s ease;
+}
+
+.hifi-home .ambassador-wall__update-link:hover,
+.hifi-home .ambassador-wall__update-link:focus-visible {
+  background: var(--ps-color-bg-subtle);
+}
+
+.hifi-home .ambassador-wall__update-link svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.hifi-home .ambassador-wall__update-dot {
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #22C55E;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hifi-home .ambassador-wall__update-dot {
+    animation: community-update-dot-pulse 2.6s ease-in-out infinite;
+  }
+}
+
+@keyframes community-update-dot-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.hifi-home .ambassador-wall__text::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46rem;
+  height: 28rem;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  background: radial-gradient(
+    closest-side,
+    rgba(242, 243, 246, 0.96) 0%,
+    rgba(242, 243, 246, 0.82) 50%,
+    rgba(242, 243, 246, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.hifi-home .ambassador-wall::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hifi-home .ambassador-wall__swiggzagg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.55;
+  mask-image: radial-gradient(closest-corner at center, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.9) 45%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask-image: radial-gradient(closest-corner at center, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.9) 45%, rgba(0, 0, 0, 0) 100%);
+}
+
+.hifi-home .ambassador-circle {
+  position: absolute;
+  aspect-ratio: 1 / 1;
+
+  pointer-events: none;
+}
+
+.hifi-home .ambassador-circle:hover {
+  z-index: 30;
+}
+
+.hifi-home .ambassador-circle--corey { left: 12%; top: 24%; width: min(21.25%, 17.5vh); z-index: 1; --accent: #3AAFC2; }
+.hifi-home .ambassador-circle--federico { left: 44%; top: 14%; width: min(11.25%, 10vh); z-index: 3; --accent: #786FFF; }
+.hifi-home .ambassador-circle--alan { left: 80%; top: 20%; width: min(23.75%, 18.75vh); z-index: 5; --accent: #FF6633; }
+.hifi-home .ambassador-circle--rana { left: 8%; top: 82%; width: min(18.75%, 15vh); z-index: 4; --accent: #0094FF; }
+.hifi-home .ambassador-circle--tib3rius { left: 52%; top: 90%; width: min(12.5%, 10vh); z-index: 2; --accent: #FFB100; }
+
+/* __inner now carries ONLY the static positioning transform (the
+   translate(-50%, -50%) that centres the circle on its anchor point, plus
+   Alan's fixed resting offset). It has NO transition and is never animated
+   on hover: the entire hover motion (lift + zoom) lives on __photo-wrap
+   below, co-located with the circular clip. Previously a transform
+   transition remained here in addition to the one on __photo-wrap, so the
+   zoom was split across two nested animating elements — removing it leaves
+   exactly one animated transform, on the clip element itself. */
+.hifi-home .ambassador-circle__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+}
+
+.hifi-home .ambassador-circle--alan .ambassador-circle__inner {
+  transform: translate(-50%, -50%) translateY(-10px);
+}
+
+.hifi-home .ambassador-circle__photo-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--ps-radius-full);
+  overflow: hidden;
+
+  /* Circular clip, WebKit-hardened. The whole hover motion (lift + zoom)
+     animates on THIS element, and it also hosts the two mix-blend-mode
+     layers (__wash `color`, __shade `multiply`) plus `isolation: isolate`.
+     That combination forces Safari to promote the blend group onto its own
+     composited layer during the animation, and on a promoted layer WebKit
+     drops the `border-radius` + `overflow: hidden` rounded clip, falling
+     back to the layer's rectangular bounds — that's the square flash seen
+     mid-transition on these bubbles (the community-highlight bubbles have
+     no blend layers/isolation, so they're never promoted and never flash).
+     border-radius alone can't survive that promotion, so an explicit
+     `clip-path: circle()` is added alongside it: WebKit honours clip-path
+     on promoted layers reliably, keeping the circle throughout. `will-change:
+     transform` promotes the element up front so the rounded clip is
+     rasterised into its own layer before the animation starts rather than
+     re-derived per frame. Visually identical in Chrome/Firefox. */
+  -webkit-clip-path: circle(50% at 50% 50%);
+  clip-path: circle(50% at 50% 50%);
+  will-change: transform;
+
+  box-shadow: 0 14px 30px -14px rgba(0, 3, 20, 0.35), 0 0 0 1px rgba(0, 3, 20, 0.1);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.32s ease;
+
+  /* Isolate the mix-blend-mode layers (__wash `color` and __shade `multiply`)
+     to this element's own group. WebKit is inconsistent about blending
+     children against the page backdrop and about clipping a blended child to
+     an ancestor's border-radius, which in Safari could leave faint
+     square-cornered darkening bleeding outside the circle. `isolation: isolate`
+     confines the blend to the opaque photo below it — visually identical in
+     Chrome/Firefox, but deterministic and clipped correctly in Safari. */
+  isolation: isolate;
+
+  pointer-events: auto;
+  cursor: default;
+}
+
+/* The full hover transform — lift + zoom — lives here on the clip element,
+   the single animated transform in the stack (the ancestor __inner no longer
+   transitions). Default bubbles lift 8px; Alan lifts 6px on top of his
+   static -10px resting offset (same net motion as before the consolidation).
+   The box-shadow is shared from the rule above; Alan only overrides transform. */
+.hifi-home .ambassador-circle:hover .ambassador-circle__photo-wrap {
+  transform: translateY(-8px) scale(1.07);
+  box-shadow:
+    0 0 0 3px var(--accent),
+    0 22px 46px -10px rgba(0, 0, 10, 0.65),
+    0 0 34px -4px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.hifi-home .ambassador-circle--alan:hover .ambassador-circle__photo-wrap {
+  transform: translateY(-6px) scale(1.07);
+}
+
+.hifi-home .ambassador-circle__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.08) brightness(0.88);
+  transition: filter 0.4s ease;
+}
+.hifi-home .ambassador-circle:hover .ambassador-circle__photo {
+  filter: none;
+}
+
+.hifi-home .ambassador-circle--corey .ambassador-circle__photo { object-position: 37% 33%; }
+.hifi-home .ambassador-circle--federico .ambassador-circle__photo { object-position: 35% 50%; }
+.hifi-home .ambassador-circle--alan .ambassador-circle__photo { object-position: 49% 44%; }
+.hifi-home .ambassador-circle--rana .ambassador-circle__photo { object-position: 51% 46%; }
+.hifi-home .ambassador-circle--tib3rius .ambassador-circle__photo { object-position: 30% 44%; }
+
+@media (max-width: 640px) {
+  .hifi-home .ambassador-wall {
+    min-height: 900px;
+  }
+
+  .hifi-home .ambassador-wall__text {
+    top: var(--ps-space-24);
+    transform: translateX(-50%);
+    width: min(92%, 26rem);
+  }
+
+  .hifi-home .ambassador-wall__text::before {
+    content: none;
+  }
+
+  /* Mobile: prune to a lighter, more breathable set — three bubbles
+     (Federico, Tib3rius, and the "students" highlight) are hidden here so
+     the remaining seven can spread across the taller wall without the
+     cramped, overlapping feel of the full ten. Desktop and tablet keep
+     the full set (their own breakpoint blocks are untouched). */
+  .hifi-home .ambassador-circle--federico,
+  .hifi-home .ambassador-circle--tib3rius,
+  .hifi-home .community-highlight--students { display: none; }
+
+  /* Cluster shifted down (top row from ~50% to ~58%) so there's clear
+     breathing room below the "Join community" CTA, and the lower bubbles
+     are pushed out asymmetrically toward the bottom-left / bottom-right
+     corners so the composition fills the section width instead of sitting
+     in a tight central column. */
+  .hifi-home .ambassador-circle--corey { top: 76%; left: 16%; width: min(24%, 18vh); }
+  .hifi-home .ambassador-circle--alan { top: 58%; left: 73%; width: min(30%, 22vh); }
+  .hifi-home .ambassador-circle--rana { top: 88%; left: 84%; width: min(24%, 18vh); }
+}
+
+.hifi-home .ambassador-circle__wash {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  mix-blend-mode: color;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.hifi-home .ambassador-circle:hover .ambassador-circle__wash {
+  opacity: 0;
+}
+
+.hifi-home .ambassador-circle__shade {
+  position: absolute;
+  inset: 0;
+  background: var(--ps-color-navy-2);
+  mix-blend-mode: multiply;
+  opacity: 0.18;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.hifi-home .ambassador-circle:hover .ambassador-circle__shade {
+  opacity: 0;
+}
+
+.hifi-home .ambassador-circle__tooltip {
+  position: absolute;
+  width: 208px;
+  padding: 10px 14px;
+  left: 50%;
+  bottom: 114%;
+  --tt-x: -50%;
+  --tt-y: 6px;
+  transform: translate(var(--tt-x), var(--tt-y)) scale(0.94);
+  background: rgba(6, 6, 28, 0.94);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: var(--ps-radius-m);
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 10, 0.6), 0 0 24px -6px color-mix(in srgb, var(--accent) 35%, transparent);
+  pointer-events: auto;
+  z-index: 40;
+  opacity: 0;
+  visibility: hidden;
+  /* Hover linger (WebKit-safe rewrite). The original mechanism delayed a
+     `pointer-events` transition so the tooltip stayed interactive for ~400ms
+     after mouseleave, letting the cursor travel from the bubble onto the
+     tooltip (a descendant of .ambassador-circle) to keep the ancestor :hover
+     alive. Safari does NOT animate/transition `pointer-events`, so that delay
+     was ignored there and the tooltip went non-interactive the instant the
+     cursor left the bubble — the "move onto the tooltip to keep it open"
+     persistence worked in Chrome/Firefox but silently broke in Safari.
+     `visibility` IS a discrete property Safari transitions with a delay, so we
+     gate interactivity with it instead: pointer-events stays `auto` at all
+     times (a `visibility: hidden` element is not hit-tested, so there's no
+     stray hover zone while hidden), and on mouseleave the resting rule keeps
+     the tooltip `visible` — and therefore hoverable — through the 0.4s linger
+     and the 0.2s fade (0.6s total) before flipping to hidden. The :hover rule
+     zeroes every delay so the reveal stays instant. Identical timing/behaviour
+     to before in Chrome/Firefox, now also correct in Safari. */
+  transition:
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s,
+    visibility 0s 0.6s;
+}
+
+.hifi-home .ambassador-circle__tooltip--below {
+  top: 114%;
+  bottom: auto;
+  --tt-y: -6px;
+}
+.hifi-home .ambassador-circle__tooltip--align-left { left: 0%; --tt-x: 0%; }
+.hifi-home .ambassador-circle__tooltip--align-right { left: 100%; --tt-x: -100%; }
+
+.hifi-home .ambassador-circle--tib3rius .ambassador-circle__tooltip {
+  top: auto;
+  bottom: 100%;
+  left: 100%;
+  --tt-x: 0%;
+  --tt-y: 6px;
+}
+
+@media (max-width: 900px) {
+  .hifi-home .ambassador-circle__tooltip,
+  .hifi-home .ambassador-circle__tooltip--align-left,
+  .hifi-home .ambassador-circle__tooltip--align-right,
+  .hifi-home .ambassador-circle--tib3rius .ambassador-circle__tooltip {
+    left: 50%;
+    width: min(208px, 66vw);
+  }
+}
+@media (max-width: 640px) {
+  .hifi-home .ambassador-circle--corey .ambassador-circle__tooltip { --tt-x: calc(-50% + (50vw - 16vw)); }
+  .hifi-home .ambassador-circle--alan .ambassador-circle__tooltip { --tt-x: calc(-50% + (50vw - 73vw)); }
+  .hifi-home .ambassador-circle--rana .ambassador-circle__tooltip { --tt-x: calc(-50% + (50vw - 84vw)); }
+}
+@media (min-width: 641px) and (max-width: 900px) {
+  .hifi-home .ambassador-circle--corey .ambassador-circle__tooltip { --tt-x: calc(-50% + (50vw - 13vw)); }
+  .hifi-home .ambassador-circle--federico .ambassador-circle__tooltip { --tt-x: calc(-50% + (50vw - 44vw)); }
+  .hifi-home .ambassador-circle--alan .ambassador-circle__tooltip { --tt-x: calc(-50% + (50vw - 89vw)); }
+  .hifi-home .ambassador-circle--rana .ambassador-circle__tooltip { --tt-x: calc(-50% + (50vw - 11vw)); }
+  .hifi-home .ambassador-circle--tib3rius .ambassador-circle__tooltip { --tt-x: calc(-50% + (50vw - 88vw)); }
+}
+
+.hifi-home .ambassador-circle:hover .ambassador-circle__tooltip {
+  opacity: 1;
+  transform: translate(var(--tt-x), 0) scale(1);
+  visibility: visible;
+  transition:
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0s,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0s,
+    visibility 0s 0s;
+}
+
+.hifi-home .ambassador-circle__tooltip-name {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-4);
+  margin: 0 0 4px;
+  font-family: var(--ps-font-family-heading);
+  font-weight: var(--ps-font-weight-bold);
+  font-size: var(--ps-font-size-14);
+  color: var(--ps-color-text-on-dark);
+}
+
+.hifi-home .ambassador-circle__tooltip-meta {
+  font-family: var(--ps-font-family-mono);
+  font-size: var(--ps-font-size-12);
+  letter-spacing: var(--ps-font-tracking-wide);
+  font-weight: var(--ps-font-weight-bold);
+  color: var(--accent);
+  margin: 0 0 6px;
+}
+
+.hifi-home .ambassador-circle__tooltip-specialty {
+  font-size: var(--ps-font-size-12);
+  line-height: var(--ps-font-leading-normal);
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0;
+}
+
+.hifi-home .community-highlight {
+  position: absolute;
+  aspect-ratio: 1 / 1;
+
+  pointer-events: none;
+}
+
+.hifi-home .community-highlight:hover {
+  z-index: 30;
+}
+
+.hifi-home .community-highlight--pros-vs-joes { left: 30%; top: 18%; width: min(25%, 20vh); z-index: 6; }
+.hifi-home .community-highlight--hac-nyc { left: 61%; top: 20%; width: min(20%, 16.25vh); z-index: 7; }
+.hifi-home .community-highlight--securityfest { left: 30%; top: 78%; width: min(32.5%, 26.25vh); z-index: 8; }
+.hifi-home .community-highlight--students { left: 70%; top: 80%; width: min(20%, 16.25vh); z-index: 9; }
+.hifi-home .community-highlight--burp-on-tour { left: 84%; top: 86%; width: min(25%, 20vh); z-index: 10; }
+
+.hifi-home .community-highlight__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: translate(-50%, -50%);
+  border-radius: var(--ps-radius-full);
+  overflow: hidden;
+  box-shadow: 0 14px 30px -14px rgba(0, 3, 20, 0.35), 0 0 0 1px rgba(0, 3, 20, 0.1);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.32s ease;
+
+  pointer-events: auto;
+  cursor: default;
+}
+
+.hifi-home .community-highlight:hover .community-highlight__inner {
+  transform: translate(-50%, -50%) translateY(-8px) scale(1.06);
+  box-shadow: 0 0 0 3px var(--ps-color-orange-1), 0 22px 46px -10px rgba(0, 0, 10, 0.5);
+}
+
+.hifi-home .community-highlight__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hifi-home .community-highlight--pros-vs-joes .community-highlight__photo { object-position: 50% 60%; }
+.hifi-home .community-highlight--hac-nyc .community-highlight__photo { object-position: 45% 40%; }
+.hifi-home .community-highlight--securityfest .community-highlight__photo { object-position: 50% 30%; }
+.hifi-home .community-highlight--students .community-highlight__photo { object-position: 50% 35%; }
+.hifi-home .community-highlight--burp-on-tour .community-highlight__photo { object-position: 50% 35%; }
+
+.hifi-home .community-highlight__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 3, 20, 0.28), rgba(0, 3, 20, 0) 55%);
+  pointer-events: none;
+}
+
+.hifi-home .community-highlight__tooltip {
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+
+  transform: translate(var(--cht-x, -50%), 4px);
+  white-space: nowrap;
+  padding: 6px 12px;
+  background: rgba(6, 6, 28, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  font-family: var(--ps-font-family-heading);
+  font-size: var(--ps-font-size-12);
+  font-weight: var(--ps-font-weight-bold);
+  color: var(--ps-color-text-on-dark);
+  pointer-events: auto;
+  opacity: 0;
+  visibility: hidden;
+  /* Hover linger (same WebKit-safe mechanism as .ambassador-circle__tooltip
+     above — see the long note there). Safari doesn't transition
+     `pointer-events`, so the delay is driven by `visibility` instead: the
+     tooltip stays interactive (pointer-events always `auto`, non-hit-tested
+     while `visibility: hidden`) through the 0.4s linger + 0.2s fade before it
+     flips to hidden; the :hover rule zeroes the delays for an instant reveal.
+     Same behaviour cross-browser, now correct in Safari too. */
+  transition:
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s,
+    visibility 0s 0.6s;
+  z-index: 40;
+}
+
+.hifi-home .community-highlight:hover .community-highlight__tooltip {
+  opacity: 1;
+  transform: translate(var(--cht-x, -50%), 0);
+  visibility: visible;
+  transition:
+    opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0s,
+    transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) 0s,
+    visibility 0s 0s;
+}
+
+@media (max-width: 900px) {
+  .hifi-home .community-highlight__tooltip {
+    white-space: normal;
+    max-width: 60vw;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Top-left of the (shifted-down) cluster. */
+  .hifi-home .community-highlight--pros-vs-joes { top: 60%; left: 29%; width: min(34%, 26vh); }
+  /* Mid-right. */
+  .hifi-home .community-highlight--hac-nyc { top: 76%; left: 65%; width: min(26%, 20vh); }
+  /* Bottom-left corner — fills the previously empty lower-left space. */
+  .hifi-home .community-highlight--securityfest { left: 26%; top: 90%; width: min(34%, 26vh); }
+
+  /* Bottom-centre, bridging the two lower corners. Re-anchored from the
+     old right:38% to a left value so it sits within the re-spaced
+     seven-bubble composition. */
+  .hifi-home .community-highlight--burp-on-tour { left: 53%; right: auto; top: 94%; width: min(26%, 20vh); }
+
+  .hifi-home .community-highlight--pros-vs-joes .community-highlight__tooltip {
+    --cht-x: calc(-50% + (50vw - 29vw - 0.5 * min(34vw, 26vh)));
+  }
+  .hifi-home .community-highlight--hac-nyc .community-highlight__tooltip {
+    --cht-x: calc(-50% + (50vw - 65vw - 0.5 * min(26vw, 20vh)));
+  }
+  .hifi-home .community-highlight--securityfest .community-highlight__tooltip {
+    --cht-x: calc(-50% + (50vw - 26vw - 0.5 * min(34vw, 26vh)));
+  }
+  .hifi-home .community-highlight--burp-on-tour .community-highlight__tooltip {
+    --cht-x: calc(-50% + (50vw - 53vw - 0.5 * min(26vw, 20vh)));
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .hifi-home .ambassador-wall {
+    min-height: 780px;
+  }
+
+  .hifi-home .ambassador-wall__text {
+    top: var(--ps-space-24);
+    transform: translateX(-50%);
+    width: min(88%, 30rem);
+  }
+
+  .hifi-home .ambassador-wall__text::before {
+    content: none;
+  }
+
+  .hifi-home .ambassador-circle--corey { left: 13%; top: 67%; width: min(17%, 100px); }
+  .hifi-home .ambassador-circle--federico { left: 44%; top: 57%; width: min(13%, 92px); }
+  .hifi-home .ambassador-circle--alan { left: 89%; top: 42%; width: min(19%, 112px); }
+  .hifi-home .ambassador-circle--rana { left: 11%; top: 40%; width: min(16%, 94px); }
+  .hifi-home .ambassador-circle--tib3rius { left: 88%; top: 68%; width: min(15%, 96px); }
+
+  .hifi-home .community-highlight--securityfest { left: 24%; top: 54%; width: min(26%, 150px); }
+  .hifi-home .community-highlight--burp-on-tour { left: 69%; top: 78%; width: min(24%, 104px); }
+  .hifi-home .community-highlight--pros-vs-joes { left: 30%; top: 76%; width: min(22%, 164px); }
+  .hifi-home .community-highlight--students { left: 50%; top: 72%; width: min(18%, 160px); }
+  .hifi-home .community-highlight--hac-nyc { left: 70%; top: 57%; width: min(22%, 180px); }
+
+  .hifi-home .community-highlight--securityfest .community-highlight__tooltip {
+    --cht-x: calc(-50% + (50vw - 24vw - 0.5 * min(26vw, 150px)));
+  }
+  .hifi-home .community-highlight--burp-on-tour .community-highlight__tooltip {
+    --cht-x: calc(-50% + (50vw - 69vw - 0.5 * min(24vw, 104px)));
+  }
+  .hifi-home .community-highlight--pros-vs-joes .community-highlight__tooltip {
+    --cht-x: calc(-50% + (50vw - 30vw - 0.5 * min(22vw, 164px)));
+  }
+  .hifi-home .community-highlight--students .community-highlight__tooltip {
+    --cht-x: calc(-50% + (50vw - 50vw - 0.5 * min(18vw, 160px)));
+  }
+  .hifi-home .community-highlight--hac-nyc .community-highlight__tooltip {
+    --cht-x: calc(-50% + (50vw - 70vw - 0.5 * min(22vw, 180px)));
+  }
+}
+
+.hifi-home .community-ticker__tooltip {
+  position: fixed;
+  z-index: 20;
+  width: 22rem;
+  padding: var(--ps-space-8) var(--ps-space-12);
+  background: var(--ps-color-text-heading);
+  color: var(--ps-color-white);
+  font-family: var(--ps-font-family-base);
+  font-size: var(--ps-font-size-14);
+  font-weight: var(--ps-font-weight-regular);
+  white-space: normal;
+  border-radius: var(--ps-radius-m);
+  opacity: 0;
+  transform: translate(-50%, calc(-100% + 4px));
+  pointer-events: none;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hifi-home .community-ticker__tooltip.is-visible {
+  opacity: 1;
+  transform: translate(-50%, -100%);
+}
+
+.hifi-home .social-balls {
+  position: relative;
+  z-index: 100;
+  margin-top: var(--ps-space-48);
+  text-align: center;
+}
+
+.hifi-home .social-balls__row {
+  display: flex;
+  justify-content: center;
+  gap: var(--ps-space-16);
+}
+
+.hifi-home .social-balls__ball {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--ps-radius-full);
+  background: var(--ps-color-bg-default);
+  border: 1px solid var(--ps-color-border-default);
+  color: var(--ps-color-text-heading);
+  transition: transform var(--ps-duration-base) cubic-bezier(0.16, 1, 0.3, 1),
+    border-color var(--ps-duration-base), color var(--ps-duration-base);
+}
+
+.hifi-home .social-balls__ball:hover {
+  transform: translateY(-3px);
+  border-color: var(--ps-color-border-brand);
+  color: var(--ps-color-text-link);
+}
+
+.hifi-home .social-balls__icon {
+  width: 22px;
+  height: 22px;
+}
+
+.hifi-home .research-showcase-hifi-outer {
+  background: var(--ps-color-bg-subtle);
+  overflow: hidden;
+}
+
+.hifi-home .research-showcase-hifi {
+  background: var(--ps-color-bg-default);
+  /* Slant below the Community section. The vertical offset uses a
+     viewport-width unit (vw) rather than a fixed px value so the diagonal's
+     angle stays constant across screen sizes: on these full-bleed sections
+     width ≈ 100vw, and tan(2°) ≈ 0.0349, so 3.5vw ≈ a fixed 2° tilt. A fixed
+     px offset against the 100%-width polygon made the angle recalculate with
+     width (steeper on narrow screens, shallower on wide). Tilts the opposite
+     way to the .final-cta-hifi slant below the Blogs section. */
+  clip-path: polygon(0 3.5vw, 100% 0, 100% 100%, 0 100%);
+  padding-top: calc(var(--ps-space-80) * 2);
+}
+
+.hifi-home .research-showcase-hifi__mark {
+  display: block;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto var(--ps-space-16);
+}
+
+.hifi-home .research-showcase-hifi__label {
+  font-family: var(--ps-font-family-heading);
+  font-size: var(--ps-font-size-14);
+  font-weight: var(--ps-font-weight-bold);
+  color: var(--ps-color-text-heading);
+  margin-bottom: var(--ps-space-16);
+}
+
+.hifi-home .research-talks {
+  margin-bottom: var(--ps-space-48);
+}
+
+.hifi-home .research-talks__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--ps-space-4);
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.hifi-home .research-talks__list > li {
+  list-style: none;
+}
+
+.hifi-home .research-talks__list > li::marker {
+  content: none;
+  display: none;
+}
+
+.hifi-home .research-talk-card {
+  display: block;
+  height: 100%;
+  padding: var(--ps-space-16);
+  background: #FBFBFB;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  transition: transform var(--ps-duration-base) cubic-bezier(0.16, 1, 0.3, 1),
+    border-color var(--ps-duration-base);
+}
+
+.hifi-home .research-talk-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--ps-color-border-brand);
+  cursor: pointer;
+}
+
+.hifi-home .research-talk-card:focus-visible {
+  outline: 2px solid var(--ps-color-action-primary);
+  outline-offset: 2px;
+}
+
+.hifi-home .research-talk-card__title {
+  font-family: var(--ps-font-family-heading);
+  font-size: var(--ps-font-size-18);
+  font-weight: var(--ps-font-weight-bold);
+  color: var(--ps-color-text-heading);
+  margin-bottom: var(--ps-space-4);
+}
+
+.hifi-home .research-talk-card__byline {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-8);
+  margin-bottom: var(--ps-space-8);
+}
+
+.hifi-home .research-talk-card__photo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.hifi-home .research-talk-card__speaker {
+  font-size: var(--ps-font-size-14);
+  color: var(--ps-color-text-default);
+}
+
+.hifi-home .research-talk-card__events {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps-space-4);
+  list-style: none;
+
+  padding-left: 0;
+  margin-left: 0;
+}
+
+.hifi-home .research-talk-card__events > li,
+.hifi-home .research-talk-card__event {
+  list-style: none;
+  font-family: var(--ps-font-family-mono);
+  font-size: var(--ps-font-size-14);
+  letter-spacing: var(--ps-font-tracking-wide);
+  color: var(--ps-color-orange-1);
+}
+
+.hifi-home .research-talk-card__events > li::marker,
+.hifi-home .research-talk-card__event::marker {
+  content: none;
+  display: none;
+}
+
+.hifi-home .research-talks__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--ps-space-16);
+}
+
+.hifi-home .research-talks__all {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  font-family: var(--ps-font-family-link);
+  font-size: var(--ps-font-size-14);
+  font-weight: var(--ps-font-weight-semibold);
+  white-space: nowrap;
+}
+
+.hifi-home .research-blog-tiles {
+  margin-bottom: var(--ps-space-24);
+}
+
+.hifi-home .research-blog-tiles__row {
+  display: flex;
+  gap: var(--ps-space-4);
+  aspect-ratio: 16 / 5;
+
+  overflow: hidden;
+}
+
+.hifi-home .research-blog-tiles__lab-block,
+.hifi-home .research-blog-tiles__posts-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  transition: flex 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hifi-home .research-blog-tiles__lab-block { flex: 1; }
+.hifi-home .research-blog-tiles__posts-block { flex: 3; }
+
+.hifi-home .research-blog-tiles__row > .research-blog-tiles__lab-block:hover {
+  flex: 1.04;
+}
+.hifi-home .research-blog-tiles__row:hover > .research-blog-tiles__posts-block:not(:hover) {
+  flex: 2.96;
+}
+.hifi-home .research-blog-tiles__row > .research-blog-tiles__posts-block:hover {
+  flex: 3.04;
+}
+.hifi-home .research-blog-tiles__row:hover > .research-blog-tiles__lab-block:not(:hover) {
+  flex: 0.96;
+}
+
+.hifi-home .research-blog-tiles__label,
+.hifi-home .research-blog-tiles__label--lab {
+  flex-shrink: 0;
+  margin: 0 0 var(--ps-space-8);
+}
+
+.hifi-home .research-blog-tiles__date {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: var(--ps-font-weight-regular);
+  color: var(--ps-color-text-muted);
+  margin-left: var(--ps-space-8);
+}
+
+.hifi-home .research-blog-tiles__lab-block > .blog-tile-lab-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
+.hifi-home .research-blog-tiles__posts-row {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: var(--ps-space-4);
+
+  overflow: hidden;
+}
+
+.hifi-home .research-blog-tiles__posts-row > .blog-tile {
+  flex: 1;
+  aspect-ratio: auto;
+  height: 100%;
+  transition: flex 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@media (min-width: 901px) {
+  .hifi-home .research-blog-tiles__posts-row > .blog-tile:hover {
+    flex: 1.025;
+    aspect-ratio: auto;
+    height: 100%;
+  }
+
+  .hifi-home .research-blog-tiles__posts-row:hover > .blog-tile:not(:hover) {
+    flex: 0.983;
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .hifi-home .research-blog-tiles__row {
+    flex-direction: column;
+    aspect-ratio: auto;
+    gap: var(--ps-space-24);
+  }
+
+  .hifi-home .research-blog-tiles__lab-block,
+  .hifi-home .research-blog-tiles__posts-block {
+    flex: none;
+  }
+
+  .hifi-home .research-blog-tiles__lab-block > .blog-tile-lab-wrap {
+    flex: none;
+    aspect-ratio: 1 / 1;
+    height: auto;
+  }
+
+  .hifi-home .research-blog-tiles__posts-row {
+    flex: none;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--ps-space-4);
+    row-gap: var(--ps-space-8);
+  }
+
+  .hifi-home .research-blog-tiles__posts-row > .blog-tile {
+    aspect-ratio: 1 / 1;
+    height: auto;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .hifi-home .research-blog-tiles__lab-block > .blog-tile-lab-wrap {
+    aspect-ratio: 2 / 1;
+  }
+}
+
+.hifi-home .blog-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: transparent;
+  border-radius: 6px;
+  aspect-ratio: 1 / 1;
+}
+
+.hifi-home .blog-tile__image {
+  position: static;
+  inset: auto;
+  display: block;
+  width: 100%;
+  height: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 6px;
+  transition: transform var(--ps-duration-slow) var(--ps-easing-out);
+}
+
+.hifi-home .blog-tile:hover .blog-tile__image {
+  transform: none;
+}
+
+.hifi-home .blog-tile__scrim {
+  display: none;
+}
+
+.hifi-home .blog-tile__content {
+  position: static;
+  inset: auto;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  height: 88px;
+  overflow: hidden;
+  justify-content: flex-start;
+  padding: var(--ps-space-12) 6px 0;
+}
+
+.hifi-home .blog-tile__title {
+  font-family: var(--ps-font-family-heading);
+  font-size: var(--ps-font-size-16);
+  font-weight: var(--ps-font-weight-bold);
+  color: var(--ps-color-text-heading);
+  margin-bottom: var(--ps-space-4);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.hifi-home .blog-tile__date {
+  font-size: var(--ps-font-size-14);
+  color: var(--ps-color-text-muted);
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .hifi-home .blog-tile__content {
+    height: auto;
+    padding: var(--ps-space-8) 6px 0;
+  }
+}
+
+.hifi-home .blog-tile--lab {
+  border-radius: 6px;
+  aspect-ratio: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  background:
+    linear-gradient(to bottom right, #A191EF 0%, #8E99AA 25%, #F63 50%) bottom right / 50% 50% no-repeat,
+    linear-gradient(to bottom left, #A191EF 0%, #8E99AA 25%, #F63 50%) bottom left / 50% 50% no-repeat,
+    linear-gradient(to top left, #A191EF 0%, #8E99AA 25%, #F63 50%) top left / 50% 50% no-repeat,
+    linear-gradient(to top right, #A191EF 0%, #8E99AA 25%, #F63 50%) top right / 50% 50% no-repeat;
+}
+
+.hifi-home .blog-tile__lab-icon {
+  position: absolute;
+  top: var(--ps-space-16);
+  left: var(--ps-space-16);
+  width: 40px;
+  height: 40px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.hifi-home .blog-tile--lab .blog-tile__title {
+  font-size: var(--ps-font-size-40);
+  line-height: 1.1;
+  color: var(--ps-color-white);
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  margin-left: 0.75rem;
+  margin-bottom: 0.875rem;
+}
+
+.hifi-home .blog-tile-lab-wrap {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.hifi-home .blog-tile__lab-desc--inside {
+  font-size: var(--ps-font-size-20);
+  color: var(--ps-color-white);
+  opacity: 0.85;
+  display: none;
+}
+
+.hifi-home .blog-tile__lab-desc--below {
+  display: none;
+}
+
+.hifi-home .blog-tile__lab-desc--below-rc2 {
+  display: block;
+  height: 84px;
+  overflow: hidden;
+  padding: var(--ps-space-12) 12px 0;
+  font-size: var(--ps-font-size-16);
+  font-weight: var(--ps-font-weight-regular);
+
+  color: #29170B;
+}
+
+.hifi-home .blog-tile__lab-desc-rc2-bold {
+  font-weight: var(--ps-font-weight-bold);
+}
+
+.hifi-home .enterprise-trust-hifi {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: calc(var(--ps-space-80) * 0.25);
+}
+
+.hifi-home .enterprise-trust-hifi > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.hifi-home .enterprise-trust-hifi__dots {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hifi-home .enterprise-trust-hifi__dots-side {
+  position: absolute;
+  inset: 0;
+}
+
+.hifi-home .enterprise-trust-hifi__dot {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--ps-color-enterprise-2);
+}
+
+.hifi-home .enterprise-trust-hifi__dot--accent {
+  background: var(--ps-color-orange-1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hifi-home .enterprise-trust-hifi__dot {
+    animation: enterprise-trust-hifi-dot-float 6s ease-in-out infinite;
+  }
+}
+
+@keyframes enterprise-trust-hifi-dot-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(1)  { left: 17.1%; top: 28.4%; width: 7px;  height: 7px;  opacity: 0.40; animation-delay: 0.0s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(2)  { left: 33.8%; top: 56.0%; width: 9px;  height: 9px;  opacity: 0.43; animation-delay: 0.3s; background: var(--ps-color-orange-1); }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(3)  { left: 27.1%; top: 77.4%; width: 8px;  height: 8px;  opacity: 0.43; animation-delay: 0.6s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(4)  { left: 5.7%;  top: 79.0%; width: 10px; height: 10px; opacity: 0.47; animation-delay: 0.9s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(5)  { left: 18.4%; top: 13.1%; width: 5px;  height: 5px;  opacity: 0.41; animation-delay: 1.2s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(6)  { left: 33.9%; top: 73.3%; width: 8px;  height: 8px;  opacity: 0.39; animation-delay: 1.5s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(7)  { left: 28.2%; top: 59.1%; width: 6px;  height: 6px;  opacity: 0.18; animation-delay: 1.8s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(8)  { left: 3.2%;  top: 37.1%; width: 5px;  height: 5px;  opacity: 0.39; animation-delay: 2.1s; background: var(--ps-color-orange-1); }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(9)  { left: 29.8%; top: 76.2%; width: 5px;  height: 5px;  opacity: 0.32; animation-delay: 2.4s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(10) { left: 20.5%; top: 40.5%; width: 6px;  height: 6px;  opacity: 0.20; animation-delay: 2.7s; background: var(--ps-color-orange-1); }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(11) { left: 20.7%; top: 37.3%; width: 10px; height: 10px; opacity: 0.23; animation-delay: 3.0s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(12) { left: 31.3%; top: 22.9%; width: 6px;  height: 6px;  opacity: 0.43; animation-delay: 3.3s; background: var(--ps-color-orange-1); }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(13) { left: 8.4%;  top: 70.3%; width: 7px;  height: 7px;  opacity: 0.22; animation-delay: 3.6s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(14) { left: 32.2%; top: 13.7%; width: 8px;  height: 8px;  opacity: 0.45; animation-delay: 3.9s; }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(15) { left: 5.0%;  top: 69.8%; width: 4px;  height: 4px;  opacity: 0.35; animation-delay: 4.2s; background: var(--ps-color-orange-1); }
+.hifi-home .enterprise-trust-hifi__dots-side--left span:nth-child(16) { left: 19.2%; top: 13.4%; width: 3px;  height: 3px;  opacity: 0.34; animation-delay: 4.5s; }
+
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(1)  { left: 82.5%; top: 32.8%; width: 7px; height: 7px;  opacity: 0.35; animation-delay: 0.15s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(2)  { left: 89.2%; top: 6.2%;  width: 8px; height: 8px;  opacity: 0.50; animation-delay: 0.45s; background: var(--ps-color-orange-1); }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(3)  { left: 84.0%; top: 83.4%; width: 7px; height: 7px;  opacity: 0.24; animation-delay: 0.75s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(4)  { left: 85.8%; top: 88.4%; width: 9px; height: 9px;  opacity: 0.45; animation-delay: 1.05s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(5)  { left: 78.7%; top: 91.6%; width: 9px; height: 9px;  opacity: 0.38; animation-delay: 1.35s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(6)  { left: 74.7%; top: 27.7%; width: 7px; height: 7px;  opacity: 0.49; animation-delay: 1.65s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(7)  { left: 76.2%; top: 10.9%; width: 4px; height: 4px;  opacity: 0.22; animation-delay: 1.95s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(8)  { left: 92.9%; top: 58.6%; width: 7px; height: 7px;  opacity: 0.37; animation-delay: 2.25s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(9)  { left: 79.8%; top: 94.1%; width: 6px; height: 6px;  opacity: 0.19; animation-delay: 2.55s; background: var(--ps-color-orange-1); }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(10) { left: 83.1%; top: 29.1%; width: 5px; height: 5px;  opacity: 0.29; animation-delay: 2.85s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(11) { left: 70.9%; top: 10.6%; width: 8px; height: 8px;  opacity: 0.22; animation-delay: 3.15s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(12) { left: 76.9%; top: 50.2%; width: 9px; height: 9px;  opacity: 0.32; animation-delay: 3.45s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(13) { left: 74.0%; top: 23.5%; width: 5px; height: 5px;  opacity: 0.17; animation-delay: 3.75s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(14) { left: 96.1%; top: 23.4%; width: 4px; height: 4px;  opacity: 0.37; animation-delay: 4.05s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(15) { left: 72.5%; top: 7.5%;  width: 9px; height: 9px;  opacity: 0.17; animation-delay: 4.35s; }
+.hifi-home .enterprise-trust-hifi__dots-side--right span:nth-child(16) { left: 80.3%; top: 4.6%;  width: 3px; height: 3px;  opacity: 0.20; animation-delay: 4.65s; background: var(--ps-color-orange-1); }
+
+@media (max-width: 900px) {
+  .hifi-home .enterprise-trust-hifi__dots {
+    display: none;
+  }
+}
+
+.hifi-home .enterprise-trust-hifi__row {
+  margin-bottom: var(--ps-space-24);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ps-space-32);
+}
+
+@media (max-width: 900px) {
+  .hifi-home .enterprise-trust-hifi__row {
+    gap: var(--ps-space-20);
+  }
+}
+
+.hifi-home .enterprise-trust-hifi__row--chips {
+  margin-bottom: var(--ps-space-24);
+}
+
+.hifi-home .enterprise-trust-hifi__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ps-space-8);
+  padding: var(--ps-space-8) var(--ps-space-16);
+  border: 1px solid var(--ps-color-border-default);
+  border-radius: var(--ps-radius-pill);
+  background: var(--ps-color-bg-default);
+  font-size: var(--ps-font-size-14);
+  font-weight: var(--ps-font-weight-semibold);
+  color: var(--ps-color-text-default);
+  white-space: nowrap;
+}
+
+.hifi-home .enterprise-trust-hifi__chip-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--ps-color-text-muted);
+}
+
+.hifi-home .enterprise-trust-hifi__chip-icon--star {
+  color: var(--ps-color-orange-1);
+}
+
+.hifi-home .logo-hex-dump {
+  position: relative;
+  display: block;
+  margin-top: var(--ps-space-64);
+  margin-bottom: var(--ps-space-64);
+  padding: var(--ps-space-48) var(--ps-space-24);
+  background-color: #FBFBFA;
+
+  /* 2026-08-07 (per Chuck) — the crisp base hex tile that used to paint
+     directly on this element (hex-dump-tile.svg, repeated) is dropped:
+     it was the sharp/prominent layer reading "too sharp" against the
+     softer blurred ::before overlay. The pattern is now ONLY the blurred,
+     muted ::before below, so nothing here renders crisp. */
+
+  isolation: isolate;
+}
+
+.hifi-home .logo-hex-dump::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("/_home/rc3/hex-dump-tile-blurred.svg");
+  background-repeat: repeat;
+  background-size: 420px 40px;
+  /* 2026-08-07 (per Chuck) — noticeably softer and more muted than
+     before: blur 2.5px → 6px, plus opacity 0.5 to dial down the
+     contrast so the hex pattern reads as a faint background texture
+     rather than a prominent element. */
+  filter: blur(6px);
+  opacity: 0.5;
+}
+
+.hifi-home .logo-hex-dump__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--ps-space-32) var(--ps-space-24);
+  max-width: var(--ps-layout-container-content);
+  margin: 0 auto;
+}
+
+.hifi-home .logo-hex-dump__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ps-space-8);
+  padding: var(--ps-space-16);
+}
+
+.hifi-home .logo-hex-dump__icon {
+  height: 36px;
+  width: 100%;
+  object-fit: contain;
+  filter: grayscale(1);
+  opacity: 0;
+  transform: scale(0.05);
+}
+
+/* 2026-08-07 (per Chuck) — AXA, NASA, FedEx, Salesforce and P&G read
+   visually smaller than the other marks at the shared 36px height, so
+   they're scaled to 1.5x (→ 54px) to balance the grid. The modifier
+   class is added per-logo in LogoBallDrop.astro; only the box height
+   changes, so the scroll-reveal opacity/scale transition on the base
+   rule is untouched. */
+.hifi-home .logo-hex-dump__icon--lg {
+  height: 54px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hifi-home .logo-hex-dump__icon {
+    transition:
+      opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+.hifi-home .logo-hex-dump__tile.is-revealed .logo-hex-dump__icon {
+  opacity: 0.85;
+  transform: scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hifi-home .logo-hex-dump__icon {
+    opacity: 0.85;
+    transform: none;
+  }
+}
+
+.hifi-home .logo-hex-dump__address {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .hifi-home .logo-hex-dump__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.hifi-home .company-blog-hifi {
+  position: relative;
+  background: var(--ps-color-bg-default);
+}
+
+.hifi-home .company-blog-hifi__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--ps-space-16);
+  margin-bottom: var(--ps-space-32);
+}
+
+.hifi-home .company-blog-hifi__heading {
+  color: var(--ps-color-text-heading);
+}
+
+.hifi-home .company-blog-hifi__all {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  font-family: var(--ps-font-family-link);
+  font-size: var(--ps-font-size-14);
+  font-weight: var(--ps-font-weight-semibold);
+  white-space: nowrap;
+}
+
+.hifi-home .company-blog-hifi__grid {
+  display: flex;
+  gap: var(--ps-space-4);
+  aspect-ratio: 16 / 5;
+  margin-bottom: var(--ps-space-64);
+
+  overflow: hidden;
+}
+
+.hifi-home .company-blog-hifi__grid > .blog-tile {
+  flex: 1;
+  aspect-ratio: auto;
+  height: 100%;
+  transition: flex 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@media (min-width: 901px) {
+  .hifi-home .company-blog-hifi__grid > .blog-tile:hover {
+    flex: 1.025;
+    aspect-ratio: auto;
+    height: 100%;
+  }
+
+  .hifi-home .company-blog-hifi__grid:hover > .blog-tile:not(:hover) {
+    flex: 0.983;
+    aspect-ratio: auto;
+    height: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .hifi-home .company-blog-hifi__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    aspect-ratio: auto;
+    column-gap: var(--ps-space-4);
+    row-gap: var(--ps-space-8);
+  }
+
+  .hifi-home .company-blog-hifi__grid > .blog-tile {
+    aspect-ratio: 1 / 1;
+    height: auto;
+  }
+}
+
+.hifi-home .final-cta-hifi-outer {
+  background: var(--ps-color-bg-default);
+  overflow: hidden;
+}
+
+.hifi-home .final-cta-hifi {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: calc(var(--ps-space-80) * 1.5);
+  /* Slant below the Blogs section. Same fixed-angle approach as the
+     .research-showcase-hifi slant above (3.5vw ≈ 2° regardless of viewport
+     width), but tilted the opposite way to preserve the alternation. */
+  clip-path: polygon(0 0, 100% 3.5vw, 100% 100%, 0 100%);
+  background: #000023;
+}
+
+.hifi-home .final-cta-hifi__cta {
+  position: relative;
+  z-index: 1;
+  padding: calc(var(--ps-space-component-padding-y) * 2.2) calc(var(--ps-space-component-padding-x) * 3);
+  font-size: var(--ps-font-size-24);
+}
+
+.hifi-home .final-cta-hifi__label {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 var(--ps-space-24);
+  font-size: var(--ps-font-size-24);
+  color: var(--ps-color-white);
+  text-align: center;
+}
+
+.hifi-home .final-cta-hifi__label-break {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .hifi-home .final-cta-hifi__label {
+    font-size: var(--ps-font-size-22);
+  }
+  .hifi-home .final-cta-hifi__label-break {
+    display: block;
+  }
+}
+
+.hifi-home .final-cta-hifi__rings {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.hifi-home .final-cta-hifi__ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.hifi-home .final-cta-hifi__ring--inner {
+  --ring-radius: 260px;
+  --icon-size: 30px;
+  --icon-opacity: 0.08;
+  animation: final-cta-ring-spin-cw 70s linear infinite;
+}
+.hifi-home .final-cta-hifi__ring--middle {
+  --ring-radius: 350px;
+  --icon-size: 42px;
+  --icon-opacity: 0.16;
+  animation: final-cta-ring-spin-ccw 90s linear infinite;
+}
+.hifi-home .final-cta-hifi__ring--outer {
+  --ring-radius: 450px;
+  --icon-size: 54px;
+  --icon-opacity: 0.24;
+  animation: final-cta-ring-spin-cw 110s linear infinite;
+}
+
+@keyframes final-cta-ring-spin-cw {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes final-cta-ring-spin-ccw {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+.hifi-home .final-cta-hifi__ring-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  margin: calc(var(--icon-size) / -2) 0 0 calc(var(--icon-size) / -2);
+  transform: rotate(var(--icon-angle)) translateX(var(--ring-radius)) scale(0);
+  opacity: 0;
+  transition: transform 0.4s var(--ps-easing-in), opacity 0.3s var(--ps-easing-in);
+}
+
+.hifi-home .final-cta-hifi:has(.final-cta-hifi__cta:hover) .final-cta-hifi__ring-icon {
+  transform: rotate(var(--icon-angle)) translateX(var(--ring-radius)) scale(1);
+  opacity: var(--icon-opacity);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s var(--ps-easing-out);
+}
+
+.hifi-home .final-cta-hifi__ring-icon-img {
+  width: 100%;
+  height: 100%;
+  filter: brightness(0) invert(1);
+}
+
+.hifi-home .final-cta-hifi__ring--inner .final-cta-hifi__ring-icon:nth-child(1) { --icon-angle: 0deg; }
+.hifi-home .final-cta-hifi__ring--inner .final-cta-hifi__ring-icon:nth-child(2) { --icon-angle: 60deg; }
+.hifi-home .final-cta-hifi__ring--inner .final-cta-hifi__ring-icon:nth-child(3) { --icon-angle: 120deg; }
+.hifi-home .final-cta-hifi__ring--inner .final-cta-hifi__ring-icon:nth-child(4) { --icon-angle: 180deg; }
+.hifi-home .final-cta-hifi__ring--inner .final-cta-hifi__ring-icon:nth-child(5) { --icon-angle: 240deg; }
+.hifi-home .final-cta-hifi__ring--inner .final-cta-hifi__ring-icon:nth-child(6) { --icon-angle: 300deg; }
+
+.hifi-home .final-cta-hifi__ring--middle .final-cta-hifi__ring-icon:nth-child(1) { --icon-angle: 0deg; }
+.hifi-home .final-cta-hifi__ring--middle .final-cta-hifi__ring-icon:nth-child(2) { --icon-angle: 40deg; }
+.hifi-home .final-cta-hifi__ring--middle .final-cta-hifi__ring-icon:nth-child(3) { --icon-angle: 80deg; }
+.hifi-home .final-cta-hifi__ring--middle .final-cta-hifi__ring-icon:nth-child(4) { --icon-angle: 120deg; }
+.hifi-home .final-cta-hifi__ring--middle .final-cta-hifi__ring-icon:nth-child(5) { --icon-angle: 160deg; }
+.hifi-home .final-cta-hifi__ring--middle .final-cta-hifi__ring-icon:nth-child(6) { --icon-angle: 200deg; }
+.hifi-home .final-cta-hifi__ring--middle .final-cta-hifi__ring-icon:nth-child(7) { --icon-angle: 240deg; }
+.hifi-home .final-cta-hifi__ring--middle .final-cta-hifi__ring-icon:nth-child(8) { --icon-angle: 280deg; }
+.hifi-home .final-cta-hifi__ring--middle .final-cta-hifi__ring-icon:nth-child(9) { --icon-angle: 320deg; }
+
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(1) { --icon-angle: 0deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(2) { --icon-angle: 30deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(3) { --icon-angle: 60deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(4) { --icon-angle: 90deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(5) { --icon-angle: 120deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(6) { --icon-angle: 150deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(7) { --icon-angle: 180deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(8) { --icon-angle: 210deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(9) { --icon-angle: 240deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(10) { --icon-angle: 270deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(11) { --icon-angle: 300deg; }
+.hifi-home .final-cta-hifi__ring--outer .final-cta-hifi__ring-icon:nth-child(12) { --icon-angle: 330deg; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hifi-home .final-cta-hifi__ring {
+    animation: none;
+  }
+  .hifi-home .final-cta-hifi__ring-icon {
+    transition: none;
+  }
+}
