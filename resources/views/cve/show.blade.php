@@ -68,7 +68,13 @@
     <div>
         <div class="vla-card" style="margin-bottom:20px">
             <h2>{{ __('academy.cve.poc') }}</h2>
-            <pre class="vla-code-block">{{ $article->poc_content ?: 'No PoC recorded.' }}</pre>
+            <div class="vla-terminal-card">
+                <div class="vla-terminal-card__bar">
+                    <span class="vla-terminal-dots"><span></span><span></span><span></span></span>
+                    <span>PoC // {{ $article->cve_id }}</span>
+                </div>
+                <pre class="vla-code-block" style="margin:0;border:none;border-radius:0">{{ $article->poc_content ?: 'No PoC recorded.' }}</pre>
+            </div>
         </div>
 
         <div class="vla-card" style="margin-bottom:20px">

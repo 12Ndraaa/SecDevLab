@@ -7,6 +7,8 @@ use App\Models\CveArticle;
 use App\Models\Lab;
 use App\Models\LabSession;
 use App\Models\User;
+use App\Services\LabArchetypeResolver;
+use App\Services\LabUrlService;
 use App\Services\WidgetRenderer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -293,7 +295,7 @@ class AcademyController extends Controller
         ]);
     }
 
-    public function launchMysteryLab(Request $request): RedirectResponse
+    public function launchMysteryLab(Request $request, LabUrlService $urlService): RedirectResponse
     {
         $level = strtoupper((string) $request->query('level', 'ANY'));
         $category = (string) $request->query('category', 'ANY');
@@ -313,12 +315,146 @@ class AcademyController extends Controller
 
         $lab = $query->inRandomOrder()->first() ?? Lab::inRandomOrder()->firstOrFail();
 
-        return redirect("/lab-env/{$lab->id}?mystery=1");
+        /** @var int $userId */
+        $userId = (int) Auth::id();
+        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
+
+        $target = $urlService->launchRedirectTarget($session, ['mystery' => 1], $request);
+
+        return $urlService->isSubdomainMode() ? redirect()->away($target) : redirect($target);
     }
 
-    public function launchLab(string $labId): RedirectResponse
+    public function launchLab(Request $request, string $labId, LabUrlService $urlService): RedirectResponse
     {
-        return redirect('/lab-env/'.strtolower($labId));
+        $lab = Lab::find(strtolower($labId));
+        if (! $lab) {
+            abort(404);
+        }
+
+        /** @var int $userId */
+        $userId = (int) Auth::id();
+        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
+
+        $target = $urlService->launchRedirectTarget($session, [], $request);
+
+        return $urlService->isSubdomainMode() ? redirect()->away($target) : redirect($target);
+    }
+
+    public function labControl(
+        Request $request,
+        string $token,
+        LabUrlService $urlService,
+        LabArchetypeResolver $archetypeResolver
+    ): View {
+        $session = LabSession::findByToken($token);
+        if (! $session || ! $session->lab) {
+            abort(404);
+        }
+        if ((int) $session->user_id !== (int) Auth::id()) {
+            abort(403, 'You do not own this lab instance.');
+        }
+
+        return view('lab-env.control', [
+            'session' => $session,
+            'lab' => $session->lab,
+            'archetype' => $archetypeResolver->meta($session->lab),
+            'instanceUrl' => $urlService->launchRedirectTarget($session, [], $request),
+            'absoluteUrl' => $urlService->absoluteBaseUrl($session, $request),
+            'urlMode' => $urlService->isSubdomainMode() ? 'subdomain' : 'path',
+        ]);
+    }
+
+    public function resetLabSession(Request $request, string $token, LabUrlService $urlService): RedirectResponse
+    {
+        $session = LabSession::findByToken($token);
+        if (! $session || ! $session->lab) {
+            abort(404);
+        }
+        if ((int) $session->user_id !== (int) Auth::id()) {
+            abort(403, 'You do not own this lab instance.');
+        }
+
+        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $session->resetState($theme, true);
+
+        if ($request->input('return_to') === 'detail') {
+            return redirect($session->lab->href)
+                ->with('status', 'Lab instance reset with a fresh 32-hex capability token and randomized secrets.');
+        }
+
+        $target = $urlService->launchRedirectTarget($session, [], $request);
+
+        return $urlService->isSubdomainMode() ? redirect()->away($target) : redirect($target);
+    }
+
+    public function renewLabSession(Request $request, string $token, LabUrlService $urlService): RedirectResponse
+    {
+        $session = LabSession::findByToken($token);
+        if (! $session || ! $session->lab) {
+            abort(404);
+        }
+        if ((int) $session->user_id !== (int) Auth::id()) {
+            abort(403, 'You do not own this lab instance.');
+        }
+
+        $session->renewTtl();
+
+        if ($request->input('return_to') === 'detail') {
+            return redirect($session->lab->href)
+                ->with('status', 'Lab session TTL renewed (+'.LabSession::ttlMinutes().' minutes).');
+        }
+
+        $target = $urlService->launchRedirectTarget($session, [], $request);
+
+        return $urlService->isSubdomainMode() ? redirect()->away($target) : redirect($target);
+    }
+
+    public function resetLabById(Request $request, string $labId, LabUrlService $urlService): RedirectResponse
+    {
+        $lab = Lab::find(strtolower($labId));
+        if (! $lab) {
+            abort(404);
+        }
+
+        /** @var int $userId */
+        $userId = (int) Auth::id();
+        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
+        $session->resetState($theme, true);
+
+        if ($request->input('return_to') === 'detail') {
+            return redirect($lab->href)
+                ->with('status', 'Lab instance reset with a fresh 32-hex capability token and randomized secrets.');
+        }
+
+        $target = $urlService->launchRedirectTarget($session, [], $request);
+
+        return $urlService->isSubdomainMode() ? redirect()->away($target) : redirect($target);
+    }
+
+    public function renewLabById(Request $request, string $labId, LabUrlService $urlService): RedirectResponse
+    {
+        $lab = Lab::find(strtolower($labId));
+        if (! $lab) {
+            abort(404);
+        }
+
+        /** @var int $userId */
+        $userId = (int) Auth::id();
+        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
+        $session->renewTtl();
+
+        if ($request->input('return_to') === 'detail') {
+            return redirect($lab->href)
+                ->with('status', 'Lab session TTL renewed (+'.LabSession::ttlMinutes().' minutes).');
+        }
+
+        $target = $urlService->launchRedirectTarget($session, [], $request);
+
+        return $urlService->isSubdomainMode() ? redirect()->away($target) : redirect($target);
     }
 
     public function widgets(Request $request, WidgetRenderer $renderer): JsonResponse
@@ -354,6 +490,13 @@ class AcademyController extends Controller
 
     public function resolvePage(Request $request): View|Response
     {
+        $urlService = app(LabUrlService::class);
+        if ($subdomainToken = $urlService->extractTokenFromHost((string) $request->getHost())) {
+            $tail = ltrim($request->getPathInfo(), '/');
+
+            return app(LabEnvironmentController::class)->handleByToken($request, $subdomainToken, $tail !== '' ? $tail : null);
+        }
+
         $cleanPath = '/'.ltrim(rtrim($request->getPathInfo(), '/'), '/');
         if ($cleanPath === '//') {
             $cleanPath = '/';
@@ -464,10 +607,22 @@ class AcademyController extends Controller
             ->limit(4)
             ->get();
 
+        $activeSession = $user
+            ? LabSession::where('user_id', $user->id)->where('lab_id', strtolower($lab->id))->first()
+            : null;
+        $urlService = app(LabUrlService::class);
+        $instanceUrl = ($activeSession && ! empty($activeSession->instance_token) && ! $activeSession->isExpired())
+            ? $urlService->launchRedirectTarget($activeSession)
+            : null;
+        $archetype = app(LabArchetypeResolver::class)->meta($lab);
+
         return view('lab-detail', [
             'lab' => $lab,
             'category' => $category,
             'isSolved' => $isSolved,
+            'activeSession' => $activeSession,
+            'instanceUrl' => $instanceUrl,
+            'archetype' => $archetype,
             'cleanDescriptionHtml' => $cleanDescriptionHtml,
             'hintSections' => $hintSections,
             'otherSections' => $otherSections,

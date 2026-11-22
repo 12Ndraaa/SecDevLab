@@ -12,13 +12,18 @@ class SetLocaleAndTheme
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = (string) $request->session()->get('locale', config('app.locale', 'en'));
+        $hasSession = $request->hasSession();
+        $locale = $hasSession
+            ? (string) $request->session()->get('locale', config('app.locale', 'en'))
+            : (string) config('app.locale', 'en');
         if (! in_array($locale, ['en', 'id'], true)) {
             $locale = 'en';
         }
         App::setLocale($locale);
 
-        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $theme = $hasSession
+            ? (string) $request->session()->get('ui_theme', 'dark')
+            : 'dark';
         if (! in_array($theme, ['dark', 'light'], true)) {
             $theme = 'dark';
         }

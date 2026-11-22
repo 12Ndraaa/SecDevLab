@@ -41,14 +41,15 @@ class SandboxedPhpEvaluator
             ];
         }
 
-        $secret = $session->carlos_secret ?: LabSession::DEFAULT_CARLOS_SECRET;
+        $secret = $session->secret('carlos_secret');
+        $hostname = $session->secret('hostname', 'academy-lab.secdevlab.internal');
         $virtualFiles = [
             '/home/carlos/secret' => $secret,
             '/etc/passwd' => "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\ncarlos:x:1001:1001::/home/carlos:/bin/bash\nwiener:x:1002:1002::/home/wiener:/bin/bash\n",
-            '/etc/hostname' => 'peter-wiener-academy-host',
+            '/etc/hostname' => $hostname,
         ];
 
-        $runVirtualCmd = static function (string $cmd) use ($virtualFiles): string {
+        $runVirtualCmd = static function (string $cmd) use ($virtualFiles, $hostname): string {
             $c = trim($cmd);
             if (str_contains($c, '/home/carlos/secret')) {
                 return $virtualFiles['/home/carlos/secret'];
@@ -63,7 +64,7 @@ class SandboxedPhpEvaluator
                 return "uid=1001(carlos) gid=1001(carlos) groups=1001(carlos)\n";
             }
             if (preg_match('/\bhostname\b/', $c)) {
-                return "peter-wiener-academy-host\n";
+                return $hostname."\n";
             }
             if (preg_match('/\buname\b/', $c)) {
                 return "Linux academy-lab 5.15.0-generic x86_64 GNU/Linux\n";

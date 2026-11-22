@@ -3,7 +3,6 @@
 use App\Http\Controllers\AcademyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CveController;
-use App\Http\Controllers\LabEnvironmentController;
 use App\Http\Controllers\Owner\CategoryLabController;
 use App\Http\Controllers\Owner\CveManagementController;
 use App\Http\Controllers\Owner\OwnerDashboardController;
@@ -80,14 +79,20 @@ Route::middleware(['auth', 'owner'])->prefix('owner')->name('owner.')->group(fun
     Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
 });
 
-// 4. Zero-JS Mystery Lab Launcher & Protected Lab Environments
-Route::get('/web-security/mystery-lab-challenge/launch', [AcademyController::class, 'launchMysteryLab']);
+// 4. Authenticated Lab Launchers & Capability Token Lifecycle Controls (Legacy /lab-env/* Blocked)
+Route::any('/lab-env/{any?}', static fn () => abort(404))->where('any', '.*');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/web-security/mystery-lab-challenge/launch', [AcademyController::class, 'launchMysteryLab']);
     Route::get('/academy/labs/launch/{labId}', [AcademyController::class, 'launchLab']);
-    Route::any('/lab-env/{labId}/{tail?}', [LabEnvironmentController::class, 'handle'])
-        ->where('tail', '.*')
-        ->name('lab-env');
+    Route::get('/academy/labs/session/{token}/control', [AcademyController::class, 'labControl'])
+        ->where('token', '[a-f0-9]{32,64}');
+    Route::post('/academy/labs/session/{token}/reset', [AcademyController::class, 'resetLabSession'])
+        ->where('token', '[a-f0-9]{32,64}');
+    Route::post('/academy/labs/session/{token}/renew', [AcademyController::class, 'renewLabSession'])
+        ->where('token', '[a-f0-9]{32,64}');
+    Route::post('/academy/labs/{labId}/reset', [AcademyController::class, 'resetLabById']);
+    Route::post('/academy/labs/{labId}/renew', [AcademyController::class, 'renewLabById']);
 });
 
 // 5. Widget & Session Helper Endpoints

@@ -188,15 +188,19 @@ class AuthAndMultiUserIsolationTest extends TestCase
         $this->assertStringNotContainsString('<script', strtolower($lightHtml));
     }
 
-    public function test_guest_is_redirected_to_users_login_when_accessing_lab_env_or_account(): void
+    public function test_guest_is_redirected_to_users_login_when_accessing_launcher_or_account_and_legacy_lab_env_is_blocked(): void
     {
         $lab = Lab::firstOrFail();
 
-        $this->get("/lab-env/{$lab->id}")
-            ->assertRedirect('/users?returnurl='.urlencode("/lab-env/{$lab->id}"));
+        // Legacy /lab-env/* endpoint is strictly blocked (404)
+        $this->get("/lab-env/{$lab->id}")->assertNotFound();
+        $this->get("/lab-env/{$lab->id}/exploit-server")->assertNotFound();
 
         $this->get("/academy/labs/launch/{$lab->id}")
             ->assertRedirect('/users?returnurl='.urlencode("/academy/labs/launch/{$lab->id}"));
+
+        $this->get('/web-security/mystery-lab-challenge/launch')
+            ->assertRedirect('/users?returnurl='.urlencode('/web-security/mystery-lab-challenge/launch'));
 
         $this->get('/users/youraccount/personaldetails')
             ->assertRedirect('/users?returnurl='.urlencode('/users/youraccount/personaldetails'));
@@ -209,19 +213,23 @@ class AuthAndMultiUserIsolationTest extends TestCase
     {
         $sqliLab = Lab::where('category_id', 'sql-injection')->orderBy('sort_order')->firstOrFail();
 
-        // Register User A
+        // Register User A -> redirects to authenticated lab launcher
         $regRes = $this->post('/users/register', [
             'name' => 'Alice Pentester',
             'email' => 'alice@academy.local',
             'password' => 'secret123',
             'password_confirmation' => 'secret123',
-            'returnurl' => "/lab-env/{$sqliLab->id}",
+            'returnurl' => "/academy/labs/launch/{$sqliLab->id}",
         ]);
-        $regRes->assertRedirect("/lab-env/{$sqliLab->id}");
+        $regRes->assertRedirect("/academy/labs/launch/{$sqliLab->id}");
         $this->assertAuthenticated();
 
-        // User A solves SQLi lab via exploit trigger
-        $solveRes = $this->get("/lab-env/{$sqliLab->id}?category=".urlencode("Gifts' OR 1=1--"));
+        $launchAlice = $this->get("/academy/labs/launch/{$sqliLab->id}");
+        $aliceLabUrl = (string) parse_url((string) $launchAlice->headers->get('Location'), PHP_URL_PATH);
+        $this->assertMatchesRegularExpression('#^/lab/[a-f0-9]{32}$#', $aliceLabUrl);
+
+        // User A solves SQLi lab via exploit trigger on her isolated capability URL
+        $solveRes = $this->get($aliceLabUrl.'?category='.urlencode("Gifts' OR 1=1--"));
         $solveRes->assertOk();
         $this->assertStringContainsString('class="notification-labsolved"', $solveRes->getContent());
 
@@ -242,7 +250,7 @@ class AuthAndMultiUserIsolationTest extends TestCase
         $this->assertStringContainsString('(0 solved)', $allLabsGuest);
         $this->assertSame(0, substr_count($allLabsGuest, 'class="widgetcontainer-lab-link is-solved"'));
 
-        // Login as User B -> must see 0 solved and unsolved lab-env state
+        // Login as User B -> gets a DIFFERENT capability token & unsolved state
         $userB = User::create([
             'name' => 'Bob Researcher',
             'email' => 'bob@academy.local',
@@ -257,7 +265,12 @@ class AuthAndMultiUserIsolationTest extends TestCase
         $this->assertStringContainsString('(0 solved)', $allLabsBob);
         $this->assertSame(0, substr_count($allLabsBob, 'class="widgetcontainer-lab-link is-solved"'));
 
-        $bobEnv = $this->get("/lab-env/{$sqliLab->id}")->assertOk()->getContent();
+        $launchBob = $this->get("/academy/labs/launch/{$sqliLab->id}");
+        $bobLabUrl = (string) parse_url((string) $launchBob->headers->get('Location'), PHP_URL_PATH);
+        $this->assertMatchesRegularExpression('#^/lab/[a-f0-9]{32}$#', $bobLabUrl);
+        $this->assertNotSame($aliceLabUrl, $bobLabUrl);
+
+        $bobEnv = $this->get($bobLabUrl)->assertOk()->getContent();
         $this->assertStringContainsString('notification-labsolved-hidden', $bobEnv);
     }
 }

@@ -52,11 +52,10 @@
 #academyLabHeader .academyLabBanner .container .logo {
   width: 204px;
   height: 70px;
-  background-image: url("/resources/labheader/images/logoAcademy.svg");
-  background-repeat: no-repeat;
-}
-.is-dark #academyLabHeader .academyLabBanner .container .logo {
-  background-image: url("/resources/labheader/images/logoAcademyDark.svg");
+  display: flex;
+  align-items: center;
+  font-weight: 800;
+  color: #fe6e00;
 }
 
 #academyLabHeader .academyLabBanner .container .widgetcontainer-lab-status {

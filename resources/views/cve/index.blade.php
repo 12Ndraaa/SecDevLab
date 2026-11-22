@@ -51,7 +51,7 @@
 
 <div class="vla-grid vla-grid--2">
     @forelse ($articles as $cve)
-        <article class="vla-card">
+        <article class="vla-card vla-card-hover">
             <div class="vla-badge-row" style="margin-bottom:10px">
                 <span class="vla-badge {{ $cve->severityBadgeClass() }}">
                     {{ $cve->severity }} {{ $cve->cvss_score !== null ? number_format($cve->cvss_score, 1) : '' }}

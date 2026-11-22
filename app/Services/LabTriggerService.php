@@ -110,10 +110,11 @@ class LabTriggerService
     ];
 
     /**
-     * Evaluate lab triggers strictly by lab category, profile features, and valid payloads.
-     * The legacy ?solve=1 shortcut has been intentionally removed.
+     * Evaluate lab triggers strictly by lab category, profile features, per-session secrets, and valid payloads.
+     * Legacy shortcuts (?solve=1) and static hardcoded global secrets have been removed.
      *
      * @param  array<string, string>  $params
+     * @param  array<string, string>  $requestHeaders
      * @return array<string, mixed>
      */
     public function evaluate(
@@ -122,10 +123,20 @@ class LabTriggerService
         array $params,
         string $rawBody,
         string $cookieHeader,
-        LabSession $session
+        LabSession $session,
+        array $requestHeaders = []
     ): array {
         $cid = $lab->category_id;
         $profile = is_array($lab->profile) ? $lab->profile : [];
+
+        $carlosSecret = $session->secret('carlos_secret');
+        $fileSecret = $session->secret('file_secret');
+        $adminPassword = $session->secret('admin_password');
+        $carlosPassword = $session->secret('carlos_password');
+        $carlosApiKey = $session->secret('carlos_api_key');
+        $awsSecret = $session->secret('aws_secret');
+        $hostname = $session->secret('hostname');
+        $forgotToken = $session->secret('forgot_password_token');
 
         $categoryParam = $params['category'] ?? 'All';
         $searchParam = $params['search'] ?? '';
@@ -164,9 +175,10 @@ class LabTriggerService
         }
 
         $evalParams = $params;
-        unset($evalParams['solve'], $evalParams['reset'], $evalParams['mystery'], $evalParams['reveal']);
-        $cleanCookieHeader = $this->extractLabCookies($cookieHeader);
-        $allParamsText = implode(' ', array_merge(array_values($evalParams), [$rawBody, $cleanCookieHeader]));
+        unset($evalParams['solve'], $evalParams['reset'], $evalParams['mystery'], $evalParams['reveal'], $evalParams['ui_theme']);
+        $cleanCookieHeader = $this->extractLabCookies($cookieHeader, $session);
+        $headerSignals = $this->extractHeaderSignals($requestHeaders);
+        $allParamsText = implode(' ', array_merge(array_values($evalParams), [$rawBody, $cleanCookieHeader, $headerSignals]));
 
         $rawSqli = (bool) preg_match(
             "/('|union\s+select|or\s+1\s*=\s*1|--|v\\\$version|information_schema|pg_sleep|dbms_pipe)/i",
@@ -184,18 +196,18 @@ class LabTriggerService
         $rawSsrfOrXxe = (bool) preg_match('/(169\.254\.169\.254|localhost|127\.0\.0\.1|192\.168\.0\.|<!ENTITY|<!DOCTYPE|SYSTEM\s+["\']file:|xi:include)/i', $storeIdParam.' '.$allParamsText);
         $rawDom = (bool) preg_match('/(postMessage|location\.search|location\.hash|innerHTML|document\.write|document\.domain|eval\(|<iframe|<svg)/i', $allParamsText);
         $rawClickjack = (bool) preg_match('/<iframe\b[\s\S]*?(opacity|style|position|z-index)|(opacity|position\s*:|z-index)[\s\S]*?<iframe\b/i', $responseBodyParam.' '.$allParamsText);
-        $rawCors = (bool) preg_match('/(XMLHttpRequest|fetch\(|withCredentials|Access-Control-Allow-Origin|Origin:\s*null|Origin:\s*https?:\/\/)/i', $responseBodyParam.' '.$allParamsText);
+        $rawCors = (bool) preg_match('/(XMLHttpRequest|fetch\(|withCredentials|Access-Control-Allow-Origin|Origin:\s*null|Origin:\s*https?:\/\/)/i', $responseBodyParam.' '.$headerSignals.' '.($params['probeOrigin'] ?? ''));
         $rawProto = (bool) preg_match('/(__proto__|constructor\.prototype|constructor\[|\[\s*"__proto__"\s*\])/i', $allParamsText);
-        $rawCachePoison = (bool) preg_match('/(X-Forwarded-Host|X-Host|X-Forwarded-Scheme|X-Original-URL|X-Rewrite-URL|cb=)/i', $responseHeadParam.' '.$responseBodyParam.' '.$allParamsText);
-        $rawHostHeader = (bool) preg_match('/(X-Forwarded-Host|Host:\s*[^\s]+|arbitraryport|exploit-server)/i', $responseHeadParam.' '.$responseBodyParam.' '.$allParamsText);
-        $rawSmuggling = (bool) preg_match('/(Transfer-Encoding\s*:|Content-Length\s*:|chunked|0\r\n\r\n|SMUGGLED|CL\.TE|TE\.CL)/i', $allParamsText);
-        $rawGraphql = (bool) preg_match('/(__schema|__type|introspection|mutation\s+|query\s*\{)/i', $allParamsText);
-        $rawJwt = (bool) preg_match('/(eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.|"alg"\s*:\s*"none"|"kid"\s*:|"jwk"\s*:|"jku"\s*:)/i', $allParamsText);
-        $rawOauth = (bool) preg_match('/(redirect_uri|client_id|response_type|oauth|client_secret|access_token)/i', $allParamsText);
+        $rawCachePoison = (bool) preg_match('/(X-Forwarded-Host|X-Host|X-Forwarded-Scheme|X-Original-URL|X-Rewrite-URL|\bcb=)/i', $responseHeadParam.' '.$responseBodyParam.' '.$headerSignals.' '.$allParamsText);
+        $rawHostHeader = (bool) preg_match('/(X-Forwarded-Host|X-Host|Host:\s*[^\s]+|arbitraryport|exploit-server)/i', $responseHeadParam.' '.$responseBodyParam.' '.$headerSignals.' '.($params['probeHost'] ?? '').' '.$allParamsText);
+        $rawSmuggling = (bool) preg_match('/(Transfer-Encoding\s*:|Content-Length\s*:|chunked|0\r\n\r\n|SMUGGLED|CL\.TE|TE\.CL)/i', $headerSignals.' '.$allParamsText);
+        $rawGraphql = (bool) preg_match('/(__schema|__type|introspection|mutation\b[\s\S]*?(delete|login|change|update)|getUser\b[\s\S]*?(carlos|password|admin))/i', $allParamsText);
+        $rawJwt = $this->detectJwtExploit($allParamsText);
+        $rawOauth = $this->detectOauthExploit($params, $allParamsText);
         $rawDeser = (bool) preg_match('/(O:\d+:|a:\d+:\{|phar:\/\/|rO0AB|java\.lang\.Runtime|__destruct|__wakeup|unserialize)/i', $allParamsText);
-        $rawInfoDisc = (bool) preg_match('/(\bphpinfo\b|\/cgi-bin|\.git\b|\/backup\b|\/debug\b|\bdebug=|TRACE\s+\/|\/actuator\b|\.env\b|SECRET_KEY)/i', $allParamsText);
+        $rawInfoDisc = (bool) preg_match('/(\bphpinfo\b|\/cgi-bin|\.git\b|\/backup\b|\/debug\b|\bdebug=|TRACE\s+\/|\/actuator\b|\.env\b|SECRET_KEY)/i', $subRoute.' '.$allParamsText);
         $rawCacheDecep = (bool) preg_match('/\/my-account(?:[\/;?%#].*\.(?:js|css|jpg|png|ico|svg|webp|woff2?)|%2f|%23|%3f|\.\.%2f)/i', $allParamsText);
-        $rawApiExploit = (bool) preg_match('/(chosen_discount|\/api\/|PATCH\s+|OPTIONS\s+|roleid|isAdmin|price\s*=)/i', $allParamsText);
+        $rawApiExploit = (bool) preg_match('/(chosen_discount|\/api\/user\/carlos|\/api\/admin|PATCH\s+|OPTIONS\s+|DELETE\s+|roleid|isAdmin|price\s*=|\.\.%2f)/i', $allParamsText);
         $rawCartExploit = ($subRoute === 'cart' || ($params['view'] ?? '') === 'cart') && (
             in_array($couponParam, ['SIGNUP30', 'NEWCUST5'], true)
             || ($priceParam !== '' && is_numeric($priceParam) && (float) $priceParam < 100.0)
@@ -208,6 +220,8 @@ class LabTriggerService
             'cross-site-request-forgery-csrf',
             'business-logic-vulnerabilities',
             'http-host-header-attacks',
+            'jwt',
+            'oauth-authentication',
         ], true);
 
         $isAdminRoute = in_array($subRoute, ['admin', 'administrator-panel'], true)
@@ -219,10 +233,11 @@ class LabTriggerService
 
         $userLower = strtolower($userParam);
         $validAdminLogin = ($subRoute === 'login' || $subRoute === 'my-account' || $userParam !== '') && (
-            ($userLower === 'administrator' && ($passParam === 's3cr3t_admin_p4ss' || $passParam === 'admin' || (bool) preg_match("/'|--/", $userParam))) ||
+            ($userLower === 'administrator' && ($passParam === $adminPassword || (bool) preg_match("/'|--/", $userParam))) ||
             (str_starts_with($userLower, 'administrator') && (bool) preg_match("/'|--/", $userParam))
         );
-        $validCarlosLogin = ($userLower === 'carlos' && ($passParam === 'montoya' || (bool) preg_match("/'|--/", $userParam)));
+        $validCarlosLogin = ($userLower === 'carlos' && ($passParam === $carlosPassword || (bool) preg_match("/'|--/", $userParam)))
+            || (($params['temp-forgot-password-token'] ?? '') === $forgotToken && $userLower === 'carlos');
         $validUserLogin = ($userLower === 'wiener' && $passParam === 'peter');
 
         $dirty = false;
@@ -245,11 +260,27 @@ class LabTriggerService
             || ($cid === 'cross-site-request-forgery-csrf' && $exploitDelivering && (bool) preg_match('/change-email|<form[\s\S]*?email/i', $responseBodyParam));
 
         $submitSolutionAllowed = ! empty($profile['hasSubmitSolution']) || ! empty($profile['requiresSubmitAfterExfil']);
-        $validSecretSubmitted = $submitSolutionAllowed && ($subRoute === 'submit-solution' || $answerParam !== '') &&
-            (bool) preg_match(
-                '/2B2tlPyJQfJDynyKME5D02Cw0ouydMpZ|9k2m7v4x8p1q3w5z6r0t|peter-wiener-academy-host|s3cr3t_admin_p4ss|wJalrXUtnFEMI/i',
-                $answerParam.' '.$rawBody
-            );
+        $submittedText = trim($answerParam.' '.$rawBody);
+        $sessionSecretCandidates = array_filter([
+            $carlosSecret,
+            $fileSecret,
+            $adminPassword,
+            $carlosApiKey,
+            $awsSecret,
+            $hostname,
+        ], static fn (string $v): bool => $v !== '');
+        $matchesPerSessionSecret = false;
+        if ($submittedText !== '') {
+            foreach ($sessionSecretCandidates as $candidate) {
+                if (str_contains($submittedText, $candidate)) {
+                    $matchesPerSessionSecret = true;
+                    break;
+                }
+            }
+        }
+        $validSecretSubmitted = $submitSolutionAllowed
+            && ($subRoute === 'submit-solution' || $answerParam !== '')
+            && $matchesPerSessionSecret;
 
         $isSqliLab = in_array($cid, ['sql-injection', 'nosql-injection', 'api-testing', 'graphql-api-vulnerabilities', 'essential-skills'], true);
         $isXssLab = $cid === 'cross-site-scripting';
@@ -302,7 +333,7 @@ class LabTriggerService
             'authentication' => $validAdminLogin || $validCarlosLogin || $matchesOfficialToken,
             'oauth-authentication' => $validAdminLogin || $validCarlosLogin || $rawOauth || $adminDeleteCarlos || $matchesOfficialToken,
             'jwt' => $validAdminLogin || $validCarlosLogin || $rawJwt || $adminDeleteCarlos || $matchesOfficialToken,
-            'access-control-vulnerabilities' => $adminDeleteCarlos || $validAdminLogin || $matchesOfficialToken,
+            'access-control-vulnerabilities' => $adminDeleteCarlos || $validAdminLogin || str_contains($cleanCookieHeader, 'Admin=true') || $matchesOfficialToken,
             'information-disclosure' => $rawInfoDisc || $adminDeleteCarlos || $matchesOfficialToken,
             'web-cache-deception' => $rawCacheDecep || $matchesOfficialToken,
             'insecure-deserialization' => $rawDeser || $adminDeleteCarlos || $matchesOfficialToken,
@@ -335,7 +366,7 @@ class LabTriggerService
 
         $stepSolved = false;
         if (! empty($profile['requiresLoginAfterExfil'])) {
-            if ($validAdminLogin && ($session->exfiltrated || $passParam === 's3cr3t_admin_p4ss')) {
+            if ($validAdminLogin && ($session->exfiltrated || $passParam === $adminPassword)) {
                 $stepSolved = true;
             }
         } elseif (! empty($profile['requiresSubmitAfterExfil'])) {
@@ -345,6 +376,10 @@ class LabTriggerService
         }
 
         if ($stepSolved) {
+            if (! $session->instance_solved) {
+                $session->instance_solved = true;
+                $dirty = true;
+            }
             if (! $session->solved) {
                 $session->solved = true;
                 $session->solved_at = now();
@@ -370,6 +405,11 @@ class LabTriggerService
             'emailUpdateTriggered' => $emailUpdateTriggered,
             'matchesOfficialToken' => $matchesOfficialToken,
             'cartExploitTriggered' => $rawCartExploit,
+            'jwtExploitTriggered' => $rawJwt,
+            'oauthExploitTriggered' => $rawOauth,
+            'graphqlExploitTriggered' => $rawGraphql,
+            'apiExploitTriggered' => $rawApiExploit,
+            'httpExploitTriggered' => $rawCors || $rawCachePoison || $rawHostHeader || $rawSmuggling || $rawDeser || $rawInfoDisc || $rawCacheDecep,
             'exploitMissingPayload' => false,
         ]);
     }
@@ -396,16 +436,21 @@ class LabTriggerService
             'emailUpdateTriggered' => false,
             'matchesOfficialToken' => false,
             'cartExploitTriggered' => false,
+            'jwtExploitTriggered' => false,
+            'oauthExploitTriggered' => false,
+            'graphqlExploitTriggered' => false,
+            'apiExploitTriggered' => false,
+            'httpExploitTriggered' => false,
             'exploitMissingPayload' => false,
             'exfiltrated' => (bool) $session->exfiltrated,
-            'autoSolved' => (bool) $session->solved,
+            'autoSolved' => (bool) $session->instance_solved,
         ], $overrides);
     }
 
     /**
      * @return list<array{col1: string, col2: string}>
      */
-    public function buildUnionRows(bool $unionTriggered, string $categoryParam, string $searchParam): array
+    public function buildUnionRows(bool $unionTriggered, string $categoryParam, string $searchParam, ?LabSession $session = null): array
     {
         if (! $unionTriggered) {
             return [];
@@ -413,6 +458,9 @@ class LabTriggerService
 
         $qLower = strtolower($categoryParam.' '.$searchParam);
         $rows = [];
+        $tableSuffix = $session ? $session->secret('users_table_suffix', 'a1b2c3') : 'a1b2c3';
+        $adminPass = $session ? $session->secret('admin_password') : 'adm_session_secret';
+        $carlosPass = $session ? $session->secret('carlos_password') : 'crl_session_secret';
 
         if (str_contains($qLower, 'version') || str_contains($qLower, 'banner')) {
             $rows[] = [
@@ -421,14 +469,14 @@ class LabTriggerService
             ];
         }
         if (str_contains($qLower, 'tables') || str_contains($qLower, 'table_name')) {
-            $rows[] = ['col1' => 'users_abcdef', 'col2' => 'products'];
+            $rows[] = ['col1' => 'users_'.$tableSuffix, 'col2' => 'products'];
         }
         if (str_contains($qLower, 'columns') || str_contains($qLower, 'column_name')) {
-            $rows[] = ['col1' => 'username_xyz', 'col2' => 'password_xyz'];
+            $rows[] = ['col1' => 'username_'.$tableSuffix, 'col2' => 'password_'.$tableSuffix];
         }
 
-        $rows[] = ['col1' => 'administrator', 'col2' => 's3cr3t_admin_p4ss'];
-        $rows[] = ['col1' => 'carlos', 'col2' => 'montoya'];
+        $rows[] = ['col1' => 'administrator', 'col2' => $adminPass];
+        $rows[] = ['col1' => 'carlos', 'col2' => $carlosPass];
         $rows[] = ['col1' => 'wiener', 'col2' => 'peter'];
 
         return $rows;
@@ -462,8 +510,11 @@ class LabTriggerService
             : (bool) preg_match('/(delete_account|delete_user|delete\s+from\s+users|\bcarlos\b|whoami|morale\.txt|<script|onerror\s*=|onload\s*=|alert\s*\()/i', $message));
 
         if ($isExploit) {
-            $session->solved = true;
-            $session->solved_at = $session->solved_at ?? now();
+            $session->instance_solved = true;
+            if (! $session->solved) {
+                $session->solved = true;
+                $session->solved_at = now();
+            }
             $reply = $isWebsocketLab
                 ? 'WebSocket frame delivered to connected victim client (XSS payload executed).'
                 : 'Tool call executed: delete_user("carlos") -> User carlos deleted.';
@@ -478,11 +529,15 @@ class LabTriggerService
         return $reply;
     }
 
-    private function extractLabCookies(string $cookieHeader): string
+    private function extractLabCookies(string $cookieHeader, LabSession $session): string
     {
         if (trim($cookieHeader) === '') {
             return '';
         }
+
+        $defaultTrackingId = $session->secret('tracking_id');
+        $defaultLabSession = $session->secret('lab_session_cookie');
+        $defaultJwt = $session->buildSessionJwt();
 
         $kept = [];
         foreach (explode(';', $cookieHeader) as $part) {
@@ -500,10 +555,13 @@ class LabTriggerService
             ) {
                 continue;
             }
-            if ($nameLower === 'session' && $val === 'eyJ1c2VyIjoid2llbmVyIiwicm9sZSI6InVzZXIifQ') {
+            if ($nameLower === 'session' && ($val === $defaultLabSession || $val === $defaultJwt || $val === 'eyJ1c2VyIjoid2llbmVyIiwicm9sZSI6InVzZXIifQ')) {
                 continue;
             }
-            if ($nameLower === 'trackingid' && $val === 'xYz123AbC456') {
+            if ($nameLower === 'trackingid' && ($val === $defaultTrackingId || $val === 'xYz123AbC456')) {
+                continue;
+            }
+            if ($nameLower === 'admin' && strtolower($val) === 'false') {
                 continue;
             }
 
@@ -511,6 +569,71 @@ class LabTriggerService
         }
 
         return implode('; ', $kept);
+    }
+
+    /**
+     * @param  array<string, string>  $requestHeaders
+     */
+    private function extractHeaderSignals(array $requestHeaders): string
+    {
+        $parts = [];
+        $currentHost = strtolower((string) ($requestHeaders['Host'] ?? ''));
+
+        foreach (['X-Forwarded-Host', 'X-Host', 'X-Forwarded-Scheme', 'X-Original-URL', 'X-Rewrite-URL', 'Transfer-Encoding', 'Authorization'] as $h) {
+            $val = trim((string) ($requestHeaders[$h] ?? ''));
+            if ($val !== '') {
+                $parts[] = "{$h}: {$val}";
+            }
+        }
+
+        $origin = trim((string) ($requestHeaders['Origin'] ?? ''));
+        if ($origin !== '') {
+            $originHost = strtolower((string) parse_url($origin, PHP_URL_HOST));
+            $currentHostOnly = strtolower(explode(':', $currentHost)[0]);
+            if (strtolower($origin) === 'null' || ($originHost !== '' && $originHost !== $currentHostOnly)) {
+                $parts[] = "Origin: {$origin}";
+            }
+        }
+
+        return implode(' ', $parts);
+    }
+
+    private function detectJwtExploit(string $text): bool
+    {
+        if (preg_match('/("alg"\s*:\s*"none"|"kid"\s*:|"jwk"\s*:|"jku"\s*:)/i', $text)) {
+            return true;
+        }
+
+        if (preg_match_all('/\b(eyJ[A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]*)/', $text, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $m) {
+                $hdr = json_decode((string) base64_decode(strtr($m[1], '-_', '+/'), true), true);
+                $pl = json_decode((string) base64_decode(strtr($m[2], '-_', '+/'), true), true);
+                if (is_array($hdr) && strtolower((string) ($hdr['alg'] ?? '')) === 'none') {
+                    return true;
+                }
+                if (is_array($hdr) && (isset($hdr['jwk']) || isset($hdr['jku']) || isset($hdr['kid']))) {
+                    return true;
+                }
+                if (is_array($pl) && (strtolower((string) ($pl['sub'] ?? '')) === 'administrator' || strtolower((string) ($pl['role'] ?? '')) === 'administrator' || ! empty($pl['isAdmin']))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param  array<string, string>  $params
+     */
+    private function detectOauthExploit(array $params, string $allParamsText): bool
+    {
+        $redirectUri = trim((string) ($params['redirect_uri'] ?? ''));
+        if ($redirectUri !== '' && preg_match('/(exploit|evil|attacker|\.\.\/|@|#)/i', $redirectUri)) {
+            return true;
+        }
+
+        return (bool) preg_match('/(redirect_uri\s*=.*?(?:evil|attacker|exploit|\.\.%2f|\.\.\/)|client_secret|access_token|oauth-linking)/i', $allParamsText);
     }
 
     private function isActionableOfficialToken(string $tokLower, bool $isCustomLab = false): bool

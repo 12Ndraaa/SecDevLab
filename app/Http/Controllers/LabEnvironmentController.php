@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\BlogPost;
 use App\Models\Lab;
 use App\Models\LabSession;
+use App\Models\LabUploadedFile;
 use App\Models\Product;
 use App\Services\AvatarUploadService;
+use App\Services\LabArchetypeResolver;
 use App\Services\LabTriggerService;
+use App\Services\LabUrlService;
 use App\Services\SandboxedPhpEvaluator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
 
 class LabEnvironmentController extends Controller
 {
@@ -31,32 +33,78 @@ class LabEnvironmentController extends Controller
     public function __construct(
         private readonly LabTriggerService $triggerService,
         private readonly AvatarUploadService $uploadService,
-        private readonly SandboxedPhpEvaluator $phpEvaluator
+        private readonly SandboxedPhpEvaluator $phpEvaluator,
+        private readonly LabUrlService $urlService,
+        private readonly LabArchetypeResolver $archetypeResolver
     ) {}
 
-    public function handle(Request $request, string $labId, ?string $tail = null): Response
+    public function handleBySubdomainToken(Request $request, ?string $tail = null): Response
     {
-        $lab = Lab::with('category')->find(strtolower($labId));
-        if (! $lab) {
+        $token = (string) ($request->route('token') ?: $this->urlService->extractTokenFromHost((string) $request->getHost()));
+        if ($token === '') {
             abort(404);
         }
 
-        /** @var int $userId */
-        $userId = (int) Auth::id();
-        $session = LabSession::forUserAndLab($userId, $lab->id);
+        return $this->handleByToken($request, $token, $tail);
+    }
 
-        if ($request->query('reset') === '1') {
-            $session->resetState();
+    public function handleByToken(Request $request, string $token, ?string $tail = null): Response
+    {
+        $session = LabSession::findByToken($token);
+        if (! $session || ! $session->lab) {
+            abort(404);
+        }
+
+        $lab = $session->lab;
+        $basePath = $this->urlService->pathPrefix($session, $request);
+
+        if ($session->isExpired()) {
+            if ($request->header('X-Academy-Repeater') === '1' || $request->expectsJson()) {
+                return response(
+                    json_encode([
+                        'error' => 'Lab instance expired. Relaunch from SecDevLab.',
+                        'expired' => true,
+                        'relaunchUrl' => url('/academy/labs/launch/'.$lab->id),
+                    ], JSON_UNESCAPED_SLASHES),
+                    410,
+                    ['Content-Type' => 'application/json; charset=utf-8']
+                );
+            }
+
+            return response(
+                view('lab-env.expired', [
+                    'session' => $session,
+                    'lab' => $lab,
+                    'archetype' => $this->archetypeResolver->meta($lab),
+                ])->render(),
+                410,
+                ['Content-Type' => 'text/html; charset=utf-8']
+            );
+        }
+
+        $tailParts = $tail ? array_values(array_filter(explode('/', $tail))) : [];
+        $subRoute = strtolower((string) ($tailParts[0] ?? ''));
+        $subAction = strtolower((string) ($tailParts[1] ?? ''));
+
+        // Non-sensitive display theme toggle for the lab Command Bar
+        if ($subRoute === '_theme' && $request->isMethod('POST')) {
+            $nextTheme = $request->input('ui_theme');
+            if (! in_array($nextTheme, ['dark', 'light'], true)) {
+                $nextTheme = ($session->ui_theme === 'light') ? 'dark' : 'light';
+            }
+            $session->ui_theme = $nextTheme;
+            $session->save();
+
+            return new Response('', 302, [
+                'Location' => $basePath !== '' ? $basePath : '/',
+            ]);
         }
 
         $profile = is_array($lab->profile) ? $lab->profile : [];
-        $tailParts = $tail ? array_values(array_filter(explode('/', $tail))) : [];
-        $subRoute = $tailParts[0] ?? '';
-        $subAction = $tailParts[1] ?? '';
-
         $cookieHeader = (string) $request->header('Cookie', '');
         $rawBody = (string) $request->getContent();
         $params = $this->extractParams($request, $rawBody);
+        $requestHeaders = $this->extractRequestHeaders($request);
 
         // Enforce strict feature availability per lab profile
         if ($subRoute === 'chat' || ($params['view'] ?? '') === 'chat') {
@@ -81,28 +129,30 @@ class LabEnvironmentController extends Controller
                 'cross-site-request-forgery-csrf',
                 'business-logic-vulnerabilities',
                 'http-host-header-attacks',
+                'jwt',
+                'oauth-authentication',
             ], true);
             if (! $adminAllowed) {
                 abort(404, 'Admin panel is not available for this lab.');
             }
         }
 
-        // 1. Sub-route: /lab-env/{labId}/image?filename=...
+        // 1. Sub-route: /lab/{token}/image?filename=...
         if ($subRoute === 'image') {
             return $this->serveImage($lab, $session, (string) ($params['filename'] ?? '30.jpg'));
         }
 
-        // 2. Sub-route: POST /lab-env/{labId}/my-account/avatar
+        // 2. Sub-route: POST /lab/{token}/my-account/avatar
         if ($subRoute === 'my-account' && $subAction === 'avatar' && $request->isMethod('POST')) {
-            return $this->handleAvatarUpload($request, $lab, $session, $params, $cookieHeader);
+            return $this->handleAvatarUpload($request, $lab, $session, $params, $cookieHeader, $requestHeaders);
         }
 
-        // 3. Sub-route: GET /lab-env/{labId}/files/...
+        // 3. Sub-route: GET /lab/{token}/files/...
         if ($subRoute === 'files') {
             return $this->serveUploadedFile($request, $lab, $session);
         }
 
-        // 4. Sub-route: POST /lab-env/{labId}/chat (Zero-JS SSR Live Chat)
+        // 4. Sub-route: POST /lab/{token}/chat (Zero-JS SSR Live Chat)
         if ($subRoute === 'chat' && $request->isMethod('POST')) {
             $msg = trim((string) ($params['message'] ?? ''));
             if ($msg !== '') {
@@ -115,14 +165,20 @@ class LabEnvironmentController extends Controller
         if ($subRoute === 'filter' && ! isset($params['view'])) {
             $params['view'] = 'shop';
         }
+        if ($subRoute === 'shop') {
+            $params['view'] = 'shop';
+        }
         if ($subRoute === 'product') {
             $params['view'] = 'product';
+        }
+        if ($subRoute === 'blog') {
+            $params['view'] = 'blog';
         }
         if ($subRoute === 'post') {
             $params['view'] = 'post';
         }
         if ($subRoute === 'login' || $subRoute === 'my-account') {
-            $params['view'] = 'my-account';
+            $params['view'] = $lab->category_id === 'file-upload-vulnerabilities' ? 'media-portal' : 'my-account';
             if ($subAction === 'change-email') {
                 $params['action'] = 'change-email';
             }
@@ -144,6 +200,29 @@ class LabEnvironmentController extends Controller
         }
         if ($subRoute === 'chat') {
             $params['view'] = 'chat';
+        }
+        if ($subRoute === 'graphql') {
+            $params['view'] = 'graphql';
+        }
+        if ($subRoute === 'api') {
+            $params['view'] = 'api-explorer';
+            if ($tail && ! isset($params['apiPath'])) {
+                $params['apiPath'] = '/'.ltrim($tail, '/');
+            }
+        }
+        if ($subRoute === 'oauth') {
+            $params['view'] = 'oauth-workbench';
+        }
+        if ($subRoute === 'jwt') {
+            $params['view'] = 'jwt-workbench';
+        }
+        if (in_array($subRoute, ['inspector', 'robots.txt', 'backup', '.git', 'phpinfo', 'actuator', '_workbench'], true)) {
+            if (! isset($params['view'])) {
+                $params['view'] = $this->archetypeResolver->defaultLandingView($lab);
+            }
+            if (in_array($subRoute, ['robots.txt', 'backup', '.git', 'phpinfo', 'actuator'], true) && ! isset($params['probePath'])) {
+                $params['probePath'] = '/'.ltrim($tail ?? $subRoute, '/');
+            }
         }
 
         // Handle Exploit Server state persistence and payload requirement
@@ -179,15 +258,16 @@ class LabEnvironmentController extends Controller
 
         // 5. X-Academy-Repeater JSON mode
         if ($request->header('X-Academy-Repeater') === '1') {
-            $trig = $this->triggerService->evaluate($lab, $subRoute, $params, $rawBody, $cookieHeader, $session);
+            $trig = $this->triggerService->evaluate($lab, $subRoute, $params, $rawBody, $cookieHeader, $session, $requestHeaders);
 
             return response(
                 json_encode([
                     'method' => $request->method(),
                     'path' => $request->getRequestUri(),
+                    'instanceToken' => $session->instance_token,
                     'exfiltrated' => $trig['exfiltrated'],
                     'autoSolved' => $trig['autoSolved'],
-                    'secret' => ($trig['exfiltrated'] || $trig['autoSolved']) ? $session->carlos_secret : null,
+                    'secret' => ($trig['exfiltrated'] || $trig['autoSolved']) ? $session->secret('carlos_secret') : null,
                     'status' => $trig['autoSolved']
                         ? 'Exploit payload triggered — Lab Solved!'
                         : ($trig['exfiltrated']
@@ -201,17 +281,20 @@ class LabEnvironmentController extends Controller
                     'Content-Type' => 'application/json; charset=utf-8',
                     'X-Lab-Solved' => $trig['autoSolved'] ? 'true' : 'false',
                     'X-Lab-Exfiltrated' => $trig['exfiltrated'] ? 'true' : 'false',
+                    'X-Lab-Instance' => (string) $session->instance_token,
                     'Cache-Control' => 'no-store',
                 ]
             );
         }
 
         return $this->renderEnvironment(
+            $request,
             $lab,
             $subRoute,
             $params,
             $rawBody,
             $cookieHeader,
+            $requestHeaders,
             $session,
             [],
             $exploitFeedback,
@@ -222,13 +305,15 @@ class LabEnvironmentController extends Controller
 
     /**
      * @param  array<string, string>  $params
+     * @param  array<string, string>  $requestHeaders
      */
     private function handleAvatarUpload(
         Request $request,
         Lab $lab,
         LabSession $session,
         array $params,
-        string $cookieHeader
+        string $cookieHeader,
+        array $requestHeaders
     ): Response {
         $result = $this->uploadService->processUpload($request, $lab, $session);
         if (! $result['ok']) {
@@ -242,13 +327,13 @@ class LabEnvironmentController extends Controller
         $params['view'] = 'upload-result';
         $params['uploadMsg'] = 'The file '.$result['reportedPath'].' has been uploaded.';
 
-        return $this->renderEnvironment($lab, 'my-account', $params, '', $cookieHeader, $session, $result['headers']);
+        return $this->renderEnvironment($request, $lab, 'my-account', $params, '', $cookieHeader, $requestHeaders, $session, $result['headers']);
     }
 
     private function serveUploadedFile(Request $request, Lab $lab, LabSession $session): Response
     {
         $rawUriPath = explode('?', (string) $request->server('REQUEST_URI', $request->getPathInfo()))[0];
-        $marker = '/lab-env/'.$lab->id.'/files/';
+        $marker = '/files/';
         $pos = stripos($rawUriPath, $marker);
         $rawRel = $pos !== false ? substr($rawUriPath, $pos + strlen($marker)) : '';
 
@@ -300,11 +385,15 @@ class LabEnvironmentController extends Controller
         }
 
         $mimeType = self::MIME_BY_EXT[$ext] ?? ($record->content_type ?: 'application/octet-stream');
-
-        return response($fileBuffer, 200, [
+        $headers = [
             'Content-Type' => $mimeType,
             'Cache-Control' => 'no-store',
-        ]);
+        ];
+        if (in_array($ext, ['.html', '.htm', '.svg'], true)) {
+            $headers['Content-Security-Policy'] = "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:";
+        }
+
+        return response($fileBuffer, 200, $headers);
     }
 
     private function serveImage(Lab $lab, LabSession $session, string $fn): Response
@@ -315,8 +404,11 @@ class LabEnvironmentController extends Controller
         if ($isPathTraversalLab && (str_contains($fn, '..') || str_contains($fn, 'passwd') || str_contains($fn, 'secret'))) {
             $session->exfiltrated = true;
             if (empty($profile['requiresMultiStep'])) {
-                $session->solved = true;
-                $session->solved_at = $session->solved_at ?? now();
+                $session->instance_solved = true;
+                if (! $session->solved) {
+                    $session->solved = true;
+                    $session->solved_at = now();
+                }
             }
             $session->save();
 
@@ -324,13 +416,13 @@ class LabEnvironmentController extends Controller
                 'root:x:0:0:root:/root:/bin/bash',
                 'daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin',
                 'carlos:x:1001:1001::/home/carlos:/bin/bash',
-                '# /home/carlos/secret: 9k2m7v4x8p1q3w5z6r0t',
+                '# /home/carlos/secret: '.$session->secret('file_secret'),
                 '',
             ]);
 
             return response($mockLines, 200, [
                 'Content-Type' => 'text/plain; charset=utf-8',
-                'X-Lab-Solved' => $session->solved ? 'true' : 'false',
+                'X-Lab-Solved' => $session->instance_solved ? 'true' : 'false',
                 'Cache-Control' => 'no-store',
             ]);
         }
@@ -355,14 +447,17 @@ class LabEnvironmentController extends Controller
 
     /**
      * @param  array<string, string>  $params
+     * @param  array<string, string>  $requestHeaders
      * @param  array<string, string>  $extraHeaders
      */
     private function renderEnvironment(
+        Request $request,
         Lab $lab,
         string $subRoute,
         array $params,
         string $rawBody,
         string $cookieHeader,
+        array $requestHeaders,
         LabSession $session,
         array $extraHeaders = [],
         string $exploitFeedback = '',
@@ -370,8 +465,12 @@ class LabEnvironmentController extends Controller
         bool $isPost = false
     ): Response {
         $profile = is_array($lab->profile) ? $lab->profile : [];
+        $archetype = $this->archetypeResolver->resolve($lab);
+        $archetypeMeta = $this->archetypeResolver->meta($lab);
+        $basePath = $this->urlService->pathPrefix($session, $request);
+        $baseUrl = $this->urlService->absoluteBaseUrl($session, $request);
+        $cookiePath = $this->urlService->cookiePath($session, $request);
         $theme = ($profile['theme'] ?? 'ecommerce') === 'blog' ? 'blog' : 'ecommerce';
-        $defaultLandingView = $theme === 'blog' ? 'blog' : 'shop';
 
         $viewParam = $params['view'] ?? '';
         $productIdParam = $params['productId'] ?? '';
@@ -384,11 +483,12 @@ class LabEnvironmentController extends Controller
         $isMystery = ($params['mystery'] ?? '') === '1';
         $revealMystery = ($params['reveal'] ?? '') === '1';
 
+        $defaultLandingView = $this->archetypeResolver->defaultLandingView($lab);
         $activeView = $viewParam !== ''
             ? $viewParam
             : ($productIdParam !== '' ? 'product' : ($postIdParam !== '' ? 'post' : $defaultLandingView));
 
-        $triggers = $this->triggerService->evaluate($lab, $subRoute, $params, $rawBody, $cookieHeader, $session);
+        $triggers = $this->triggerService->evaluate($lab, $subRoute, $params, $rawBody, $cookieHeader, $session, $requestHeaders);
 
         // Seeded products for this lab
         $allProducts = Product::all()->keyBy('id');
@@ -434,9 +534,16 @@ class LabEnvironmentController extends Controller
         $stockOutput = '';
         if ($storeIdParam !== '') {
             if ($triggers['cmdTriggered']) {
-                $stockOutput = "42 units\npeter-wiener-academy-host\nuid=1001(carlos) gid=1001(carlos) groups=1001(carlos)\n/home/carlos/secret: 9k2m7v4x8p1q3w5z6r0t";
+                $stockOutput = "42 units\n"
+                    .$session->secret('hostname')."\n"
+                    ."uid=1001(carlos) gid=1001(carlos) groups=1001(carlos)\n"
+                    .'/home/carlos/secret: '.$session->secret('file_secret');
             } elseif ($triggers['ssrfOrXxeTriggered']) {
-                $stockOutput = "HTTP/1.1 200 OK\nAdmin Interface Reached via Internal Loopback\nroot:x:0:0:root:/root:/bin/bash\ncarlos:x:1001:1001::/home/carlos:/bin/bash\nAWS SecretAccessKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
+                $stockOutput = "HTTP/1.1 200 OK\n"
+                    ."Admin Interface Reached via Internal Loopback\n"
+                    ."root:x:0:0:root:/root:/bin/bash\n"
+                    ."carlos:x:1001:1001::/home/carlos:/bin/bash\n"
+                    .'AWS SecretAccessKey: '.$session->secret('aws_secret');
             } else {
                 $stockOutput = "64 units in stock at {$storeIdParam}";
             }
@@ -463,30 +570,32 @@ class LabEnvironmentController extends Controller
             if (str_contains($searchParam, '7*7')) {
                 $sstiEval = '49';
             } elseif (preg_match('/secret|settings|object|env|passwd/i', $searchParam)) {
-                $sstiEval = $session->carlos_secret ?: LabSession::DEFAULT_CARLOS_SECRET;
+                $sstiEval = $session->secret('file_secret');
             } else {
                 $sstiEval = $searchParam;
             }
         } else {
             $sstiEval = $searchParam;
         }
-        $unionRows = $this->triggerService->buildUnionRows($triggers['unionTriggered'], $categoryParam, $searchParam);
+        $unionRows = $this->triggerService->buildUnionRows($triggers['unionTriggered'], $categoryParam, $searchParam, $session);
 
         $rawCategories = $profile['categories'] ?? ['All', 'Accessories', 'Clothing, shoes and accessories', 'Gifts', 'Lifestyle'];
         $categoriesList = array_map(static fn (string $label): array => [
             'label' => $label,
             'href' => $label === 'All'
-                ? "/lab-env/{$lab->id}"
-                : "/lab-env/{$lab->id}/filter?category=".str_replace('%20', '+', rawurlencode($label)),
+                ? ($basePath !== '' ? $basePath.'/shop' : '/shop')
+                : $basePath.'/filter?category='.str_replace('%20', '+', rawurlencode($label)),
         ], $rawCategories);
 
-        $usesImageEndpoint = ! empty($profile['usesImageFilenameEndpoint']);
+        $usesImageEndpoint = ! empty($profile['usesImageFilenameEndpoint']) || $lab->category_id === 'path-traversal';
         $resolveProdImg = static fn (Product $p): string => $usesImageEndpoint
-            ? "/lab-env/{$lab->id}/image?filename={$p->filename}"
+            ? "{$basePath}/image?filename={$p->filename}"
             : $p->img;
 
         $currentUser = $session->logged_in_user ?: ($triggers['validLoginTriggered'] ? $userParam : '');
-        $avatarSrc = $session->avatar_path ?: "/lab-env/{$lab->id}/files/avatars/default.jpg";
+        $avatarSrc = $session->avatar_path !== ''
+            ? (str_starts_with($session->avatar_path, '/') ? $session->avatar_path : "{$basePath}/".ltrim($session->avatar_path, '/'))
+            : "{$basePath}/files/avatars/default.jpg";
 
         $cartMessage = '';
         if ($activeView === 'cart' && $isPost) {
@@ -499,18 +608,33 @@ class LabEnvironmentController extends Controller
         if ($subRoute === 'submit-solution' && $isPost && ! $triggers['autoSolved']) {
             $submitSolutionError = ! empty($profile['requiresSubmitAfterExfil']) && ! $triggers['exfiltrated']
                 ? 'Solution rejected: complete the vulnerability exploitation / exfiltration step before submitting the secret.'
-                : 'Incorrect solution secret submitted. Verify the extracted secret from the target environment.';
+                : 'Incorrect solution secret submitted. Verify the extracted secret from this session instance.';
         }
 
+        // Contextual Workbench Execution & Telemetry Logging
+        $workbenchOutput = $this->buildWorkbenchOutput($lab, $archetype, $subRoute, $params, $rawBody, $requestHeaders, $session, $triggers, $isPost);
+        $uploadedFiles = LabUploadedFile::where('user_id', $session->user_id)
+            ->where('lab_id', $lab->id)
+            ->orderByDesc('updated_at')
+            ->get(['storage_key', 'content_type', 'expires_at_ms']);
+
         $exploitState = is_array($session->exploit_state) ? $session->exploit_state : [];
+        $sessionJwt = $session->buildSessionJwt($currentUser !== '' ? $currentUser : null);
 
         $html = view('lab-env.show', [
             'lab' => $lab,
+            'session' => $session,
             'profile' => $profile,
+            'archetype' => $archetype,
+            'archetypeMeta' => $archetypeMeta,
+            'basePath' => $basePath,
+            'baseUrl' => $baseUrl,
+            'urlMode' => $this->urlService->isSubdomainMode() ? 'subdomain' : 'path',
+            'labUiTheme' => in_array($session->ui_theme, ['dark', 'light'], true) ? $session->ui_theme : 'dark',
             'theme' => $theme,
-            'themeCssHref' => $theme === 'blog' ? '/resources/css/labsBlog.css' : '/resources/css/labsEcommerce.css',
             'isMystery' => $isMystery,
             'revealMystery' => $revealMystery,
+            'defaultLandingView' => $defaultLandingView,
             'activeView' => $activeView,
             'categoryParam' => $categoryParam,
             'searchParam' => $searchParam,
@@ -521,10 +645,12 @@ class LabEnvironmentController extends Controller
             'cookieHeader' => $cookieHeader,
             'exfiltrated' => $triggers['exfiltrated'],
             'autoSolved' => $triggers['autoSolved'],
+            'academySolved' => (bool) $session->solved,
             'validLoginTriggered' => $triggers['validLoginTriggered'],
             'adminDeleteCarlos' => $triggers['adminDeleteCarlos'],
             'visibleProducts' => $visibleProducts,
             'selectedProduct' => $selectedProduct,
+            'labProducts' => $labProducts,
             'stockOutput' => $stockOutput,
             'blogPosts' => $blogPosts,
             'selectedPost' => $selectedPost,
@@ -534,27 +660,250 @@ class LabEnvironmentController extends Controller
             'resolveProdImg' => $resolveProdImg,
             'currentUser' => $currentUser,
             'avatarSrc' => $avatarSrc,
+            'uploadedFiles' => $uploadedFiles,
             'chatHistory' => is_array($session->chat_history) ? $session->chat_history : [],
             'exploitState' => $exploitState,
             'exploitFeedback' => $exploitFeedback,
             'exploitError' => $exploitError,
             'cartMessage' => $cartMessage,
             'submitSolutionError' => $submitSolutionError,
+            'workbenchOutput' => $workbenchOutput,
+            'sessionJwt' => $sessionJwt,
+            'wienerApiKey' => $session->secret('wiener_api_key'),
+            'csrfToken' => $session->secret('csrf_token'),
+            'forgotToken' => $session->secret('forgot_password_token'),
+            'trackingIdDefault' => $session->secret('tracking_id'),
+            'requestHeaders' => $requestHeaders,
+            'params' => $params,
         ])->render();
 
         $headers = array_merge([
             'Content-Type' => 'text/html; charset=utf-8',
-            'Cache-Control' => 'no-store',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate',
         ], $extraHeaders);
 
         $response = response($html, 200, $headers);
-        if (! empty($profile['cookies']) && is_array($profile['cookies'])) {
-            foreach ($profile['cookies'] as $rawCookie) {
-                $response->headers->set('Set-Cookie', (string) $rawCookie, false);
+        $this->attachIsolatedLabCookies($response, $profile, $session, $cookiePath, $lab->category_id === 'jwt');
+
+        return $response;
+    }
+
+    /**
+     * @param  array<string, mixed>  $profile
+     */
+    private function attachIsolatedLabCookies(
+        Response $response,
+        array $profile,
+        LabSession $session,
+        string $cookiePath,
+        bool $isJwtLab
+    ): void {
+        $sessionVal = $isJwtLab ? $session->buildSessionJwt() : $session->secret('lab_session_cookie');
+        $response->headers->set(
+            'Set-Cookie',
+            "session={$sessionVal}; Path={$cookiePath}; HttpOnly; SameSite=Lax",
+            false
+        );
+
+        if (! empty($profile['hasTrackingIdCookie'])) {
+            $trackingId = $session->secret('tracking_id');
+            $response->headers->set(
+                'Set-Cookie',
+                "TrackingId={$trackingId}; Path={$cookiePath}; SameSite=Lax",
+                false
+            );
+        }
+
+        $rawCookies = is_array($profile['cookies'] ?? null) ? $profile['cookies'] : [];
+        foreach ($rawCookies as $raw) {
+            if (is_string($raw) && str_starts_with(trim($raw), 'Admin=')) {
+                $response->headers->set(
+                    'Set-Cookie',
+                    "Admin=false; Path={$cookiePath}; SameSite=Lax",
+                    false
+                );
+                break;
+            }
+        }
+    }
+
+    /**
+     * @param  array<string, string>  $params
+     * @param  array<string, string>  $requestHeaders
+     * @param  array<string, mixed>  $triggers
+     * @return array<string, mixed>
+     */
+    private function buildWorkbenchOutput(
+        Lab $lab,
+        string $archetype,
+        string $subRoute,
+        array $params,
+        string $rawBody,
+        array $requestHeaders,
+        LabSession $session,
+        array $triggers,
+        bool $isPost
+    ): array {
+        $cid = $lab->category_id;
+        $status = $triggers['autoSolved'] ? '200 OK (TRIGGERED / SOLVED)' : ($triggers['exfiltrated'] ? '200 OK (EXFILTRATED)' : '200 OK');
+
+        $out = [
+            'status' => $status,
+            'headline' => '',
+            'body' => '',
+            'headers' => [
+                'Host' => $requestHeaders['Host'] ?? 'localhost',
+                'X-Lab-Archetype' => $archetype,
+                'X-Cache' => 'MISS',
+                'Cache-Control' => 'private, no-store',
+                'X-Frame-Options' => $cid === 'clickjacking' ? 'ALLOW-FROM * (Unprotected)' : 'SAMEORIGIN',
+            ],
+        ];
+
+        if ($cid === 'cross-origin-resource-sharing-cors') {
+            $origin = trim((string) ($params['probeOrigin'] ?? ($requestHeaders['Origin'] ?? '')));
+            if ($origin !== '') {
+                $out['headers']['Access-Control-Allow-Origin'] = $origin;
+                $out['headers']['Access-Control-Allow-Credentials'] = 'true';
+                $out['headline'] = "Reflected Origin: {$origin}";
+                $out['body'] = json_encode([
+                    'username' => $session->logged_in_user ?: 'wiener',
+                    'apikey' => $session->secret('wiener_api_key'),
+                    'cors_policy' => 'DYNAMIC_ORIGIN_REFLECTION',
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            }
+        } elseif ($cid === 'web-cache-poisoning' || $cid === 'http-host-header-attacks') {
+            $fwdHost = trim((string) ($params['probeHost'] ?? ($requestHeaders['X-Forwarded-Host'] ?? ($requestHeaders['X-Host'] ?? ''))));
+            if ($fwdHost !== '') {
+                $out['headers']['X-Cache'] = 'HIT (poisoned key)';
+                $out['headers']['X-Forwarded-Host'] = $fwdHost;
+                $out['headline'] = "Unkeyed Host Reflection: {$fwdHost}";
+                $out['body'] = "<script src=\"https://{$fwdHost}/resources/js/tracking.js\"></script>";
+            }
+        } elseif ($cid === 'web-cache-deception') {
+            $probePath = trim((string) ($params['probePath'] ?? ''));
+            if ($probePath !== '') {
+                $cached = (bool) preg_match('/\.(js|css|jpg|png|ico|svg|webp)$/i', $probePath);
+                $out['headers']['X-Cache'] = $cached ? 'HIT (Static extension rule matched)' : 'MISS';
+                $out['headline'] = "Origin Route Normalized: {$probePath}";
+                $out['body'] = json_encode([
+                    'cached_publicly' => $cached,
+                    'account' => $session->logged_in_user ?: 'wiener',
+                    'apiKey' => $session->secret('wiener_api_key'),
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            }
+        } elseif ($cid === 'graphql-api-vulnerabilities') {
+            $gql = trim((string) ($params['graphqlQuery'] ?? ($params['query'] ?? '')));
+            if ($gql !== '' || $subRoute === 'graphql') {
+                if (preg_match('/__schema|__type|introspection/i', $gql)) {
+                    $out['headline'] = 'GraphQL Introspection Enabled (/graphql/v1)';
+                    $out['body'] = json_encode([
+                        'data' => [
+                            '__schema' => [
+                                'types' => [
+                                    ['name' => 'Query', 'fields' => ['getProduct', 'getUser', 'login']],
+                                    ['name' => 'Mutation', 'fields' => ['deleteUser', 'changeEmail']],
+                                    ['name' => 'User', 'fields' => ['id', 'username', 'password', 'apiKey']],
+                                ],
+                            ],
+                        ],
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                } elseif (preg_match('/carlos/i', $gql)) {
+                    $out['headline'] = 'GraphQL User Node Exposed';
+                    $out['body'] = json_encode([
+                        'data' => ['getUser' => ['id' => 2, 'username' => 'carlos', 'password' => $session->secret('carlos_password')]],
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                } else {
+                    $out['headline'] = 'GraphQL Query Executed (/graphql/v1)';
+                    $out['body'] = json_encode([
+                        'data' => ['getProduct' => ['id' => 7, 'name' => 'Giant Pillow Thing', 'price' => '$95.14']],
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                }
+            }
+        } elseif ($cid === 'api-testing') {
+            $apiMethod = strtoupper((string) ($params['apiMethod'] ?? 'GET'));
+            $apiPath = trim((string) ($params['apiPath'] ?? ''));
+            if ($apiPath !== '' || $subRoute === 'api') {
+                $path = $apiPath ?: '/api/user/wiener';
+                $out['headline'] = "{$apiMethod} {$path}";
+                if (str_contains(strtolower($path), 'carlos') || $apiMethod === 'DELETE' || $apiMethod === 'PATCH' || $apiMethod === 'OPTIONS') {
+                    $out['body'] = json_encode([
+                        'endpoint' => $path,
+                        'method' => $apiMethod,
+                        'allowed_methods' => ['GET', 'PATCH', 'DELETE', 'OPTIONS'],
+                        'result' => $triggers['autoSolved'] ? 'Action executed cleanly' : 'Endpoint reachable',
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                } else {
+                    $out['body'] = json_encode([
+                        'username' => 'wiener',
+                        'email' => 'wiener@normal-user.net',
+                        'apiKey' => $session->secret('wiener_api_key'),
+                        'docsHint' => 'Try OPTIONS /api or PATCH /api/user/wiener with hidden fields.',
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+                }
+            }
+        } elseif ($cid === 'information-disclosure') {
+            $probePath = trim((string) ($params['probePath'] ?? ''));
+            if ($probePath !== '') {
+                $out['headline'] = "GET {$probePath}";
+                $out['body'] = match (true) {
+                    str_contains($probePath, '.git') => "ref: refs/heads/main\n# Exposed commit: admin fallback secret = {$session->secret('admin_password')}",
+                    str_contains($probePath, 'phpinfo') => "PHP Version 8.3-sandbox\nSECRET_KEY = {$session->secret('file_secret')}",
+                    str_contains($probePath, 'backup') => "BackupArchive.java.bak\npostgres://postgres:{$session->secret('admin_password')}@127.0.0.1:5432/academy",
+                    str_contains($probePath, 'robots') => "User-agent: *\nDisallow: /administrator-panel\nDisallow: /backup\nDisallow: /cgi-bin/phpinfo.php",
+                    default => "Diagnostic response for {$probePath} (HTTP 200 OK)",
+                };
+            }
+        } elseif ($cid === 'insecure-deserialization') {
+            $deser = trim((string) ($params['deserPayload'] ?? ''));
+            if ($deser !== '') {
+                $out['headline'] = 'Serialized Object Deserializer Trace';
+                $out['body'] = $triggers['autoSolved']
+                    ? "unserialize() invoked magic gadget (__destruct / __wakeup)\nTarget action executed cleanly."
+                    : "Decoded object token preview:\n{$deser}";
+            }
+        } elseif ($cid === 'http-request-smuggling') {
+            $smug = trim((string) ($params['probeBody'] ?? $rawBody));
+            if ($smug !== '' && $isPost) {
+                $out['headline'] = 'Front-End / Back-End Desync Inspector';
+                $out['body'] = $triggers['autoSolved']
+                    ? "CL.TE / TE.CL buffer boundary desynchronized!\nSmuggled prefix processed by back-end queue."
+                    : "Forwarded HTTP frame (".strlen($smug).' bytes) — no desync boundary matched yet.';
+            }
+        } elseif ($cid === 'prototype-pollution') {
+            $proto = trim((string) ($params['protoPayload'] ?? $rawBody));
+            if ($proto !== '') {
+                $out['headline'] = 'Prototype Merge Inspector';
+                $out['body'] = $triggers['autoSolved']
+                    ? "Object.prototype polluted! Gadget property propagated to sink / role check."
+                    : "Merged payload safely without polluting Object.prototype.";
+            }
+        } elseif ($cid === 'dom-based-vulnerabilities') {
+            $dom = trim((string) ($params['domPayload'] ?? ($params['search'] ?? '')));
+            if ($dom !== '') {
+                $out['headline'] = 'DOM Source -> Sink Dataflow';
+                $out['body'] = "Source: location.search / postMessage\nSink: innerHTML / document.write\nTainted value: {$dom}";
+            }
+        } elseif ($cid === 'jwt') {
+            $jwtIn = trim((string) ($params['jwtToken'] ?? ''));
+            if ($jwtIn !== '') {
+                $out['headline'] = 'JWT Verification Engine';
+                $out['body'] = $triggers['autoSolved']
+                    ? "Signature verification bypassed / forged administrator claim accepted!"
+                    : "Token parsed: signature valid only for standard role 'user'.";
             }
         }
 
-        return $response;
+        if ($out['headline'] !== '' && $isPost) {
+            $wb = is_array($session->workbench_state) ? $session->workbench_state : [];
+            $logs = is_array($wb['logs'] ?? null) ? $wb['logs'] : [];
+            $logs[] = '['.now()->format('H:i:s').'] '.$out['headline'].' -> '.$out['status'];
+            $wb['logs'] = array_slice($logs, -8);
+            $session->workbench_state = $wb;
+            $session->save();
+        }
+
+        return $out;
     }
 
     /**
@@ -601,21 +950,48 @@ class LabEnvironmentController extends Controller
         return $params;
     }
 
+    /**
+     * @return array<string, string>
+     */
+    private function extractRequestHeaders(Request $request): array
+    {
+        $names = [
+            'Host',
+            'Origin',
+            'X-Forwarded-Host',
+            'X-Host',
+            'X-Forwarded-Scheme',
+            'X-Original-URL',
+            'X-Rewrite-URL',
+            'Transfer-Encoding',
+            'Authorization',
+        ];
+        $out = [];
+        foreach ($names as $name) {
+            $val = $request->header($name);
+            if (is_string($val) && trim($val) !== '') {
+                $out[$name] = trim($val);
+            }
+        }
+
+        return $out;
+    }
+
     private function renderProductSvg(int $id): string
     {
         $palettes = [
-            ['#001350', '#ff6633', 'M20 70 L50 25 L80 70 Z'],
-            ['#115f82', '#29ace5', 'M30 30 H70 V70 H30 Z'],
-            ['#159c80', '#70d16d', 'M50 22 A28 28 0 1 0 50 78 A28 28 0 1 0 50 22'],
-            ['#9160a5', '#ffaf10', 'M25 65 L40 30 L60 55 L75 25 L85 65 Z'],
-            ['#333332', '#ff6633', 'M25 35 H75 V65 H25 Z'],
-            ['#0066cc', '#70d16d', 'M50 20 L78 50 L50 80 L22 50 Z'],
+            ['#0f131c', '#fe6e00', 'M20 70 L50 25 L80 70 Z'],
+            ['#141925', '#06b6d4', 'M30 30 H70 V70 H30 Z'],
+            ['#141925', '#00c758', 'M50 22 A28 28 0 1 0 50 78 A28 28 0 1 0 50 22'],
+            ['#1a2132', '#edb200', 'M25 65 L40 30 L60 55 L75 25 L85 65 Z'],
+            ['#141414', '#fe6e00', 'M25 35 H75 V65 H25 Z'],
+            ['#0f131c', '#3080ff', 'M50 20 L78 50 L50 80 L22 50 Z'],
         ];
         [$bg, $fg, $shape] = $palettes[max($id - 1, 0) % count($palettes)];
 
-        return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:160px;background:'.$bg.';border-radius:4px;display:block">'
-            .'<path d="'.$shape.'" fill="'.$fg.'" opacity="0.9"/>'
-            .'<circle cx="75" cy="25" r="8" fill="#ffffff" opacity="0.25"/>'
+        return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:160px;background:'.$bg.';border-radius:8px;display:block">'
+            .'<path d="'.$shape.'" fill="'.$fg.'" opacity="0.92"/>'
+            .'<circle cx="75" cy="25" r="8" fill="#ffffff" opacity="0.22"/>'
             .'</svg>';
     }
 }

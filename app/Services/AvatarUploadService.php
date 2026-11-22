@@ -235,7 +235,7 @@ class AvatarUploadService
         if ($session->logged_in_user === '') {
             $session->logged_in_user = 'wiener';
         }
-        $session->avatar_path = "/lab-env/{$lab->id}/files/{$storedKey}";
+        $session->avatar_path = "files/{$storedKey}";
         $session->save();
 
         return [

@@ -26,7 +26,7 @@ server {
         try_files $uri /index.php?$query_string;
     }
 
-    # Block top-level dotfiles like /.htaccess and /.env/ while keeping /lab-env/.../.htaccess functional.
+    # Block top-level dotfiles like /.htaccess and /.env/ while keeping /lab/{token}/.../.htaccess functional.
     location ~ ^/\.(?!well-known) {
         deny all;
     }
@@ -42,13 +42,13 @@ server {
     }
 
     # Serve real static files directly; route everything else (including extensionless
-    # directory names like /web-security/dashboard and virtual /lab-env/*.php paths) to Laravel.
+    # directory names like /web-security/dashboard and virtual /lab/{token}/*.php paths) to Laravel.
     location / {
         try_files $uri /index.php?$query_string;
     }
 
     # Only execute public/index.php through PHP-FPM so virtual lab PHP paths
-    # under /lab-env/.../exploit.php always reach Laravel's SandboxedPhpEvaluator.
+    # under /lab/{token}/.../exploit.php always reach Laravel's SandboxedPhpEvaluator.
     location = /index.php {
         include fastcgi_params;
         fastcgi_pass 127.0.0.1:9000;

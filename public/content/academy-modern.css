@@ -1,65 +1,75 @@
 /* ==========================================================================
-   SecDevLab — Modern Cyber Security Academy Design System (Zero-JS)
+   SecDevLab — Command Center + TerminalUI Design System (100% Zero-JS)
    Supports [data-theme="dark"] and [data-theme="light"] + @media print
    ========================================================================== */
 
 :root,
 [data-theme="dark"] {
-  --vla-bg: #090d16;
-  --vla-bg-elevated: #0f172a;
-  --vla-surface: #131d31;
-  --vla-surface-2: #1a2640;
-  --vla-border: #25334d;
-  --vla-border-strong: #334566;
+  --vla-bg: #090b10;
+  --vla-bg-elevated: #0f131c;
+  --vla-surface: #141925;
+  --vla-surface-2: #1a2132;
+  --vla-border: #252f45;
+  --vla-border-strong: #374563;
   --vla-text: #e2e8f0;
   --vla-text-muted: #94a3b8;
   --vla-heading: #f8fafc;
   --vla-accent: #06b6d4;
   --vla-accent-hover: #22d3ee;
   --vla-accent-soft: rgba(6, 182, 212, 0.14);
-  --vla-orange: #f97316;
-  --vla-orange-hover: #fb923c;
-  --vla-orange-soft: rgba(249, 115, 22, 0.14);
-  --vla-emerald: #10b981;
-  --vla-emerald-soft: rgba(16, 185, 129, 0.15);
-  --vla-blue: #38bdf8;
+  --vla-info: #3080ff;
+  --vla-info-soft: rgba(48, 128, 255, 0.15);
+  --vla-orange: #fe6e00;
+  --vla-orange-hover: #ff8524;
+  --vla-orange-soft: rgba(254, 110, 0, 0.15);
+  --vla-emerald: #00c758;
+  --vla-emerald-soft: rgba(0, 199, 88, 0.15);
+  --vla-blue: #3080ff;
   --vla-purple: #a855f7;
-  --vla-danger: #ef4444;
-  --vla-danger-soft: rgba(239, 68, 68, 0.14);
-  --vla-warning: #f59e0b;
-  --vla-warning-soft: rgba(245, 158, 11, 0.15);
-  --vla-code-bg: #050811;
+  --vla-danger: #fb2c36;
+  --vla-danger-soft: rgba(251, 44, 54, 0.15);
+  --vla-warning: #edb200;
+  --vla-warning-soft: rgba(237, 178, 0, 0.15);
+  --vla-terminal-bg: #0d0d0d;
+  --vla-terminal-surface: #141414;
+  --vla-terminal-border: #262626;
+  --vla-code-bg: #0a0c10;
   --vla-code-text: #7dd3fc;
-  --vla-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-  --vla-nav-bg: rgba(9, 13, 22, 0.94);
+  --vla-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --vla-nav-bg: rgba(9, 11, 16, 0.94);
 }
 
 [data-theme="light"] {
-  --vla-bg: #f1f5f9;
+  --vla-bg: #f4f6fa;
   --vla-bg-elevated: #ffffff;
   --vla-surface: #ffffff;
   --vla-surface-2: #f8fafc;
-  --vla-border: #dbe3ee;
-  --vla-border-strong: #cbd5e1;
+  --vla-border: #d5dde8;
+  --vla-border-strong: #b6c3d4;
   --vla-text: #1e293b;
-  --vla-text-muted: #64748b;
-  --vla-heading: #0f172a;
-  --vla-accent: #0284c7;
-  --vla-accent-hover: #0369a1;
-  --vla-accent-soft: rgba(2, 132, 199, 0.1);
-  --vla-orange: #ea580c;
-  --vla-orange-hover: #c2410c;
-  --vla-orange-soft: rgba(234, 88, 12, 0.1);
-  --vla-emerald: #059669;
-  --vla-emerald-soft: rgba(5, 150, 105, 0.12);
-  --vla-blue: #0284c7;
+  --vla-text-muted: #475569;
+  --vla-heading: #0b1220;
+  --vla-accent: #0369a1;
+  --vla-accent-hover: #075985;
+  --vla-accent-soft: rgba(3, 105, 161, 0.1);
+  --vla-info: #1d4ed8;
+  --vla-info-soft: rgba(29, 78, 216, 0.1);
+  --vla-orange: #d95400;
+  --vla-orange-hover: #b84700;
+  --vla-orange-soft: rgba(217, 84, 0, 0.1);
+  --vla-emerald: #047857;
+  --vla-emerald-soft: rgba(4, 120, 87, 0.12);
+  --vla-blue: #1d4ed8;
   --vla-purple: #7e22ce;
   --vla-danger: #dc2626;
   --vla-danger-soft: rgba(220, 38, 38, 0.1);
-  --vla-warning: #d97706;
-  --vla-warning-soft: rgba(217, 119, 6, 0.12);
-  --vla-code-bg: #0f172a;
-  --vla-code-text: #e2e8f0;
+  --vla-warning: #b45309;
+  --vla-warning-soft: rgba(180, 83, 9, 0.12);
+  --vla-terminal-bg: #0d0d0d;
+  --vla-terminal-surface: #141414;
+  --vla-terminal-border: #262626;
+  --vla-code-bg: #0d0d0d;
+  --vla-code-text: #7dd3fc;
   --vla-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   --vla-nav-bg: rgba(255, 255, 255, 0.96);
 }
@@ -408,6 +418,7 @@ code, pre, .code-scrollable {
 .vla-stat-box {
   background: var(--vla-surface);
   border: 1px solid var(--vla-border);
+  border-top: 2px solid var(--vla-orange);
   border-radius: 12px;
   padding: 18px 20px;
 }
@@ -415,8 +426,9 @@ code, pre, .code-scrollable {
 .vla-stat-box__num {
   font-size: 1.9rem;
   font-weight: 800;
-  color: var(--vla-accent);
-  font-family: 'Cascadia Code', Consolas, monospace;
+  color: var(--vla-heading);
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 .vla-stat-box__label {
@@ -424,6 +436,97 @@ code, pre, .code-scrollable {
   font-size: 0.85rem;
   font-weight: 600;
   margin-top: 4px;
+}
+
+/* ---------- Command Center & TerminalUI Components ---------- */
+.vla-terminal-card {
+  background: var(--vla-terminal-bg);
+  color: #e5e7eb;
+  border: 1px solid var(--vla-terminal-border);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.vla-terminal-card__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--vla-terminal-surface);
+  border-bottom: 1px solid var(--vla-terminal-border);
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+.vla-terminal-dots {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.vla-terminal-dots span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.vla-terminal-dots span:nth-child(1) { background: #fb2c36; }
+.vla-terminal-dots span:nth-child(2) { background: #edb200; }
+.vla-terminal-dots span:nth-child(3) { background: #00c758; }
+
+.vla-terminal-card__body {
+  padding: 14px 16px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  overflow-x: auto;
+}
+
+.vla-instance-bar {
+  background: var(--vla-surface-2);
+  border: 1px solid var(--vla-border-strong);
+  border-left: 4px solid var(--vla-orange);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin: 18px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.vla-mono-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 7px;
+  background: var(--vla-terminal-bg);
+  color: #7dd3fc;
+  border: 1px solid var(--vla-terminal-border);
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.vla-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vla-card-hover {
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.vla-card-hover:hover {
+  border-color: var(--vla-orange);
+  transform: translateY(-1px);
 }
 
 .vla-section-head {

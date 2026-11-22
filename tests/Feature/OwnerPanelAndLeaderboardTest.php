@@ -96,8 +96,13 @@ class OwnerPanelAndLeaderboardTest extends TestCase
 
         // 4. Learner solves an Apprentice SQLi lab + the custom Practitioner lab (plus hyphenated custom payload test) -> verify Dynamic Leaderboard & Certificate
         $sqliLab = Lab::where('category_id', 'sql-injection')->where('difficulty', 'APPRENTICE')->firstOrFail();
-        $this->actingAs($learner)->get("/lab-env/{$sqliLab->id}?category=".urlencode("Gifts' OR 1=1--"))->assertOk();
-        $this->actingAs($learner)->get("/lab-env/{$customLab->id}?search=custom_api_bypass_token")->assertOk();
+        $sqliLaunch = $this->actingAs($learner)->get("/academy/labs/launch/{$sqliLab->id}");
+        $sqliUrl = (string) parse_url((string) $sqliLaunch->headers->get('Location'), PHP_URL_PATH);
+        $this->actingAs($learner)->get($sqliUrl.'?category='.urlencode("Gifts' OR 1=1--"))->assertOk();
+
+        $customLaunch = $this->actingAs($learner)->get("/academy/labs/launch/{$customLab->id}");
+        $customUrl = (string) parse_url((string) $customLaunch->headers->get('Location'), PHP_URL_PATH);
+        $this->actingAs($learner)->get($customUrl.'?search=custom_api_bypass_token')->assertOk();
 
         // Owner updates custom lab with hyphenated / brace custom payload -> must still solve reliably
         $this->actingAs($owner)->put("/owner/labs/{$customLab->id}", [
@@ -111,8 +116,10 @@ class OwnerPanelAndLeaderboardTest extends TestCase
             'solution_payloads' => 'FLAG{hyphen-bypass-2026}',
             'has_my_account' => '1',
         ])->assertRedirect('/owner/labs');
-        $this->actingAs($learner)->get("/lab-env/{$customLab->id}?reset=1")->assertOk();
-        $customSolved = $this->actingAs($learner)->get("/lab-env/{$customLab->id}?search=".urlencode('FLAG{hyphen-bypass-2026}'))->assertOk()->getContent();
+        $resetCustom = $this->actingAs($learner)->post("/academy/labs/{$customLab->id}/reset");
+        $resetCustomUrl = (string) parse_url((string) $resetCustom->headers->get('Location'), PHP_URL_PATH);
+        $this->assertNotSame($customUrl, $resetCustomUrl);
+        $customSolved = $this->actingAs($learner)->get($resetCustomUrl.'?search='.urlencode('FLAG{hyphen-bypass-2026}'))->assertOk()->getContent();
         $this->assertStringContainsString('class="notification-labsolved"', $customSolved);
 
         // 1 Apprentice (10 pts) + 1 Practitioner (25 pts) = 35 pts

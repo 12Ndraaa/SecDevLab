@@ -4,12 +4,25 @@
 
 @section('content')
 <section class="vla-hero">
-    <span class="vla-badge vla-badge--accent">{{ __('academy.home.badge') }}</span>
+    <div class="vla-badge-row" style="margin-bottom:10px">
+        <span class="vla-badge vla-badge--orange">{{ __('academy.home.badge') }}</span>
+        <span class="vla-mono-chip">PER-SESSION TOKEN // 8 TARGET ARCHETYPES // ZERO-JS SSR</span>
+    </div>
     <h1>{{ __('academy.home.hero_title') }}</h1>
     <p>{{ __('academy.home.hero_sub') }}</p>
     <div class="vla-btn-group">
-        <a href="/web-security/all-labs" class="vla-btn vla-btn--primary">{{ __('academy.home.cta_labs') }}</a>
-        <a href="/cve" class="vla-btn vla-btn--accent">{{ __('academy.home.cta_cve') }}</a>
+        <a href="/web-security/all-labs" class="vla-btn vla-btn--primary">
+            <span class="vla-icon" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 3h6M10 3v5l-5.5 9.5A2 2 0 0 0 6.2 20.5h11.6a2 2 0 0 0 1.7-3L14 8V3"/></svg>
+            </span>
+            <span>{{ __('academy.home.cta_labs') }}</span>
+        </a>
+        <a href="/cve" class="vla-btn vla-btn--accent">
+            <span class="vla-icon" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <span>{{ __('academy.home.cta_cve') }}</span>
+        </a>
         <a href="/web-security/mystery-lab-challenge" class="vla-btn vla-btn--outline">{{ __('academy.home.cta_mystery') }}</a>
     </div>
 </section>
@@ -39,7 +52,7 @@
 </div>
 <div class="vla-grid vla-grid--3">
     @foreach ($featuredCategories as $cat)
-        <div class="vla-card vla-card--compact">
+        <div class="vla-card vla-card--compact vla-card-hover">
             <div class="vla-badge-row" style="justify-content:space-between;margin-bottom:8px">
                 <span class="vla-badge vla-badge--accent">{{ $cat->labs_count }} Labs</span>
                 <a href="/web-security/all-labs#{{ $cat->id }}" class="vla-muted-sm">Catalog &rarr;</a>
