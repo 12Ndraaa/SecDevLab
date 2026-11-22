@@ -9,9 +9,9 @@
     <li>{{ $article->cve_id }}</li>
 </ul>
 
-<div class="vla-card" style="margin-bottom:22px">
+<div class="vla-card" style="margin-bottom:20px">
     <div class="vla-badge-row" style="margin-bottom:12px">
-        <span class="vla-badge {{ $article->severityBadgeClass() }}">
+        <span class="vla-badge {{ $article->severityBadgeClass() }} vla-mono">
             {{ $article->severity }} {{ $article->cvss_score !== null ? 'CVSS '.number_format($article->cvss_score, 1) : '' }}
         </span>
         @if ($article->is_hot)
@@ -20,7 +20,7 @@
         @if ($article->status !== 'published')
             <span class="vla-badge vla-badge--muted">{{ __('academy.cve.draft_badge') }}</span>
         @endif
-        <span class="vla-badge vla-badge--accent">{{ $article->cve_id }}</span>
+        <span class="vla-mono-chip">{{ $article->cve_id }}</span>
         <span class="vla-badge vla-badge--muted">{{ __('academy.cve.source_label') }}: {{ $article->source_repo }}</span>
     </div>
 
@@ -41,7 +41,7 @@
         </div>
         <div class="vla-card vla-card--compact" style="background:var(--vla-surface-2);box-shadow:none">
             <div class="vla-muted-sm">{{ __('academy.cve.cvss_score') }}</div>
-            <strong>{{ $article->cvss_score !== null ? number_format($article->cvss_score, 1).' / 10.0' : $article->severity }}</strong>
+            <strong class="vla-mono">{{ $article->cvss_score !== null ? number_format($article->cvss_score, 1).' / 10.0' : $article->severity }}</strong>
         </div>
     </div>
 

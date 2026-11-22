@@ -7,7 +7,7 @@
     <div class="vla-badge-row" style="justify-content:space-between;margin-bottom:14px">
         <div>
             <h1 style="margin:0 0 6px">{{ __('academy.auth.account_title') }}</h1>
-            <span class="vla-badge {{ $user->isOwner() ? 'vla-badge--orange' : 'vla-badge--accent' }}">{{ strtoupper($user->role) }}</span>
+            <span class="vla-role-pill {{ $user->isOwner() ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper($user->role) }}</span>
         </div>
         <div class="vla-btn-group">
             <a href="/certificate" class="vla-btn vla-btn--accent vla-btn--sm">{{ __('academy.dashboard.print_cert') }}</a>

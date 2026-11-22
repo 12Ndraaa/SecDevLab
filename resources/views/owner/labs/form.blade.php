@@ -67,7 +67,7 @@
         </div>
 
         <div class="vla-grid vla-grid--3">
-            <div class="vla-field" style="grid-column:span 2">
+            <div class="vla-field vla-field--span2">
                 <label for="lab-title">Lab Title *</label>
                 <input id="lab-title" type="text" name="title" value="{{ old('title', $lab->title) }}" required>
             </div>

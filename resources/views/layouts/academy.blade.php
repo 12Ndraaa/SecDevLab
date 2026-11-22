@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ $uiLocale ?? app()->getLocale() }}" data-theme="{{ $uiTheme ?? session('ui_theme', 'dark') }}">
+<html lang="{{ $uiLocale ?? app()->getLocale() }}" data-theme="{{ $uiTheme ?? session('ui_theme', 'light') }}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,26 +11,33 @@
         <link rel="preload" href="/content/fonts/ps-icons-small/ps-icons-small.woff?td2uot" as="font" crossorigin="anonymous">
         <link rel="preload" href="/content/fonts/ps-main/ps-icons.woff?l1la2n" as="font" crossorigin="anonymous">
     @endif
-    <link href="/content/academy-modern.css" rel="stylesheet" type="text/css">
+    <link href="/content/fonts/fonts.css?v={{ @filemtime(public_path('content/fonts/fonts.css')) ?: '1' }}" rel="stylesheet" type="text/css">
+    <link href="/content/academy-modern.css?v={{ @filemtime(public_path('content/academy-modern.css')) ?: '2' }}" rel="stylesheet" type="text/css">
 </head>
 <body>
+@php
+    $currentTheme = $uiTheme ?? session('ui_theme', 'light');
+    $brandName = config('app.name') ?: 'SecDevLab';
+@endphp
 <header class="vla-topbar no-print" id="top">
     <div class="vla-topbar__inner">
         <a class="vla-brand" href="/">
             <span class="vla-brand__icon" aria-hidden="true">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                     <path d="M9 12l2 2 4-4"/>
                 </svg>
             </span>
-            <span>{{ config('app.name') ?: 'SecDevLab' }}</span>
+            <span>{{ $brandName }}</span>
         </a>
 
         <input type="checkbox" id="vla-mobile-nav" class="vla-mobile-toggle-input">
-        <label for="vla-mobile-nav" class="vla-mobile-toggle-label">Menu</label>
+        <label for="vla-mobile-nav" class="vla-mobile-toggle-label">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            <span>Menu</span>
+        </label>
 
         <nav class="vla-nav" aria-label="Primary navigation">
-            <a href="/" class="{{ request()->is('/') ? 'is-active' : '' }}">{{ __('academy.nav.home') }}</a>
             <a href="/web-security/all-topics" class="{{ request()->is('web-security/all-topics') ? 'is-active' : '' }}">{{ __('academy.nav.topics') }}</a>
             <a href="/web-security/all-labs" class="{{ request()->is('web-security/all-labs') ? 'is-active' : '' }}">{{ __('academy.nav.all_labs') }}</a>
             <a href="/cve" class="{{ request()->is('cve*') ? 'is-active' : '' }}">{{ __('academy.nav.cve') }}</a>
@@ -38,7 +45,6 @@
             <a href="/web-security/hall-of-fame" class="{{ request()->is('web-security/hall-of-fame', 'leaderboard') ? 'is-active' : '' }}">{{ __('academy.nav.leaderboard') }}</a>
             <a href="/web-security/dashboard" class="{{ request()->is('web-security/dashboard') ? 'is-active' : '' }}">{{ __('academy.nav.dashboard') }}</a>
             @auth
-                <a href="/certificate" class="{{ request()->is('certificate*') ? 'is-active' : '' }}">{{ __('academy.nav.certificate') }}</a>
                 @if (Auth::user()->isOwner())
                     <a href="/owner" class="is-owner-link {{ request()->is('owner*') ? 'is-active' : '' }}">{{ __('academy.nav.owner_panel') }}</a>
                 @endif
@@ -62,7 +68,7 @@
                 <input type="hidden" name="redirect_to" value="{{ request()->getRequestUri() }}">
                 <button type="submit" class="vla-btn vla-btn--outline vla-btn--sm" title="{{ __('academy.nav.switch_theme') }}">
                     <span class="vla-icon" aria-hidden="true">
-                        @if (($uiTheme ?? 'dark') === 'dark')
+                        @if ($currentTheme === 'dark')
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="4"/>
                                 <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
@@ -73,7 +79,7 @@
                             </svg>
                         @endif
                     </span>
-                    <span>{{ ($uiTheme ?? 'dark') === 'dark' ? __('academy.nav.theme_light') : __('academy.nav.theme_dark') }}</span>
+                    <span class="vla-theme-label">{{ $currentTheme === 'dark' ? __('academy.nav.theme_light') : __('academy.nav.theme_dark') }}</span>
                 </button>
             </form>
 
@@ -124,16 +130,20 @@
 <footer class="vla-footer no-print">
     <div class="vla-footer__inner">
         <div>
-            <strong>{{ config('app.name') ?: 'SecDevLab' }}</strong>
+            <strong>{{ $brandName }}</strong>
             <div class="vla-muted-sm">{{ __('academy.footer.tagline') }}</div>
-            <div class="vla-muted-sm">&copy; {{ date('Y') }} {{ config('app.name') ?: 'SecDevLab' }} &mdash; {{ __('academy.footer.copyright') }}</div>
+            <div class="vla-muted-sm">&copy; {{ date('Y') }} {{ $brandName }} &mdash; {{ __('academy.footer.copyright') }}</div>
         </div>
         <div class="vla-footer__links">
+            <a href="/">{{ __('academy.nav.home') }}</a>
             <a href="/web-security/all-labs">{{ __('academy.nav.all_labs') }}</a>
             <a href="/web-security/all-topics">{{ __('academy.nav.topics') }}</a>
             <a href="/cve">{{ __('academy.nav.cve') }}</a>
             <a href="/web-security/hall-of-fame">{{ __('academy.nav.leaderboard') }}</a>
             <a href="/web-security/dashboard">{{ __('academy.nav.dashboard') }}</a>
+            @auth
+                <a href="/certificate">{{ __('academy.nav.certificate') }}</a>
+            @endauth
         </div>
     </div>
 </footer>

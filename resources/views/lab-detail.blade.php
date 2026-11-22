@@ -33,11 +33,11 @@
 @section('content')
 <h1 class="heading-2">Lab: {{ $lab->title }}</h1>
 
-<div class="vla-badge-row" style="justify-content:space-between;margin-bottom:14px">
+<div class="vla-badge-row" style="justify-content:space-between;margin-bottom:16px">
     <div class="vla-badge-row">
         @include('partials.widgets.lab-info', ['lab' => $lab, 'isSolved' => $isSolved])
         @if (!empty($archetype))
-            <span class="vla-badge vla-badge--orange">{{ $archetype['short'] }}</span>
+            <span class="vla-badge vla-badge--accent">{{ $archetype['short'] }}</span>
         @endif
     </div>
     @include('partials.widget', ['id' => 'academy-sharepage'])
@@ -104,10 +104,10 @@
 
 @if (isset($relatedCves) && $relatedCves->isNotEmpty())
     <div class="highlightedarea" style="margin-top:24px">
-        <h4>{{ __('academy.cve.title') }} &mdash; {{ $category->title }}</h4>
-        <ul>
+        <h4 style="margin-bottom:10px">{{ __('academy.cve.title') }} &mdash; {{ $category->title }}</h4>
+        <ul style="margin:0;padding-left:18px">
             @foreach ($relatedCves as $cve)
-                <li>
+                <li style="margin-bottom:6px">
                     <span class="vla-badge {{ $cve->severityBadgeClass() }}">{{ $cve->cve_id }}</span>
                     <a href="/cve/{{ $cve->slug }}">{{ $cve->title }}</a>
                 </li>

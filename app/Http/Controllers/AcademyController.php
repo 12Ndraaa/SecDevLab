@@ -317,7 +317,7 @@ class AcademyController extends Controller
 
         /** @var int $userId */
         $userId = (int) Auth::id();
-        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $theme = (string) $request->session()->get('ui_theme', 'light');
         $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
 
         $target = $urlService->launchRedirectTarget($session, ['mystery' => 1], $request);
@@ -334,7 +334,7 @@ class AcademyController extends Controller
 
         /** @var int $userId */
         $userId = (int) Auth::id();
-        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $theme = (string) $request->session()->get('ui_theme', 'light');
         $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
 
         $target = $urlService->launchRedirectTarget($session, [], $request);
@@ -376,7 +376,7 @@ class AcademyController extends Controller
             abort(403, 'You do not own this lab instance.');
         }
 
-        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $theme = (string) $request->session()->get('ui_theme', 'light');
         $session->resetState($theme, true);
 
         if ($request->input('return_to') === 'detail') {
@@ -420,7 +420,7 @@ class AcademyController extends Controller
 
         /** @var int $userId */
         $userId = (int) Auth::id();
-        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $theme = (string) $request->session()->get('ui_theme', 'light');
         $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
         $session->resetState($theme, true);
 
@@ -443,7 +443,7 @@ class AcademyController extends Controller
 
         /** @var int $userId */
         $userId = (int) Auth::id();
-        $theme = (string) $request->session()->get('ui_theme', 'dark');
+        $theme = (string) $request->session()->get('ui_theme', 'light');
         $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
         $session->renewTtl();
 

@@ -9,8 +9,8 @@
         <p class="vla-muted" style="margin:0">{{ __('academy.cve.subtitle') }}</p>
     </div>
     <div class="vla-badge-row">
-        <span class="vla-badge vla-badge--accent">{{ $totalPublished }} Published</span>
-        <span class="vla-badge vla-badge--orange">{{ $hotCount }} Hot CVEs</span>
+        <span class="vla-badge vla-badge--accent vla-mono">{{ $totalPublished }} Published</span>
+        <span class="vla-badge vla-badge--orange vla-mono">{{ $hotCount }} Hot CVEs</span>
         @if (Auth::user()?->isOwner())
             <a href="/owner/cves" class="vla-btn vla-btn--primary vla-btn--sm">{{ __('academy.owner.nav_cves') }}</a>
         @endif
@@ -39,7 +39,7 @@
                 <option value="{{ $cat->id }}" @selected($categoryId === $cat->id)>{{ $cat->title }}</option>
             @endforeach
         </select>
-        <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.86rem;font-weight:600;cursor:pointer">
+        <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.84rem;font-weight:600;cursor:pointer">
             <input type="checkbox" name="hot" value="1" @checked($hotOnly)> {{ __('academy.cve.hot_only') }}
         </label>
         <button type="submit" class="vla-btn vla-btn--primary vla-btn--sm">{{ __('academy.cve.filter') }}</button>
@@ -53,7 +53,7 @@
     @forelse ($articles as $cve)
         <article class="vla-card vla-card-hover">
             <div class="vla-badge-row" style="margin-bottom:10px">
-                <span class="vla-badge {{ $cve->severityBadgeClass() }}">
+                <span class="vla-badge {{ $cve->severityBadgeClass() }} vla-mono">
                     {{ $cve->severity }} {{ $cve->cvss_score !== null ? number_format($cve->cvss_score, 1) : '' }}
                 </span>
                 @if ($cve->is_hot)
@@ -62,11 +62,11 @@
                 @if ($cve->status !== 'published')
                     <span class="vla-badge vla-badge--muted">{{ __('academy.cve.draft_badge') }}</span>
                 @endif
-                <span class="vla-badge vla-badge--muted">{{ $cve->cve_id }}</span>
-                <span class="vla-muted-sm">{{ $cve->cve_year }}</span>
+                <span class="vla-mono-chip">{{ $cve->cve_id }}</span>
+                <span class="vla-muted-sm vla-mono">{{ $cve->cve_year }}</span>
             </div>
 
-            <h3 style="margin-bottom:8px"><a href="/cve/{{ $cve->slug }}">{{ $cve->title }}</a></h3>
+            <h3 style="margin-bottom:8px;font-size:1.06rem"><a href="/cve/{{ $cve->slug }}">{{ $cve->title }}</a></h3>
 
             @if ($cve->affected_product)
                 <div class="vla-muted-sm" style="margin-bottom:8px">

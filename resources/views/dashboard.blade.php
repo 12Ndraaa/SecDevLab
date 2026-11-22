@@ -10,7 +10,7 @@
     </div>
     <div class="vla-btn-group">
         @auth
-            <a href="/certificate" class="vla-btn vla-btn--accent">{{ __('academy.dashboard.print_cert') }}</a>
+            <a href="/certificate" class="vla-btn vla-btn--outline">{{ __('academy.dashboard.print_cert') }}</a>
         @endauth
         <a href="/web-security/all-labs" class="vla-btn vla-btn--primary">{{ __('academy.nav.all_labs') }}</a>
     </div>
@@ -84,7 +84,7 @@
         <div class="vla-card vla-card--compact">
             <div class="vla-badge-row" style="justify-content:space-between">
                 <a href="{{ $cs['topic_route'] }}"><strong>{{ $cs['title'] }}</strong></a>
-                <span class="vla-muted-sm">{{ $cs['solved'] }} / {{ $cs['total'] }}</span>
+                <span class="vla-muted-sm vla-mono">{{ $cs['solved'] }} / {{ $cs['total'] }}</span>
             </div>
             <div class="dashboard-bar-track">
                 <div class="dashboard-bar-fill vla-fill-total" style="width:{{ $cs['pct'] }}%"></div>

@@ -4,10 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="/content/images/logos/favicon.ico" type="image/x-icon">
-    <link href="/content/lab-workbench.css" rel="stylesheet">
+    <link href="/content/fonts/fonts.css?v={{ @filemtime(public_path('content/fonts/fonts.css')) ?: '1' }}" rel="stylesheet">
+    <link href="/content/lab-workbench.css?v={{ @filemtime(public_path('content/lab-workbench.css')) ?: '2' }}" rel="stylesheet">
     <title>{{ $isMystery && !$revealMystery ? 'Mystery Lab Challenge' : $lab->title }} | {{ config('app.name') ?: 'SecDevLab' }}</title>
 </head>
-<body>
+<body class="lw-archetype--{{ $archetype }}">
 <div id="academyLabHeader"
      class="sdl-command-header"
      data-lab-id="{{ strtolower($lab->id) }}"
@@ -70,9 +71,9 @@
                         <span>Token: {{ substr((string) $session->instance_token, 0, 12) }}&hellip;</span>
                     </summary>
                     <div class="ps-inline-details__panel" style="left:0;right:auto;min-width:340px">
-                        <div style="font-weight:800;margin-bottom:6px;color:var(--lw-heading)">Per-Session Capability Token</div>
+                        <div style="font-weight:700;margin-bottom:6px;color:var(--lw-heading)">Per-Session Capability Token</div>
                         <div class="lw-mono" style="font-size:0.78rem;word-break:break-all;margin-bottom:8px">{{ $session->instance_token }}</div>
-                        <div style="font-weight:800;margin-bottom:4px;color:var(--lw-heading)">Target Base URL (Burp / curl)</div>
+                        <div style="font-weight:700;margin-bottom:4px;color:var(--lw-heading)">Target Base URL (Burp / curl)</div>
                         <div class="lw-mono" style="font-size:0.78rem;word-break:break-all">{{ $baseUrl }}</div>
                     </div>
                 </details>

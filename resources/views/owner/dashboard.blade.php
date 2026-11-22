@@ -41,7 +41,7 @@
         <code>hot_cves.csv</code>: <strong>{{ $hasHotCsv ? 'Detected' : 'Missing' }}</strong>
     </p>
     <p class="vla-muted-sm">CLI Command: <code>php artisan cve:sync-trickest --years=2024,2025,2026 --limit=300</code></p>
-    <a href="/owner/cves#trickest-sync" class="vla-btn vla-btn--accent vla-btn--sm">Open Importer Controls</a>
+    <a href="/owner/cves#trickest-sync" class="vla-btn vla-btn--outline vla-btn--sm">Open Importer Controls</a>
 </div>
 
 <div class="vla-grid vla-grid--2">

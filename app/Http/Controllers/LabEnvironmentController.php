@@ -90,7 +90,7 @@ class LabEnvironmentController extends Controller
         if ($subRoute === '_theme' && $request->isMethod('POST')) {
             $nextTheme = $request->input('ui_theme');
             if (! in_array($nextTheme, ['dark', 'light'], true)) {
-                $nextTheme = ($session->ui_theme === 'light') ? 'dark' : 'light';
+                $nextTheme = ($session->ui_theme === 'dark') ? 'light' : 'dark';
             }
             $session->ui_theme = $nextTheme;
             $session->save();
@@ -630,7 +630,7 @@ class LabEnvironmentController extends Controller
             'basePath' => $basePath,
             'baseUrl' => $baseUrl,
             'urlMode' => $this->urlService->isSubdomainMode() ? 'subdomain' : 'path',
-            'labUiTheme' => in_array($session->ui_theme, ['dark', 'light'], true) ? $session->ui_theme : 'dark',
+            'labUiTheme' => in_array($session->ui_theme, ['dark', 'light'], true) ? $session->ui_theme : 'light',
             'theme' => $theme,
             'isMystery' => $isMystery,
             'revealMystery' => $revealMystery,

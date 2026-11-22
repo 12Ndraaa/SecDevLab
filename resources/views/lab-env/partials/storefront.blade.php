@@ -1,8 +1,8 @@
 @if ($activeView === 'cart')
-    <div class="lw-workbench-banner">
+    <div class="lw-store-hero">
         <div>
-            <span class="lw-pill lw-pill--orange">STOREFRONT // CART &amp; RACE LOGIC</span>
-            <h2 style="margin:6px 0 2px;color:var(--lw-heading)">Your Cart &amp; Checkout Workbench</h2>
+            <span class="lw-pill lw-pill--emerald">STOREFRONT // CART &amp; RACE LOGIC</span>
+            <h2 style="margin:6px 0 2px;color:var(--lw-heading)">Checkout &amp; Order Ledger</h2>
             <p class="lw-muted" style="margin:0">Inspect price integrity, coupon validation, quantity bounds, and concurrent checkout logic.</p>
         </div>
         <span class="lw-token-chip">Store Credit: $100.00</span>
@@ -20,7 +20,7 @@
                     <thead><tr><th>Product</th><th>Price</th><th>Quantity</th></tr></thead>
                     <tbody>
                         <tr>
-                            <td>Lightweight "l33t" Leather Jacket</td>
+                            <td><strong>Lightweight "l33t" Leather Jacket</strong></td>
                             <td class="lw-mono">$1337.00</td>
                             <td class="lw-mono">1</td>
                         </tr>
@@ -41,24 +41,24 @@
             </form>
         </div>
 
-        <div class="lw-terminal">
-            <div class="lw-terminal__bar">
-                <span class="lw-terminal__dots"><span></span><span></span><span></span></span>
-                <span>CHECKOUT_TELEMETRY // {{ strtoupper($lab->category_id) }}</span>
+        <div class="lw-receipt-panel">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <h3 style="margin:0">Order Receipt Telemetry</h3>
+                <span class="lw-pill {{ $autoSolved ? 'lw-pill--emerald' : 'lw-pill--warning' }}">{{ $autoSolved ? 'ORDER_ACCEPTED' : 'INSUFFICIENT_CREDIT' }}</span>
             </div>
-            <div class="lw-terminal__body">Account Balance : $100.00
-Target Item     : $1337.00
-Endpoint        : POST {{ $basePath }}/cart
-Active Fields   : price, quantity, coupon
-Session State   : {{ $autoSolved ? 'ORDER_ACCEPTED' : 'INSUFFICIENT_CREDIT' }}</div>
+            <div class="lw-receipt-row"><span>Account Balance</span><strong class="lw-mono">$100.00</strong></div>
+            <div class="lw-receipt-row"><span>Target Item</span><strong class="lw-mono">$1337.00</strong></div>
+            <div class="lw-receipt-row"><span>Checkout Endpoint</span><code class="lw-mono">POST {{ $basePath }}/cart</code></div>
+            <div class="lw-receipt-row"><span>Mutable Parameters</span><code class="lw-mono">price, quantity, coupon</code></div>
+            <div class="lw-receipt-row"><span>Category Context</span><span class="lw-mono">{{ strtoupper($lab->category_id) }}</span></div>
         </div>
     </div>
 @else
-    <div class="lw-workbench-banner">
+    <div class="lw-store-hero">
         <div>
-            <span class="lw-pill lw-pill--orange">STOREFRONT // {{ strtoupper($lab->category_id) }}</span>
+            <span class="lw-pill lw-pill--emerald">COMMERCE CATALOG // {{ strtoupper($lab->category_id) }}</span>
             <h2 style="margin:6px 0 2px;color:var(--lw-heading)">SecDev Commerce Storefront</h2>
-            <p class="lw-muted" style="margin:0">Filter categories, inspect product queries, or test SQL/NoSQL parameter injection.</p>
+            <p class="lw-muted" style="margin:0">Filter retail categories, inspect catalog queries, or test SQL/NoSQL parameter injection.</p>
         </div>
         @if (!empty($profile['hasTrackingIdCookie']))
             <span class="lw-token-chip">TrackingId={{ $trackingIdDefault }}</span>
@@ -90,13 +90,13 @@ Session State   : {{ $autoSolved ? 'ORDER_ACCEPTED' : 'INSUFFICIENT_CREDIT' }}</
     </div>
 
     @if (!empty($unionRows))
-        <div class="lw-terminal" style="margin-bottom:18px">
-            <div class="lw-terminal__bar">
-                <span class="lw-terminal__dots"><span></span><span></span><span></span></span>
-                <span>SQL UNION QUERY RESULT</span>
+        <div class="lw-card" style="margin-bottom:18px;border-color:var(--lw-arch-accent)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <h3 style="margin:0">Database Query Output (UNION Result)</h3>
+                <span class="lw-pill lw-pill--emerald">SQL ROWS RETURNED</span>
             </div>
-            <div class="lw-terminal__body">
-                <table class="lw-table" style="color:#e5e7eb">
+            <div class="lw-table-wrap">
+                <table class="lw-table">
                     <tbody>
                         @foreach ($unionRows as $r)
                             <tr><th>{{ $r['col1'] }}</th><td class="lw-mono">{{ $r['col2'] }}</td></tr>

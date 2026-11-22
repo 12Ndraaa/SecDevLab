@@ -24,12 +24,19 @@
 @endsection
 
 @section('content')
-<h1 class="heading-2">{{ __('academy.labs.all_labs_title') }}</h1>
+<div class="vla-section-head" style="margin-top:0;margin-bottom:14px">
+    <h1 class="heading-2" style="margin:0">{{ __('academy.labs.all_labs_title') }}</h1>
+    <span class="vla-mono-chip" id="stats-summary">{{ $visibleCount }} / {{ $totalLabs }} labs ({{ $solvedTotal }} solved)</span>
+</div>
 
 <div class="highlightedarea">
-    <h4>{{ __('academy.labs.mystery_title') }}</h4>
-    <p>{{ __('academy.labs.mystery_desc') }}</p>
-    <a class="vla-btn vla-btn--outline vla-btn--sm" href="/web-security/mystery-lab-challenge">{{ __('academy.labs.mystery_cta') }}</a>
+    <div class="vla-badge-row" style="justify-content:space-between">
+        <div>
+            <h4 style="margin:0 0 4px">{{ __('academy.labs.mystery_title') }}</h4>
+            <p style="margin:0" class="vla-muted-sm">{{ __('academy.labs.mystery_desc') }}</p>
+        </div>
+        <a class="vla-btn vla-btn--outline vla-btn--sm" href="/web-security/mystery-lab-challenge">{{ __('academy.labs.mystery_cta') }}</a>
+    </div>
 </div>
 
 <form class="vla-filter-card" method="GET" action="/web-security/all-labs" role="search" aria-label="Filter labs">
@@ -50,7 +57,6 @@
         @if ($search !== '' || $difficulty !== 'ALL' || $status !== 'ALL' || ($categoryFilter ?? 'ALL') !== 'ALL')
             <a class="vla-btn vla-btn--outline vla-btn--sm" href="/web-security/all-labs">{{ __('academy.labs.reset') }}</a>
         @endif
-        <span class="vla-badge vla-badge--accent" id="stats-summary">{{ $visibleCount }} / {{ $totalLabs }} labs ({{ $solvedTotal }} solved)</span>
     </div>
 </form>
 

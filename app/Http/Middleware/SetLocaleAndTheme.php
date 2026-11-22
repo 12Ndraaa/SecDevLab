@@ -22,10 +22,10 @@ class SetLocaleAndTheme
         App::setLocale($locale);
 
         $theme = $hasSession
-            ? (string) $request->session()->get('ui_theme', 'dark')
-            : 'dark';
+            ? (string) $request->session()->get('ui_theme', 'light')
+            : 'light';
         if (! in_array($theme, ['dark', 'light'], true)) {
-            $theme = 'dark';
+            $theme = 'light';
         }
 
         View::share('uiLocale', $locale);

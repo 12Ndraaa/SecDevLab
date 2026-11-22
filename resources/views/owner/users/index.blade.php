@@ -40,7 +40,7 @@
                     <td>#{{ $u->id }}</td>
                     <td><strong>{{ $u->name }}</strong></td>
                     <td>{{ $u->email }}</td>
-                    <td><span class="vla-badge {{ $u->isOwner() ? 'vla-badge--orange' : 'vla-badge--accent' }}">{{ strtoupper($u->role) }}</span></td>
+                    <td><span class="vla-role-pill {{ $u->isOwner() ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper($u->role) }}</span></td>
                     <td><strong>{{ $u->solved_count }}</strong></td>
                     <td>
                         <div class="vla-btn-group">

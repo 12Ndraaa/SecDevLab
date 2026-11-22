@@ -25,7 +25,7 @@ class PreferenceController extends Controller
         if (in_array($requested, ['dark', 'light'], true)) {
             $next = $requested;
         } else {
-            $current = (string) $request->session()->get('ui_theme', 'dark');
+            $current = (string) $request->session()->get('ui_theme', 'light');
             $next = $current === 'dark' ? 'light' : 'dark';
         }
 

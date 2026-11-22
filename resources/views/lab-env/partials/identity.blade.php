@@ -1,32 +1,39 @@
-<div class="lw-workbench-banner">
-    <div>
-        <span class="lw-pill lw-pill--info">IDENTITY &amp; ACCESS // {{ strtoupper($lab->category_id) }}</span>
-        <h2 style="margin:6px 0 2px;color:var(--lw-heading)">
-            @if ($activeView === 'jwt-workbench')
-                JWT Token &amp; Claim Verification Workbench
-            @elseif ($activeView === 'oauth-workbench')
-                OAuth 2.0 Client &amp; Redirect Workbench
-            @elseif ($lab->category_id === 'cross-site-request-forgery-csrf')
-                Account Profile &amp; CSRF Email Target
-            @else
-                Authentication &amp; Access Control Portal
-            @endif
-        </h2>
-        <p class="lw-muted" style="margin:0">Inspect active credentials, session tokens, email change flows, or administrative access boundaries.</p>
+<div class="lw-iam-header">
+    <div class="lw-iam-brand">
+        <span class="lw-iam-emblem" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+        </span>
+        <div>
+            <span class="lw-pill lw-pill--info">IDENTITY &amp; ACCESS // {{ strtoupper($lab->category_id) }}</span>
+            <h2 style="margin:4px 0 0;color:var(--lw-heading);font-size:1.18rem">
+                @if ($activeView === 'jwt-workbench')
+                    JWT Token &amp; Claim Verification Workbench
+                @elseif ($activeView === 'oauth-workbench')
+                    OAuth 2.0 Client &amp; Redirect Workbench
+                @elseif ($lab->category_id === 'cross-site-request-forgery-csrf')
+                    Account Profile &amp; CSRF Email Target
+                @else
+                    SSO / Identity &amp; Access Control Portal
+                @endif
+            </h2>
+        </div>
     </div>
-    <span class="lw-token-chip">Role: {{ $currentUser === 'administrator' ? 'ADMIN' : ($currentUser !== '' ? strtoupper($currentUser) : 'ANONYMOUS') }}</span>
+    <span class="lw-token-chip">Principal: {{ $currentUser === 'administrator' ? 'ADMIN' : ($currentUser !== '' ? strtoupper($currentUser) : 'ANONYMOUS') }}</span>
 </div>
 
-<div class="lw-grid lw-grid--split">
+<div class="lw-identity-grid">
     <div class="lw-card">
         @if ($currentUser !== '')
-            <div id="account-details" style="margin-bottom:16px">
+            <div id="account-details" style="padding:14px;border-radius:10px;background:var(--lw-surface-2);border:1px solid var(--lw-border);margin-bottom:16px">
                 <p style="margin:0 0 6px">Your username is: <strong>{{ $currentUser }}</strong></p>
                 <p style="margin:0">Your API Key is: <code>{{ $wienerApiKey }}</code></p>
             </div>
         @else
             <form id="login-form" method="POST" action="{{ $basePath }}/login" class="lw-form">
-                <h3 style="margin-bottom:4px">Sign In</h3>
+                <h3 style="margin-bottom:4px">SSO / Account Sign In</h3>
                 <p class="lw-muted" style="margin-top:0">Standard test credentials: <code>wiener:peter</code></p>
                 <label for="login-user">Username</label>
                 <input type="text" name="username" id="login-user" value="{{ $userParam }}" required>
@@ -83,20 +90,29 @@
         @endif
     </div>
 
-    <div class="lw-terminal">
-        <div class="lw-terminal__bar">
-            <span class="lw-terminal__dots"><span></span><span></span><span></span></span>
-            <span>IDENTITY_TELEMETRY // {{ strtoupper($lab->category_id) }}</span>
-        </div>
-        <div class="lw-terminal__body">Session User : {{ $currentUser !== '' ? $currentUser : 'unauthenticated' }}
-Admin Access : {{ ($validLoginTriggered || str_contains($cookieHeader, 'Admin=true')) ? 'UNLOCKED' : 'RESTRICTED' }}
-@if ($lab->category_id === 'jwt')
-Issued JWT   : {{ $sessionJwt }}
-@endif
-@if (!empty($workbenchOutput['headline']))
+    <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="lw-card">
+            <h3 style="margin-bottom:10px">Identity Security Posture</h3>
+            <div class="lw-receipt-row"><span>Session Principal</span><strong class="lw-mono">{{ $currentUser !== '' ? $currentUser : 'unauthenticated' }}</strong></div>
+            <div class="lw-receipt-row"><span>Admin Boundary</span><span class="lw-pill {{ ($validLoginTriggered || str_contains($cookieHeader, 'Admin=true')) ? 'lw-pill--emerald' : 'lw-pill--warning' }}">{{ ($validLoginTriggered || str_contains($cookieHeader, 'Admin=true')) ? 'UNLOCKED' : 'RESTRICTED' }}</span></div>
+            <div class="lw-receipt-row"><span>Anti-CSRF Token</span><code class="lw-mono" style="font-size:0.74rem">{{ substr((string) $csrfToken, 0, 14) }}&hellip;</code></div>
 
-[{{ $workbenchOutput['status'] }}] {{ $workbenchOutput['headline'] }}
-{{ $workbenchOutput['body'] }}
-@endif</div>
+            @if ($lab->category_id === 'jwt')
+                @php $jwtParts = explode('.', (string) $sessionJwt); @endphp
+                <div style="margin-top:14px">
+                    <div class="lw-muted" style="font-size:0.78rem;margin-bottom:6px">Issued Session JWT (Header . Payload . Signature)</div>
+                    <div class="lw-jwt-segments">
+                        <span class="lw-jwt-part--hdr">{{ $jwtParts[0] ?? '' }}</span>.<span class="lw-jwt-part--pld">{{ $jwtParts[1] ?? '' }}</span>.<span class="lw-jwt-part--sig">{{ $jwtParts[2] ?? '' }}</span>
+                    </div>
+                </div>
+            @endif
+
+            @if (!empty($workbenchOutput['headline']))
+                <div class="lw-alert {{ $autoSolved ? 'lw-alert--success' : 'lw-alert--info' }}" style="margin-top:14px;margin-bottom:0">
+                    <div style="font-size:0.76rem;text-transform:uppercase;letter-spacing:0.04em">[{{ $workbenchOutput['status'] }}] {{ $workbenchOutput['headline'] }}</div>
+                    <div class="lw-mono" style="font-size:0.8rem;margin-top:4px;white-space:pre-wrap">{{ $workbenchOutput['body'] }}</div>
+                </div>
+            @endif
+        </div>
     </div>
 </div>

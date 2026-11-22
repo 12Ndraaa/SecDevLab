@@ -60,14 +60,14 @@
                 <tr class="{{ Auth::id() === $row['user_id'] ? 'is-highlight' : '' }}">
                     <td><strong>#{{ $row['rank'] }}</strong></td>
                     <td><strong>{{ $row['name'] }}</strong></td>
-                    <td><span class="vla-badge {{ $row['role'] === 'owner' ? 'vla-badge--orange' : 'vla-badge--muted' }}">{{ strtoupper($row['role']) }}</span></td>
-                    <td><strong>{{ $row['solved_total'] }}</strong></td>
+                    <td><span class="vla-role-pill {{ $row['role'] === 'owner' ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper($row['role']) }}</span></td>
+                    <td class="vla-mono"><strong>{{ $row['solved_total'] }}</strong></td>
                     <td>
                         <span class="label-light-green-small">A: {{ $row['apprentice'] }}</span>
                         <span class="label-light-blue-small">P: {{ $row['practitioner'] }}</span>
                         <span class="label-purple-small">E: {{ $row['expert'] }}</span>
                     </td>
-                    <td><span class="vla-badge vla-badge--accent">{{ $row['points'] }} pts</span></td>
+                    <td><span class="vla-badge vla-badge--accent vla-mono">{{ $row['points'] }} pts</span></td>
                     <td class="vla-muted-sm">{{ $row['last_solved_at'] ? $row['last_solved_at']->format('d M Y H:i') : '-' }}</td>
                 </tr>
             @empty

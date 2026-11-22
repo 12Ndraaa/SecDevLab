@@ -98,7 +98,7 @@ class LabSession extends Model
     public static function forUserAndLab(int $userId, string $labId, ?string $uiTheme = null): self
     {
         $normalizedLabId = strtolower($labId);
-        $theme = in_array($uiTheme, ['dark', 'light'], true) ? $uiTheme : 'dark';
+        $theme = in_array($uiTheme, ['dark', 'light'], true) ? $uiTheme : 'light';
 
         $existing = self::where('user_id', $userId)
             ->where('lab_id', $normalizedLabId)
@@ -227,7 +227,7 @@ class LabSession extends Model
             'workbench_state' => null,
             'ui_theme' => in_array($uiTheme, ['dark', 'light'], true)
                 ? $uiTheme
-                : ($this->ui_theme ?: 'dark'),
+                : ($this->ui_theme ?: 'light'),
         ]);
         $this->save();
 

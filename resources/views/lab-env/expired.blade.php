@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{{ $session->ui_theme ?: 'dark' }}">
+<html lang="en" data-theme="{{ in_array($session->ui_theme, ['dark', 'light'], true) ? $session->ui_theme : 'light' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="/content/images/logos/favicon.ico" type="image/x-icon">
-    <link href="/content/lab-workbench.css" rel="stylesheet">
+    <link href="/content/fonts/fonts.css?v={{ @filemtime(public_path('content/fonts/fonts.css')) ?: '1' }}" rel="stylesheet">
+    <link href="/content/lab-workbench.css?v={{ @filemtime(public_path('content/lab-workbench.css')) ?: '2' }}" rel="stylesheet">
     <title>Lab Session Expired | {{ config('app.name') ?: 'SecDevLab' }}</title>
 </head>
 <body>

@@ -10,8 +10,12 @@ use App\Services\LabArchetypeResolver;
 use App\Services\WidgetRenderer;
 use Database\Seeders\CatalogSeeder;
 use Database\Seeders\UserSeeder;
+use Illuminate\Database\MySqlConnection;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class PerSessionIsolationAndArchetypesTest extends TestCase
@@ -77,6 +81,8 @@ class PerSessionIsolationAndArchetypesTest extends TestCase
         $res->assertHeader('X-Robots-Tag', 'noindex, nofollow');
         $csp = (string) $res->headers->get('Content-Security-Policy');
         $this->assertStringContainsString("script-src 'none'", $csp);
+        $this->assertStringContainsString("style-src 'self'", $csp);
+        $this->assertStringContainsString("font-src 'self'", $csp);
         $this->assertStringContainsString('sandbox allow-forms allow-same-origin', $csp);
 
         // Isolated cookies: target cookies scoped to /lab/{token}, NO secdevlab-session or XSRF-TOKEN emitted
@@ -88,11 +94,20 @@ class PerSessionIsolationAndArchetypesTest extends TestCase
             $this->assertSame("/lab/{$token}", $cookie->getPath());
         }
 
-        // SecDevLab Command Bar content (no PortSwigger logoAcademy.svg, zero JS, token & TTL shown)
+        // SecDevLab Command Bar content (no PortSwigger logoAcademy.svg, zero JS, self-hosted fonts, token & TTL shown)
         $html = $res->getContent();
         $this->assertStringContainsString('SecDevLab', $html);
         $this->assertStringContainsString('Token: '.substr($token, 0, 12), $html);
         $this->assertStringContainsString('TTL:', $html);
+        $this->assertMatchesRegularExpression('#/content/fonts/fonts\.css\?v=\d+#', $html);
+        $this->assertMatchesRegularExpression('#/content/lab-workbench\.css\?v=\d+#', $html);
+        $this->assertLessThan(
+            strpos($html, '/content/lab-workbench.css'),
+            strpos($html, '/content/fonts/fonts.css'),
+            'Lab workbench must load self-hosted fonts.css before lab-workbench.css'
+        );
+        $this->assertStringNotContainsString('fonts.googleapis.com', $html);
+        $this->assertStringNotContainsString('fonts.gstatic.com', $html);
         $this->assertStringNotContainsString('logoAcademy.svg', $html);
         $this->assertStringNotContainsString('<script', strtolower($html));
     }
@@ -141,7 +156,19 @@ class PerSessionIsolationAndArchetypesTest extends TestCase
         // Expired instance returns 410 Gone (and JSON 410 for Repeater), while preserving Academy solved status!
         $session->expires_at = now()->subMinute();
         $session->save();
-        $this->get($launchUrl)->assertStatus(410)->assertSee('410 Gone');
+        $expiredRes = $this->get($launchUrl)->assertStatus(410)->assertSee('410 Gone');
+        $expiredHtml = $expiredRes->getContent();
+        $this->assertMatchesRegularExpression('#/content/fonts/fonts\.css\?v=\d+#', $expiredHtml);
+        $this->assertMatchesRegularExpression('#/content/lab-workbench\.css\?v=\d+#', $expiredHtml);
+        $this->assertLessThan(
+            strpos($expiredHtml, '/content/lab-workbench.css'),
+            strpos($expiredHtml, '/content/fonts/fonts.css'),
+            'Expired workbench page must load self-hosted fonts.css before lab-workbench.css'
+        );
+        $this->assertStringNotContainsString('fonts.googleapis.com', $expiredHtml);
+        $this->assertStringNotContainsString('fonts.gstatic.com', $expiredHtml);
+        $this->assertStringContainsString("font-src 'self'", (string) $expiredRes->headers->get('Content-Security-Policy'));
+        $this->assertStringNotContainsString('<script', strtolower($expiredHtml));
         $this->get($launchUrl, ['X-Academy-Repeater' => '1'])->assertStatus(410)->assertJson(['expired' => true]);
 
         // Relaunching after expiry assigns fresh token & secrets, resets instance_solved, keeps solved=true on Academy!
@@ -244,6 +271,9 @@ class PerSessionIsolationAndArchetypesTest extends TestCase
             $html = $res->getContent();
 
             $this->assertStringContainsString("data-archetype=\"{$archetype}\"", $html);
+            $this->assertStringContainsString("class=\"lw-archetype--{$archetype}\"", $html);
+            $this->assertMatchesRegularExpression('#/content/fonts/fonts\.css\?v=\d+#', $html);
+            $this->assertMatchesRegularExpression('#/content/lab-workbench\.css\?v=\d+#', $html);
             $this->assertStringContainsString(e($resolver->meta($lab)['short']), $html);
             $this->assertStringNotContainsString('<script', strtolower($html));
             $this->assertStringNotContainsString('logoAcademy.svg', $html);
@@ -253,17 +283,52 @@ class PerSessionIsolationAndArchetypesTest extends TestCase
         // All 8 archetypes must be exercised across the 31 categories
         $this->assertCount(8, $seenArchetypes);
 
-        // Test Dark/Light toggle inside lab instance (Zero-JS POST _theme)
+        // Test Light (default) / Dark toggle inside lab instance (Zero-JS POST _theme)
         $aiLab = Lab::where('category_id', 'web-llm-attacks')->firstOrFail();
         $aiUrl = $this->launchPath($this->alice, $aiLab->id);
+        $this->assertStringContainsString('data-theme="light"', $this->get($aiUrl)->assertOk()->getContent());
+        $this->post($aiUrl.'/_theme')->assertRedirect($aiUrl);
         $this->assertStringContainsString('data-theme="dark"', $this->get($aiUrl)->assertOk()->getContent());
         $this->post($aiUrl.'/_theme')->assertRedirect($aiUrl);
         $this->assertStringContainsString('data-theme="light"', $this->get($aiUrl)->assertOk()->getContent());
 
-        // Verify lab-workbench.css supports both Dark and Light themes without JS
+        // Verify lab-workbench.css supports Dark/Light themes, all 8 distinct archetypes, contrast tokens, and styled file upload without JS
         $labCss = (string) file_get_contents(public_path('content/lab-workbench.css'));
         $this->assertStringContainsString('[data-theme="dark"]', $labCss);
         $this->assertStringContainsString('[data-theme="light"]', $labCss);
+        $this->assertStringContainsString('--lw-arch-btn-bg:', $labCss);
+        $this->assertStringContainsString('--lw-solved-bg:', $labCss);
+        $this->assertStringContainsString('::file-selector-button', $labCss);
+        $this->assertDoesNotMatchRegularExpression('/font-weight:\s*800\b/', $labCss);
+        foreach (array_keys(LabArchetypeResolver::ARCHETYPES) as $archId) {
+            $this->assertStringContainsString("lw-archetype--{$archId}", $labCss);
+        }
+
+        // Verify distinct structural chrome across all 8 archetypes
+        $expectedArchetypeMarkers = [
+            'sql-injection' => 'lw-store-hero',
+            'os-command-injection' => 'lw-diag-strip',
+            'file-upload-vulnerabilities' => 'lw-studio-shell',
+            'authentication' => 'lw-iam-header',
+            'api-testing' => 'lw-ide-urlbar',
+            'cross-site-scripting' => 'lw-editorial-masthead',
+            'web-llm-attacks' => 'lw-chat-shell',
+            'information-disclosure' => 'lw-repeater-presets',
+        ];
+        foreach ($expectedArchetypeMarkers as $catSlug => $markerClass) {
+            $sampleLab = Lab::where('category_id', $catSlug)->orderBy('sort_order')->firstOrFail();
+            $sampleUrl = $this->launchPath($this->alice, $sampleLab->id);
+            $sampleHtml = $this->get($sampleUrl)->assertOk()->getContent();
+            $this->assertStringContainsString($markerClass, $sampleHtml, "Expected distinct archetype marker '{$markerClass}' for category '{$catSlug}'");
+        }
+
+        // Verify Media Upload Blade renders cleanly without leaked "@else" directive
+        $fuLab = Lab::where('category_id', 'file-upload-vulnerabilities')->orderBy('sort_order')->firstOrFail();
+        $fuUrl = $this->launchPath($this->alice, $fuLab->id);
+        $fuHtml = $this->get($fuUrl)->assertOk()->getContent();
+        $this->assertStringNotContainsString('secret@else', $fuHtml);
+        $this->assertStringNotContainsString('@else', $fuHtml);
+        $this->assertStringContainsString('Target secret path:', $fuHtml);
     }
 
     public function test_zero_emojis_as_ui_icons_in_academy_chrome_and_lab_views(): void
@@ -383,7 +448,72 @@ class PerSessionIsolationAndArchetypesTest extends TestCase
 
     public function test_per_session_migration_can_roll_back_and_reapply_cleanly(): void
     {
+        $lab = Lab::orderBy('sort_order')->firstOrFail();
+
+        // 1. Fresh migrate sets SQL column default of lab_sessions.ui_theme to 'light'
+        $defaultRowId = DB::table('lab_sessions')->insertGetId([
+            'user_id' => $this->alice->id,
+            'lab_id' => $lab->id,
+            'instance_token' => bin2hex(random_bytes(16)),
+            'executable_exts' => json_encode(['.php']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        try {
+            $this->assertSame('light', DB::table('lab_sessions')->where('id', $defaultRowId)->value('ui_theme'));
+        } finally {
+            DB::table('lab_sessions')->where('id', $defaultRowId)->delete();
+        }
+
+        // 2. Verify MySQL grammar compiles ->default('light')->change() into valid MODIFY DDL
+        $mysqlConn = new MySqlConnection(static fn () => null);
+        $mysqlConn->useDefaultSchemaGrammar();
+        $blueprint = new Blueprint($mysqlConn, 'lab_sessions');
+        $blueprint->string('ui_theme', 16)->default('light')->change();
+        $mysqlSql = strtolower(implode('; ', $blueprint->toSql()));
+        $this->assertStringContainsString("modify `ui_theme` varchar(16) not null default 'light'", $mysqlSql);
+
+        // 3. Rollback 2026_11_22_000002 (--step=1): default reverts to 'dark'
         $this->artisan('migrate:rollback', ['--step' => 1])->assertExitCode(0);
+
+        $darkRowId = DB::table('lab_sessions')->insertGetId([
+            'user_id' => $this->bob->id,
+            'lab_id' => $lab->id,
+            'instance_token' => bin2hex(random_bytes(16)),
+            'executable_exts' => json_encode(['.php']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        try {
+            $this->assertSame('dark', DB::table('lab_sessions')->where('id', $darkRowId)->value('ui_theme'));
+
+            // 4. Reapply 2026_11_22_000002: existing 'dark' session resets to 'light' and default becomes 'light'
+            $this->artisan('migrate')->assertExitCode(0);
+            $this->assertSame('light', DB::table('lab_sessions')->where('id', $darkRowId)->value('ui_theme'));
+
+            $postMigrateId = DB::table('lab_sessions')->insertGetId([
+                'user_id' => $this->alice->id,
+                'lab_id' => $lab->id,
+                'instance_token' => bin2hex(random_bytes(16)),
+                'executable_exts' => json_encode(['.php']),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            try {
+                $this->assertSame('light', DB::table('lab_sessions')->where('id', $postMigrateId)->value('ui_theme'));
+            } finally {
+                DB::table('lab_sessions')->where('id', $postMigrateId)->delete();
+            }
+        } finally {
+            DB::table('lab_sessions')->where('id', $darkRowId)->delete();
+        }
+
+        // 5. Rollback both 2026_11_22_000002 and 2026_11_22_000001 (--step=2) and reapply cleanly
+        $this->artisan('migrate:rollback', ['--step' => 2])->assertExitCode(0);
+        $this->assertFalse(Schema::hasColumn('lab_sessions', 'ui_theme'));
+        $this->assertFalse(Schema::hasColumn('lab_sessions', 'instance_token'));
         $this->artisan('migrate')->assertExitCode(0);
+        $this->assertTrue(Schema::hasColumn('lab_sessions', 'ui_theme'));
+        $this->assertTrue(Schema::hasColumn('lab_sessions', 'instance_token'));
     }
 }

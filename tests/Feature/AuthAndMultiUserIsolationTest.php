@@ -168,10 +168,61 @@ class AuthAndMultiUserIsolationTest extends TestCase
 
     public function test_bilingual_locale_and_theme_switchers_persist_in_session_without_js(): void
     {
-        // Default theme is dark, default locale is en
+        // Default theme is light (Clean Light Editorial), default locale is en
         $defaultHtml = $this->get('/')->assertOk()->getContent();
-        $this->assertStringContainsString('data-theme="dark"', $defaultHtml);
+        $this->assertStringContainsString('data-theme="light"', $defaultHtml);
         $this->assertStringContainsString('Explore All Labs', $defaultHtml);
+        $this->assertStringNotContainsString('>1. Study Vulnerability Theory<', $defaultHtml);
+        $this->assertStringContainsString('>Study Vulnerability Theory<', $defaultHtml);
+        $this->assertMatchesRegularExpression('#/content/fonts/fonts\.css\?v=\d+#', $defaultHtml);
+        $this->assertMatchesRegularExpression('#/content/academy-modern\.css\?v=\d+#', $defaultHtml);
+        $this->assertLessThan(
+            strpos($defaultHtml, '/content/academy-modern.css'),
+            strpos($defaultHtml, '/content/fonts/fonts.css'),
+            'Self-hosted fonts.css must load before academy-modern.css'
+        );
+        $this->assertStringNotContainsString('fonts.googleapis.com', $defaultHtml);
+        $this->assertStringNotContainsString('fonts.gstatic.com', $defaultHtml);
+
+        // Learning page using legacy_css also loads self-hosted fonts.css before academy-modern.css
+        $topicHtml = $this->get('/web-security/sql-injection')->assertOk()->getContent();
+        $this->assertMatchesRegularExpression('#/content/fonts/fonts\.css\?v=\d+#', $topicHtml);
+        $this->assertLessThan(
+            strpos($topicHtml, '/content/academy-modern.css'),
+            strpos($topicHtml, '/content/fonts/fonts.css'),
+            'Learning pages must load self-hosted fonts.css before academy-modern.css'
+        );
+        $this->assertStringNotContainsString('fonts.googleapis.com', $topicHtml);
+        $this->assertStringNotContainsString('fonts.gstatic.com', $topicHtml);
+
+        $fontsCssPath = public_path('content/fonts/fonts.css');
+        $this->assertFileExists($fontsCssPath);
+        $fontsCss = (string) file_get_contents($fontsCssPath);
+        $this->assertStringContainsString("font-family: 'Inter'", $fontsCss);
+        $this->assertStringContainsString("font-family: 'Plus Jakarta Sans'", $fontsCss);
+        $this->assertStringContainsString("font-family: 'JetBrains Mono'", $fontsCss);
+        $this->assertDoesNotMatchRegularExpression('#https?://|//#i', $fontsCss);
+        preg_match_all("#url\('(/content/fonts/[^']+\.woff2)'\)#", $fontsCss, $woffMatches);
+        $this->assertCount(11, $woffMatches[1]);
+        foreach ($woffMatches[1] as $fontWebPath) {
+            $fontDiskPath = public_path(ltrim($fontWebPath, '/'));
+            $this->assertFileExists($fontDiskPath, "Missing self-hosted webfont binary: {$fontWebPath}");
+            $bytes = (string) file_get_contents($fontDiskPath);
+            $this->assertGreaterThan(1024, strlen($bytes), "Webfont binary looks truncated: {$fontWebPath}");
+            $this->assertSame('wOF2', substr($bytes, 0, 4), "Invalid WOFF2 magic header in {$fontWebPath}");
+        }
+
+        // Static web server front-controller rules allow direct 200 delivery of /content/fonts/*
+        $this->assertStringContainsString('is_file($publicPath.$uri)', (string) file_get_contents(base_path('server.php')));
+        $this->assertStringContainsString('RewriteCond %{REQUEST_FILENAME} !-f', (string) file_get_contents(public_path('.htaccess')));
+
+        $academyCss = (string) file_get_contents(public_path('content/academy-modern.css'));
+        $this->assertStringContainsString('--vla-btn-primary-bg:', $academyCss);
+        $this->assertStringContainsString('.dashboard-progress-card--summary', $academyCss);
+        $this->assertStringContainsString('.vla-field--span2', $academyCss);
+        $this->assertStringContainsString('@media (max-width: 1179px)', $academyCss);
+        $this->assertStringContainsString('.vla-learning-content .tg-wrap .tg th', $academyCss);
+        $this->assertDoesNotMatchRegularExpression('/font-weight:\s*800\b/', $academyCss);
 
         // Switch locale to Indonesian (id)
         $this->post('/preferences/locale', ['locale' => 'id', 'redirect_to' => '/'])
@@ -180,12 +231,25 @@ class AuthAndMultiUserIsolationTest extends TestCase
         $this->assertStringContainsString('<html lang="id"', $idHtml);
         $this->assertStringContainsString('Jelajahi Semua Lab', $idHtml);
 
-        // Switch theme to light
+        // Switch theme to dark (Octo Code) and back to light
+        $this->post('/preferences/theme', ['redirect_to' => '/'])
+            ->assertRedirect('/');
+        $darkHtml = $this->get('/')->assertOk()->getContent();
+        $this->assertStringContainsString('data-theme="dark"', $darkHtml);
+        $this->assertStringNotContainsString('<script', strtolower($darkHtml));
+
         $this->post('/preferences/theme', ['redirect_to' => '/'])
             ->assertRedirect('/');
         $lightHtml = $this->get('/')->assertOk()->getContent();
         $this->assertStringContainsString('data-theme="light"', $lightHtml);
         $this->assertStringNotContainsString('<script', strtolower($lightHtml));
+
+        // Verify Owner pill contrast fix (no vla-btn--accent wrapping vla-badge--orange)
+        $owner = User::where('email', 'owner@secdevlab.local')->firstOrFail();
+        $ownerHtml = $this->actingAs($owner)->get('/')->assertOk()->getContent();
+        $this->assertStringContainsString('vla-account-pill', $ownerHtml);
+        $this->assertStringContainsString('vla-role-pill--owner', $ownerHtml);
+        $this->assertStringNotContainsString('vla-btn vla-btn--accent vla-btn--sm" href="/users/youraccount/personaldetails"', $ownerHtml);
     }
 
     public function test_guest_is_redirected_to_users_login_when_accessing_launcher_or_account_and_legacy_lab_env_is_blocked(): void
