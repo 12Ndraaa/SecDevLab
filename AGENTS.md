@@ -5,3 +5,10 @@
   - MySQL CLI: `C:\laragon\bin\mysql\mysql-8.0.30-winx64\bin\mysql.exe`
 - Dilarang memakai atau mereferensikan XAMPP (`C:\xampp`) meskipun `php` di `PATH` sistem masih menunjuk ke XAMPP.
 - Database runtime target adalah **MySQL Laragon** (`portswigger_labs`); SQLite `:memory:` hanya dipakai oleh konfigurasi tes `phpunit.xml`.
+
+# Project UI & Deployment Guardrails
+
+- Semua link CSS di layout Academy maupun Lab Workbench wajib menyertakan cache-busting `?v={{ @filemtime(...) }}`.
+- Webfont baru harus di-bundle sebagai aset lokal (`.woff2` + `@font-face`) di `public/content/fonts/` agar lolos CSP `font-src 'self'` dan Zero-JS.
+- Dilarang mengedit file migrasi yang sudah ter-deploy ke Railway/Laragon MySQL; selalu buat file migrasi aditif baru.
+- Setelah push perubahan UI ke `main`, verifikasi deployment live menggunakan `browseros-neo` (cek screenshot serta `getComputedStyle` & `document.fonts`) sebelum menutup tugas.
