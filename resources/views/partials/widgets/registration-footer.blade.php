@@ -3,9 +3,9 @@
         <div>
             <h3>
                 @if($user)
-                    {{ __('academy.nav.dashboard') }} — {{ $user->name }}
+                    {{ __('academy.nav.dashboard') }}: {{ $user->name }}
                 @else
-                    {{ config('app.name') }}
+                    {{ config('app.name') ?: 'SecDevLab' }}
                 @endif
             </h3>
             <ul>

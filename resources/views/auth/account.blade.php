@@ -7,7 +7,7 @@
     <div class="vla-badge-row" style="justify-content:space-between;margin-bottom:14px">
         <div>
             <h1 style="margin:0 0 6px">{{ __('academy.auth.account_title') }}</h1>
-            <span class="vla-role-pill {{ $user->isOwner() ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper($user->role) }}</span>
+            <span class="vla-role-pill {{ $user->isOwner() ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper($user->isOwner() ? __('academy.common.role_owner') : __('academy.common.role_user')) }}</span>
         </div>
         <div class="vla-btn-group">
             <a href="/certificate" class="vla-btn vla-btn--accent vla-btn--sm">{{ __('academy.dashboard.print_cert') }}</a>
@@ -19,7 +19,7 @@
 
     <p><strong>{{ __('academy.auth.name') }}:</strong> {{ $user->name }}</p>
     <p><strong>{{ __('academy.auth.email') }}:</strong> {{ $user->email }}</p>
-    <p><strong>Total Labs Solved:</strong> {{ $solvedSessions->count() }} / {{ $totalLabs }} ({{ $summary['points'] }} pts)</p>
+    <p><strong>{{ __('academy.auth.total_labs_solved') }}:</strong> {{ $solvedSessions->count() }} / {{ $totalLabs }} ({{ $summary['points'] }} {{ __('academy.common.pts') }})</p>
 
     <form method="POST" action="/users/logout" style="margin-top:14px">
         @csrf
@@ -30,7 +30,7 @@
 @include('partials.widget', ['id' => 'academy-accountstatus', 'largeView' => true])
 
 <div class="vla-section-head">
-    <h2>Solved Labs</h2>
+    <h2>{{ __('academy.auth.solved_labs_heading') }}</h2>
 </div>
 @if ($solvedSessions->isEmpty())
     <div class="vla-card"><p class="vla-muted">{{ __('academy.dashboard.no_solves') }}</p></div>

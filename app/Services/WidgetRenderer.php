@@ -74,11 +74,13 @@ class WidgetRenderer
         }
 
         if ($widgetId === 'academy-validatecertification') {
-            return '<div class="vla-card"><p>'.e((string) (config('app.name') ?: 'SecDevLab')).': Verify local academic certificates on the <a href="/certificate">Certificate &amp; Progress Report</a> page.</p></div>';
+            $brand = e((string) (config('app.name') ?: 'SecDevLab'));
+
+            return '<div class="vla-card"><p>'.__('academy.widgets.verify_cert_html', ['brand' => $brand]).'</p></div>';
         }
 
         if ($widgetId === 'academy-sharepage') {
-            return '<div class="vla-badge-row"><a class="vla-btn vla-btn--outline vla-btn--sm" href="/cve">CVE Encyclopedia</a><a class="vla-btn vla-btn--outline vla-btn--sm" href="/web-security/all-labs">All Labs</a></div>';
+            return '<div class="vla-badge-row"><a class="vla-btn vla-btn--outline vla-btn--sm" href="/cve">'.e(__('academy.widgets.cve_encyclopedia')).'</a><a class="vla-btn vla-btn--outline vla-btn--sm" href="/web-security/all-labs">'.e(__('academy.nav.all_labs')).'</a></div>';
         }
 
         if ($widgetId === 'academy-startlearningcta') {
@@ -95,8 +97,14 @@ class WidgetRenderer
             ])->render();
         }
 
+        if ($widgetId === 'academy-available-learning-paths') {
+            return view('partials.widgets.learning-paths', [
+                'user' => $user,
+            ])->render();
+        }
+
         if ($widgetId === 'burp-certificationstartingprice' || $widgetId === 'burp-prostartingprice') {
-            return '<span>Free (Local Offline Mode)</span>';
+            return '<span>'.e(__('academy.widgets.free_offline')).'</span>';
         }
 
         $official = $this->loadOfficialWidgets();

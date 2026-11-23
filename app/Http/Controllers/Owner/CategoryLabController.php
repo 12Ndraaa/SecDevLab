@@ -63,7 +63,7 @@ class CategoryLabController extends Controller
             'sort_order' => (int) $data['sort_order'],
         ]);
 
-        return redirect('/owner/categories')->with('status', "Category '{$data['title']}' created.");
+        return redirect('/owner/categories')->with('status', __('academy.owner.flash_cat_created', ['title' => $data['title']]));
     }
 
     public function editCategory(Category $category): View
@@ -89,7 +89,7 @@ class CategoryLabController extends Controller
         ]);
         $category->syncLabCount();
 
-        return redirect('/owner/categories')->with('status', "Category '{$category->title}' updated.");
+        return redirect('/owner/categories')->with('status', __('academy.owner.flash_cat_updated', ['title' => $category->title]));
     }
 
     public function destroyCategory(Category $category): RedirectResponse
@@ -97,7 +97,7 @@ class CategoryLabController extends Controller
         $title = $category->title;
         $category->delete();
 
-        return redirect('/owner/categories')->with('status', "Category '{$title}' deleted.");
+        return redirect('/owner/categories')->with('status', __('academy.owner.flash_cat_deleted', ['title' => $title]));
     }
 
     // --- LABS CRUD ---
@@ -168,7 +168,7 @@ class CategoryLabController extends Controller
 
         $lab->category?->syncLabCount();
 
-        return redirect('/owner/labs')->with('status', "Lab '{$lab->title}' created.");
+        return redirect('/owner/labs')->with('status', __('academy.owner.flash_lab_created', ['title' => $lab->title]));
     }
 
     public function editLab(Lab $lab): View
@@ -202,7 +202,7 @@ class CategoryLabController extends Controller
         }
         $lab->category?->syncLabCount();
 
-        return redirect('/owner/labs')->with('status', "Lab '{$lab->title}' updated.");
+        return redirect('/owner/labs')->with('status', __('academy.owner.flash_lab_updated', ['title' => $lab->title]));
     }
 
     public function destroyLab(Lab $lab): RedirectResponse
@@ -212,7 +212,7 @@ class CategoryLabController extends Controller
         $lab->delete();
         $cat?->syncLabCount();
 
-        return redirect('/owner/labs')->with('status', "Lab '{$title}' deleted.");
+        return redirect('/owner/labs')->with('status', __('academy.owner.flash_lab_deleted', ['title' => $title]));
     }
 
     /**

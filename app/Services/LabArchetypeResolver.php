@@ -159,8 +159,17 @@ class LabArchetypeResolver
     public function meta(Lab $lab): array
     {
         $archetype = $this->resolve($lab);
+        $base = self::ARCHETYPES[$archetype] ?? self::ARCHETYPES['storefront'];
+        $id = $base['id'];
 
-        return self::ARCHETYPES[$archetype] ?? self::ARCHETYPES['storefront'];
+        return [
+            'id' => $id,
+            'label' => __('academy.archetypes.'.$id.'.label'),
+            'short' => __('academy.archetypes.'.$id.'.short'),
+            'tone' => $base['tone'],
+            'prompt' => __('academy.archetypes.'.$id.'.prompt'),
+            'description' => __('academy.archetypes.'.$id.'.description'),
+        ];
     }
 
     /**

@@ -12,7 +12,7 @@
 
 <form method="GET" action="/owner/categories" class="vla-filter-card">
     <div class="vla-filter-row">
-        <input type="search" name="search" value="{{ $search }}" placeholder="Search category slug or title...">
+        <input type="search" name="search" value="{{ $search }}" placeholder="{{ __('academy.owner.cat_search_placeholder') }}">
         <button type="submit" class="vla-btn vla-btn--primary vla-btn--sm">{{ __('academy.labs.filter') }}</button>
     </div>
 </form>
@@ -21,12 +21,12 @@
     <table class="vla-table">
         <thead>
             <tr>
-                <th>Order</th>
-                <th>Slug ID</th>
-                <th>Title</th>
-                <th>Topic Route</th>
-                <th>Labs</th>
-                <th>CVEs</th>
+                <th>{{ __('academy.owner.col_order') }}</th>
+                <th>{{ __('academy.owner.col_slug_id') }}</th>
+                <th>{{ __('academy.owner.col_title') }}</th>
+                <th>{{ __('academy.owner.col_topic_route') }}</th>
+                <th>{{ __('academy.owner.col_labs') }}</th>
+                <th>{{ __('academy.owner.col_cves') }}</th>
                 <th>{{ __('academy.owner.actions') }}</th>
             </tr>
         </thead>

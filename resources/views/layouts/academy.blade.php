@@ -5,9 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', config('app.name') ?: 'SecDevLab')</title>
-    <link rel="icon" href="/content/images/logos/favicon.ico" type="image/x-icon">
     @hasSection('legacy_css')
-        <link href="@yield('legacy_css')" rel="stylesheet" type="text/css">
+        @php
+            $legacyCssHref = trim((string) $__env->yieldContent('legacy_css'));
+            $legacyCssPath = strtok($legacyCssHref, '?') ?: $legacyCssHref;
+            $legacyCssVer = @filemtime(public_path(ltrim($legacyCssPath, '/'))) ?: '1';
+        @endphp
+        <link href="{{ $legacyCssPath }}?v={{ $legacyCssVer }}" rel="stylesheet" type="text/css">
         <link rel="preload" href="/content/fonts/ps-icons-small/ps-icons-small.woff?td2uot" as="font" crossorigin="anonymous">
         <link rel="preload" href="/content/fonts/ps-main/ps-icons.woff?l1la2n" as="font" crossorigin="anonymous">
     @endif
@@ -32,12 +36,12 @@
         </a>
 
         <input type="checkbox" id="vla-mobile-nav" class="vla-mobile-toggle-input">
-        <label for="vla-mobile-nav" class="vla-mobile-toggle-label">
+        <label for="vla-mobile-nav" class="vla-mobile-toggle-label" aria-label="{{ __('academy.nav.toggle_nav') }}">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            <span>Menu</span>
+            <span>{{ __('academy.nav.menu') }}</span>
         </label>
 
-        <nav class="vla-nav" aria-label="Primary navigation">
+        <nav class="vla-nav" aria-label="{{ __('academy.nav.primary_nav') }}">
             <a href="/web-security/all-topics" class="{{ request()->is('web-security/all-topics') ? 'is-active' : '' }}">{{ __('academy.nav.topics') }}</a>
             <a href="/web-security/all-labs" class="{{ request()->is('web-security/all-labs') ? 'is-active' : '' }}">{{ __('academy.nav.all_labs') }}</a>
             <a href="/cve" class="{{ request()->is('cve*') ? 'is-active' : '' }}">{{ __('academy.nav.cve') }}</a>
@@ -56,7 +60,7 @@
             <form method="POST" action="/preferences/locale" class="vla-inline-form">
                 @csrf
                 <input type="hidden" name="redirect_to" value="{{ request()->getRequestUri() }}">
-                <div class="vla-pill-switch" role="group" aria-label="Language">
+                <div class="vla-pill-switch" role="group" aria-label="{{ __('academy.nav.language') }}">
                     <button type="submit" name="locale" value="en" class="{{ ($uiLocale ?? 'en') === 'en' ? 'is-active' : '' }}">EN</button>
                     <button type="submit" name="locale" value="id" class="{{ ($uiLocale ?? 'en') === 'id' ? 'is-active' : '' }}">ID</button>
                 </div>
@@ -132,7 +136,7 @@
         <div>
             <strong>{{ $brandName }}</strong>
             <div class="vla-muted-sm">{{ __('academy.footer.tagline') }}</div>
-            <div class="vla-muted-sm">&copy; {{ date('Y') }} {{ $brandName }} &mdash; {{ __('academy.footer.copyright') }}</div>
+            <div class="vla-muted-sm">&copy; {{ date('Y') }} {{ $brandName }}. {{ __('academy.footer.copyright') }}</div>
         </div>
         <div class="vla-footer__links">
             <a href="/">{{ __('academy.nav.home') }}</a>

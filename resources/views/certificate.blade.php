@@ -29,7 +29,7 @@
 
         <div class="vla-badge-row" style="justify-content:center;margin:20px 0">
             <span class="vla-badge vla-badge--orange">{{ __('academy.certificate.tier_label') }}: {{ $tier }}</span>
-            <span class="vla-badge vla-badge--solved">{{ $summary['total_solved'] }} / {{ $totalLabs }} Labs ({{ $completionPct }}%)</span>
+            <span class="vla-badge vla-badge--solved">{{ __('academy.certificate.summary_badge', ['solved' => $summary['total_solved'], 'total' => $totalLabs, 'pct' => $completionPct]) }}</span>
             <span class="vla-badge vla-badge--accent">{{ $summary['points'] }} {{ __('academy.certificate.points_label') }}</span>
         </div>
 
@@ -40,7 +40,7 @@
             </div>
             <div>
                 <div class="vla-muted-sm">{{ __('academy.certificate.issued_date') }}</div>
-                <strong>{{ now()->format('d F Y') }}</strong>
+                <strong>{{ now()->translatedFormat('d F Y') }}</strong>
             </div>
             <div>
                 <div class="vla-muted-sm">{{ __('academy.auth.email') }}</div>
@@ -57,10 +57,10 @@
         <div class="vla-badge-row" style="justify-content:space-between;border-bottom:2px solid var(--vla-border);padding-bottom:14px;margin-bottom:18px">
             <div>
                 <h1 style="margin:0">{{ __('academy.certificate.report_title') }}</h1>
-                <div class="vla-muted-sm">{{ $brandName }} &bull; {{ __('academy.certificate.issued_date') }}: {{ now()->format('d F Y H:i') }}</div>
+                <div class="vla-muted-sm">{{ $brandName }} &bull; {{ __('academy.certificate.issued_date') }}: {{ now()->translatedFormat('d F Y H:i') }}</div>
             </div>
-            <div style="text-align:right">
-                <strong>{{ $user->name }}</strong> ({{ strtoupper($user->role) }})<br>
+            <div class="vla-cert-report-user">
+                <strong>{{ $user->name }}</strong> ({{ strtoupper($user->isOwner() ? __('academy.common.role_owner') : __('academy.common.role_user')) }})<br>
                 <span class="vla-muted-sm">{{ $user->email }} &bull; <code>{{ $verificationCode }}</code></span>
             </div>
         </div>
@@ -68,7 +68,7 @@
         <div class="vla-grid vla-grid--4" style="margin-bottom:22px">
             <div class="vla-stat-box">
                 <div class="vla-stat-box__num">{{ $summary['total_solved'] }} / {{ $totalLabs }}</div>
-                <div class="vla-stat-box__label">Solved Labs ({{ $completionPct }}%)</div>
+                <div class="vla-stat-box__label">{{ __('academy.certificate.solved_labs_ratio', ['pct' => $completionPct]) }}</div>
             </div>
             <div class="vla-stat-box">
                 <div class="vla-stat-box__num">{{ $summary['apprentice'] }}</div>
@@ -80,7 +80,7 @@
             </div>
             <div class="vla-stat-box">
                 <div class="vla-stat-box__num">{{ $summary['expert'] }}</div>
-                <div class="vla-stat-box__label">Expert ({{ $summary['points'] }} pts)</div>
+                <div class="vla-stat-box__label">Expert ({{ $summary['points'] }} {{ __('academy.common.pts') }})</div>
             </div>
         </div>
 
@@ -127,7 +127,7 @@
                             <td>{{ $sess->lab?->title ?? $sess->lab_id }}</td>
                             <td>{{ $sess->lab?->category?->title ?? '-' }}</td>
                             <td>{{ $sess->lab?->difficulty ?? '-' }}</td>
-                            <td>{{ $sess->solved_at?->format('d M Y H:i') ?? '-' }}</td>
+                            <td>{{ $sess->solved_at?->translatedFormat('d M Y H:i') ?? '-' }}</td>
                         </tr>
                     @empty
                         <tr><td colspan="5">{{ __('academy.dashboard.no_solves') }}</td></tr>

@@ -12,7 +12,7 @@
 
 <form method="GET" action="/owner/labs" class="vla-filter-card">
     <div class="vla-filter-row">
-        <input type="search" name="search" value="{{ $search }}" placeholder="Search lab title, href, or ID...">
+        <input type="search" name="search" value="{{ $search }}" placeholder="{{ __('academy.owner.lab_search_placeholder') }}">
         <select name="category">
             <option value="ALL">{{ __('academy.cve.all_categories') }}</option>
             @foreach ($categories as $cat)
@@ -33,10 +33,10 @@
     <table class="vla-table">
         <thead>
             <tr>
-                <th>Difficulty</th>
-                <th>Title &amp; Path</th>
-                <th>Category</th>
-                <th>Theme</th>
+                <th>{{ __('academy.owner.col_difficulty') }}</th>
+                <th>{{ __('academy.owner.col_title_path') }}</th>
+                <th>{{ __('academy.owner.col_category') }}</th>
+                <th>{{ __('academy.owner.col_theme') }}</th>
                 <th>{{ __('academy.owner.actions') }}</th>
             </tr>
         </thead>

@@ -14,6 +14,9 @@ use App\Services\LabUrlService;
 use App\Services\SandboxedPhpEvaluator;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 
 class LabEnvironmentController extends Controller
 {
@@ -57,36 +60,15 @@ class LabEnvironmentController extends Controller
 
         $lab = $session->lab;
         $basePath = $this->urlService->pathPrefix($session, $request);
-
-        if ($session->isExpired()) {
-            if ($request->header('X-Academy-Repeater') === '1' || $request->expectsJson()) {
-                return response(
-                    json_encode([
-                        'error' => 'Lab instance expired. Relaunch from SecDevLab.',
-                        'expired' => true,
-                        'relaunchUrl' => url('/academy/labs/launch/'.$lab->id),
-                    ], JSON_UNESCAPED_SLASHES),
-                    410,
-                    ['Content-Type' => 'application/json; charset=utf-8']
-                );
-            }
-
-            return response(
-                view('lab-env.expired', [
-                    'session' => $session,
-                    'lab' => $lab,
-                    'archetype' => $this->archetypeResolver->meta($lab),
-                ])->render(),
-                410,
-                ['Content-Type' => 'text/html; charset=utf-8']
-            );
-        }
+        $labLocale = $session->uiLocale();
+        App::setLocale($labLocale);
+        Carbon::setLocale($labLocale);
 
         $tailParts = $tail ? array_values(array_filter(explode('/', $tail))) : [];
         $subRoute = strtolower((string) ($tailParts[0] ?? ''));
         $subAction = strtolower((string) ($tailParts[1] ?? ''));
 
-        // Non-sensitive display theme toggle for the lab Command Bar
+        // Non-sensitive display theme & locale toggles for the lab Command Bar
         if ($subRoute === '_theme' && $request->isMethod('POST')) {
             $nextTheme = $request->input('ui_theme');
             if (! in_array($nextTheme, ['dark', 'light'], true)) {
@@ -100,6 +82,50 @@ class LabEnvironmentController extends Controller
             ]);
         }
 
+        if ($subRoute === '_locale' && $request->isMethod('POST')) {
+            $nextLocale = strtolower(trim((string) ($request->input('ui_locale', $request->input('locale', '')))));
+            if (! in_array($nextLocale, ['en', 'id'], true)) {
+                $nextLocale = ($labLocale === 'id') ? 'en' : 'id';
+            }
+            $session->setUiLocale($nextLocale, true);
+            if ($session->user_id) {
+                Cache::put("secdevlab_pending_locale:{$session->user_id}", $nextLocale, now()->addHours(24));
+                LabSession::where('user_id', $session->user_id)
+                    ->where('id', '!=', $session->id)
+                    ->get()
+                    ->each(static fn (LabSession $other) => $other->setUiLocale($nextLocale, false));
+            }
+
+            return new Response('', 302, [
+                'Location' => $basePath !== '' ? $basePath : '/',
+            ]);
+        }
+
+        if ($session->isExpired()) {
+            if ($request->header('X-Academy-Repeater') === '1' || $request->expectsJson()) {
+                return response(
+                    json_encode([
+                        'error' => __('academy.expired.page_title').' - '.$lab->title,
+                        'expired' => true,
+                        'relaunchUrl' => url('/academy/labs/launch/'.$lab->id),
+                    ], JSON_UNESCAPED_SLASHES),
+                    410,
+                    ['Content-Type' => 'application/json; charset=utf-8']
+                );
+            }
+
+            return response(
+                view('lab-env.expired', [
+                    'session' => $session,
+                    'lab' => $lab,
+                    'archetype' => $this->archetypeResolver->meta($lab),
+                    'labUiLocale' => $labLocale,
+                ])->render(),
+                410,
+                ['Content-Type' => 'text/html; charset=utf-8']
+            );
+        }
+
         $profile = is_array($lab->profile) ? $lab->profile : [];
         $cookieHeader = (string) $request->header('Cookie', '');
         $rawBody = (string) $request->getContent();
@@ -109,17 +135,17 @@ class LabEnvironmentController extends Controller
         // Enforce strict feature availability per lab profile
         if ($subRoute === 'chat' || ($params['view'] ?? '') === 'chat') {
             if (empty($profile['hasLiveChat'])) {
-                abort(404, 'Live chat is not enabled for this lab.');
+                abort(404, __('academy.workbench.feature_no_chat'));
             }
         }
         if ($subRoute === 'exploit-server' || $subRoute === 'exploit' || ($params['view'] ?? '') === 'exploit-server') {
             if (empty($profile['hasExploitServer'])) {
-                abort(404, 'Exploit server is not enabled for this lab.');
+                abort(404, __('academy.workbench.feature_no_exploit'));
             }
         }
         if ($subRoute === 'email' || ($params['view'] ?? '') === 'email') {
             if (empty($profile['hasEmailClient'])) {
-                abort(404, 'Email client is not enabled for this lab.');
+                abort(404, __('academy.workbench.feature_no_email'));
             }
         }
         if (in_array($subRoute, ['admin', 'administrator-panel'], true) || ($params['view'] ?? '') === 'admin') {
@@ -133,7 +159,7 @@ class LabEnvironmentController extends Controller
                 'oauth-authentication',
             ], true);
             if (! $adminAllowed) {
-                abort(404, 'Admin panel is not available for this lab.');
+                abort(404, __('academy.workbench.feature_no_admin'));
             }
         }
 
@@ -237,19 +263,19 @@ class LabEnvironmentController extends Controller
             $logs = is_array($state['accessLog'] ?? null) ? $state['accessLog'] : [];
 
             if ($formAction === 'ACCESS_LOG') {
-                $exploitFeedback = 'Showing latest victim & scanner access log entries.';
+                $exploitFeedback = __('academy.workbench.access_log_feedback');
             } elseif (trim($respBody) === '') {
-                $exploitError = 'Exploit payload body cannot be empty.';
+                $exploitError = __('academy.workbench.empty_exploit_error');
             } else {
                 $state['responseFile'] = $respFile;
                 $state['responseHead'] = $respHead;
                 $state['responseBody'] = $respBody;
                 if ($formAction === 'DELIVER_TO_VICTIM') {
-                    $logs[] = now()->format('Y-m-d H:i:s')." UTC — Victim bot fetched {$respFile} (".strlen($respBody).' bytes)';
+                    $logs[] = now()->format('Y-m-d H:i:s')." UTC - Victim bot fetched {$respFile} (".strlen($respBody).' bytes)';
                     $state['accessLog'] = array_slice($logs, -10);
-                    $exploitFeedback = 'Exploit delivered to victim bot.';
+                    $exploitFeedback = __('academy.workbench.exploit_delivered_feedback');
                 } else {
-                    $exploitFeedback = 'Exploit stored at '.$respFile.'. Click "Deliver exploit to victim" to test it.';
+                    $exploitFeedback = __('academy.workbench.exploit_stored_feedback', ['file' => $respFile]);
                 }
                 $session->exploit_state = $state;
                 $session->save();
@@ -269,12 +295,12 @@ class LabEnvironmentController extends Controller
                     'autoSolved' => $trig['autoSolved'],
                     'secret' => ($trig['exfiltrated'] || $trig['autoSolved']) ? $session->secret('carlos_secret') : null,
                     'status' => $trig['autoSolved']
-                        ? 'Exploit payload triggered — Lab Solved!'
+                        ? __('academy.workbench.repeater_solved')
                         : ($trig['exfiltrated']
-                            ? 'Step 1 exfiltration succeeded — complete final step to solve.'
+                            ? __('academy.workbench.repeater_exfil')
                             : ($trig['exploitMissingPayload']
-                                ? 'Exploit payload body cannot be empty.'
-                                : 'Request processed (no exploit trigger matched).')),
+                                ? __('academy.workbench.empty_exploit_error')
+                                : __('academy.workbench.repeater_processed'))),
                 ], JSON_UNESCAPED_SLASHES),
                 200,
                 [
@@ -325,7 +351,9 @@ class LabEnvironmentController extends Controller
         }
 
         $params['view'] = 'upload-result';
-        $params['uploadMsg'] = 'The file '.$result['reportedPath'].' has been uploaded.';
+        $params['uploadMsg'] = app()->getLocale() === 'id'
+            ? 'Berkas '.$result['reportedPath'].' berhasil diunggah.'
+            : 'The file '.$result['reportedPath'].' has been uploaded.';
 
         return $this->renderEnvironment($request, $lab, 'my-account', $params, '', $cookieHeader, $requestHeaders, $session, $result['headers']);
     }
@@ -545,7 +573,7 @@ class LabEnvironmentController extends Controller
                     ."carlos:x:1001:1001::/home/carlos:/bin/bash\n"
                     .'AWS SecretAccessKey: '.$session->secret('aws_secret');
             } else {
-                $stockOutput = "64 units in stock at {$storeIdParam}";
+                $stockOutput = __('academy.workbench.stock_units_at', ['count' => 64, 'store' => $storeIdParam]);
             }
         }
 
@@ -600,15 +628,15 @@ class LabEnvironmentController extends Controller
         $cartMessage = '';
         if ($activeView === 'cart' && $isPost) {
             $cartMessage = $triggers['autoSolved']
-                ? 'Order placed successfully!'
-                : 'Not enough store credit ($100.00) to purchase $1337.00 item without a valid discount or price flaw.';
+                ? __('academy.workbench.cart_success')
+                : __('academy.workbench.cart_insufficient');
         }
 
         $submitSolutionError = '';
         if ($subRoute === 'submit-solution' && $isPost && ! $triggers['autoSolved']) {
             $submitSolutionError = ! empty($profile['requiresSubmitAfterExfil']) && ! $triggers['exfiltrated']
-                ? 'Solution rejected: complete the vulnerability exploitation / exfiltration step before submitting the secret.'
-                : 'Incorrect solution secret submitted. Verify the extracted secret from this session instance.';
+                ? __('academy.workbench.solution_need_exfil')
+                : __('academy.workbench.solution_wrong');
         }
 
         // Contextual Workbench Execution & Telemetry Logging
@@ -631,6 +659,7 @@ class LabEnvironmentController extends Controller
             'baseUrl' => $baseUrl,
             'urlMode' => $this->urlService->isSubdomainMode() ? 'subdomain' : 'path',
             'labUiTheme' => in_array($session->ui_theme, ['dark', 'light'], true) ? $session->ui_theme : 'light',
+            'labUiLocale' => $session->uiLocale(),
             'theme' => $theme,
             'isMystery' => $isMystery,
             'revealMystery' => $revealMystery,
@@ -745,7 +774,9 @@ class LabEnvironmentController extends Controller
         bool $isPost
     ): array {
         $cid = $lab->category_id;
-        $status = $triggers['autoSolved'] ? '200 OK (TRIGGERED / SOLVED)' : ($triggers['exfiltrated'] ? '200 OK (EXFILTRATED)' : '200 OK');
+        $status = $triggers['autoSolved']
+            ? __('academy.workbench.out_status_solved')
+            : ($triggers['exfiltrated'] ? __('academy.workbench.out_status_exfil') : '200 OK');
 
         $out = [
             'status' => $status,
@@ -756,7 +787,7 @@ class LabEnvironmentController extends Controller
                 'X-Lab-Archetype' => $archetype,
                 'X-Cache' => 'MISS',
                 'Cache-Control' => 'private, no-store',
-                'X-Frame-Options' => $cid === 'clickjacking' ? 'ALLOW-FROM * (Unprotected)' : 'SAMEORIGIN',
+                'X-Frame-Options' => $cid === 'clickjacking' ? __('academy.workbench.out_xfo_unprotected') : 'SAMEORIGIN',
             ],
         ];
 
@@ -765,7 +796,7 @@ class LabEnvironmentController extends Controller
             if ($origin !== '') {
                 $out['headers']['Access-Control-Allow-Origin'] = $origin;
                 $out['headers']['Access-Control-Allow-Credentials'] = 'true';
-                $out['headline'] = "Reflected Origin: {$origin}";
+                $out['headline'] = __('academy.workbench.out_cors_headline', ['origin' => $origin]);
                 $out['body'] = json_encode([
                     'username' => $session->logged_in_user ?: 'wiener',
                     'apikey' => $session->secret('wiener_api_key'),
@@ -775,17 +806,17 @@ class LabEnvironmentController extends Controller
         } elseif ($cid === 'web-cache-poisoning' || $cid === 'http-host-header-attacks') {
             $fwdHost = trim((string) ($params['probeHost'] ?? ($requestHeaders['X-Forwarded-Host'] ?? ($requestHeaders['X-Host'] ?? ''))));
             if ($fwdHost !== '') {
-                $out['headers']['X-Cache'] = 'HIT (poisoned key)';
+                $out['headers']['X-Cache'] = __('academy.workbench.out_cache_poisoned');
                 $out['headers']['X-Forwarded-Host'] = $fwdHost;
-                $out['headline'] = "Unkeyed Host Reflection: {$fwdHost}";
+                $out['headline'] = __('academy.workbench.out_host_headline', ['host' => $fwdHost]);
                 $out['body'] = "<script src=\"https://{$fwdHost}/resources/js/tracking.js\"></script>";
             }
         } elseif ($cid === 'web-cache-deception') {
             $probePath = trim((string) ($params['probePath'] ?? ''));
             if ($probePath !== '') {
                 $cached = (bool) preg_match('/\.(js|css|jpg|png|ico|svg|webp)$/i', $probePath);
-                $out['headers']['X-Cache'] = $cached ? 'HIT (Static extension rule matched)' : 'MISS';
-                $out['headline'] = "Origin Route Normalized: {$probePath}";
+                $out['headers']['X-Cache'] = $cached ? __('academy.workbench.out_cache_static_hit') : 'MISS';
+                $out['headline'] = __('academy.workbench.out_wcd_headline', ['path' => $probePath]);
                 $out['body'] = json_encode([
                     'cached_publicly' => $cached,
                     'account' => $session->logged_in_user ?: 'wiener',
@@ -796,7 +827,7 @@ class LabEnvironmentController extends Controller
             $gql = trim((string) ($params['graphqlQuery'] ?? ($params['query'] ?? '')));
             if ($gql !== '' || $subRoute === 'graphql') {
                 if (preg_match('/__schema|__type|introspection/i', $gql)) {
-                    $out['headline'] = 'GraphQL Introspection Enabled (/graphql/v1)';
+                    $out['headline'] = __('academy.workbench.out_gql_introspection');
                     $out['body'] = json_encode([
                         'data' => [
                             '__schema' => [
@@ -809,12 +840,12 @@ class LabEnvironmentController extends Controller
                         ],
                     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
                 } elseif (preg_match('/carlos/i', $gql)) {
-                    $out['headline'] = 'GraphQL User Node Exposed';
+                    $out['headline'] = __('academy.workbench.out_gql_user_exposed');
                     $out['body'] = json_encode([
                         'data' => ['getUser' => ['id' => 2, 'username' => 'carlos', 'password' => $session->secret('carlos_password')]],
                     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
                 } else {
-                    $out['headline'] = 'GraphQL Query Executed (/graphql/v1)';
+                    $out['headline'] = __('academy.workbench.out_gql_executed');
                     $out['body'] = json_encode([
                         'data' => ['getProduct' => ['id' => 7, 'name' => 'Giant Pillow Thing', 'price' => '$95.14']],
                     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
@@ -831,14 +862,14 @@ class LabEnvironmentController extends Controller
                         'endpoint' => $path,
                         'method' => $apiMethod,
                         'allowed_methods' => ['GET', 'PATCH', 'DELETE', 'OPTIONS'],
-                        'result' => $triggers['autoSolved'] ? 'Action executed cleanly' : 'Endpoint reachable',
+                        'result' => $triggers['autoSolved'] ? __('academy.workbench.out_api_executed') : __('academy.workbench.out_api_reachable'),
                     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
                 } else {
                     $out['body'] = json_encode([
                         'username' => 'wiener',
                         'email' => 'wiener@normal-user.net',
                         'apiKey' => $session->secret('wiener_api_key'),
-                        'docsHint' => 'Try OPTIONS /api or PATCH /api/user/wiener with hidden fields.',
+                        'docsHint' => __('academy.workbench.out_api_docs_hint'),
                     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
                 }
             }
@@ -851,46 +882,46 @@ class LabEnvironmentController extends Controller
                     str_contains($probePath, 'phpinfo') => "PHP Version 8.3-sandbox\nSECRET_KEY = {$session->secret('file_secret')}",
                     str_contains($probePath, 'backup') => "BackupArchive.java.bak\npostgres://postgres:{$session->secret('admin_password')}@127.0.0.1:5432/academy",
                     str_contains($probePath, 'robots') => "User-agent: *\nDisallow: /administrator-panel\nDisallow: /backup\nDisallow: /cgi-bin/phpinfo.php",
-                    default => "Diagnostic response for {$probePath} (HTTP 200 OK)",
+                    default => __('academy.workbench.out_info_diag', ['path' => $probePath]),
                 };
             }
         } elseif ($cid === 'insecure-deserialization') {
             $deser = trim((string) ($params['deserPayload'] ?? ''));
             if ($deser !== '') {
-                $out['headline'] = 'Serialized Object Deserializer Trace';
+                $out['headline'] = __('academy.workbench.out_deser_headline');
                 $out['body'] = $triggers['autoSolved']
-                    ? "unserialize() invoked magic gadget (__destruct / __wakeup)\nTarget action executed cleanly."
-                    : "Decoded object token preview:\n{$deser}";
+                    ? __('academy.workbench.out_deser_solved')
+                    : __('academy.workbench.out_deser_preview', ['payload' => $deser]);
             }
         } elseif ($cid === 'http-request-smuggling') {
             $smug = trim((string) ($params['probeBody'] ?? $rawBody));
             if ($smug !== '' && $isPost) {
-                $out['headline'] = 'Front-End / Back-End Desync Inspector';
+                $out['headline'] = __('academy.workbench.out_smug_headline');
                 $out['body'] = $triggers['autoSolved']
-                    ? "CL.TE / TE.CL buffer boundary desynchronized!\nSmuggled prefix processed by back-end queue."
-                    : "Forwarded HTTP frame (".strlen($smug).' bytes) — no desync boundary matched yet.';
+                    ? __('academy.workbench.out_smug_solved')
+                    : __('academy.workbench.out_smug_forwarded', ['bytes' => strlen($smug)]);
             }
         } elseif ($cid === 'prototype-pollution') {
             $proto = trim((string) ($params['protoPayload'] ?? $rawBody));
             if ($proto !== '') {
-                $out['headline'] = 'Prototype Merge Inspector';
+                $out['headline'] = __('academy.workbench.out_proto_headline');
                 $out['body'] = $triggers['autoSolved']
-                    ? "Object.prototype polluted! Gadget property propagated to sink / role check."
-                    : "Merged payload safely without polluting Object.prototype.";
+                    ? __('academy.workbench.out_proto_solved')
+                    : __('academy.workbench.out_proto_safe');
             }
         } elseif ($cid === 'dom-based-vulnerabilities') {
             $dom = trim((string) ($params['domPayload'] ?? ($params['search'] ?? '')));
             if ($dom !== '') {
-                $out['headline'] = 'DOM Source -> Sink Dataflow';
-                $out['body'] = "Source: location.search / postMessage\nSink: innerHTML / document.write\nTainted value: {$dom}";
+                $out['headline'] = __('academy.workbench.out_dom_headline');
+                $out['body'] = __('academy.workbench.out_dom_body', ['val' => $dom]);
             }
         } elseif ($cid === 'jwt') {
             $jwtIn = trim((string) ($params['jwtToken'] ?? ''));
             if ($jwtIn !== '') {
-                $out['headline'] = 'JWT Verification Engine';
+                $out['headline'] = __('academy.workbench.out_jwt_headline');
                 $out['body'] = $triggers['autoSolved']
-                    ? "Signature verification bypassed / forged administrator claim accepted!"
-                    : "Token parsed: signature valid only for standard role 'user'.";
+                    ? __('academy.workbench.out_jwt_solved')
+                    : __('academy.workbench.out_jwt_valid');
             }
         }
 

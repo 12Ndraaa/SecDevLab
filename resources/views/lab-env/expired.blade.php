@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{{ in_array($session->ui_theme, ['dark', 'light'], true) ? $session->ui_theme : 'light' }}">
+<html lang="{{ $labUiLocale ?? app()->getLocale() }}" data-theme="{{ in_array($session->ui_theme, ['dark', 'light'], true) ? $session->ui_theme : 'light' }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="/content/images/logos/favicon.ico" type="image/x-icon">
     <link href="/content/fonts/fonts.css?v={{ @filemtime(public_path('content/fonts/fonts.css')) ?: '1' }}" rel="stylesheet">
     <link href="/content/lab-workbench.css?v={{ @filemtime(public_path('content/lab-workbench.css')) ?: '2' }}" rel="stylesheet">
-    <title>Lab Session Expired | {{ config('app.name') ?: 'SecDevLab' }}</title>
+    <title>{{ __('academy.expired.page_title') }} | {{ config('app.name') ?: 'SecDevLab' }}</title>
 </head>
 <body>
 <header class="sdl-command-header">
@@ -21,7 +20,7 @@
                 </span>
                 <span>{{ config('app.name') ?: 'SecDevLab' }}</span>
             </a>
-            <span class="lw-pill lw-pill--danger">SESSION EXPIRED (410)</span>
+            <span class="lw-pill lw-pill--danger">{{ __('academy.expired.badge') }}</span>
         </div>
     </div>
 </header>
@@ -31,27 +30,26 @@
         <div class="lw-terminal" style="margin-bottom:18px">
             <div class="lw-terminal__bar">
                 <span class="lw-terminal__dots"><span></span><span></span><span></span></span>
-                <span>INSTANCE_LIFECYCLE // TTL_EXPIRED</span>
+                <span>{{ __('academy.expired.terminal_head') }}</span>
             </div>
-            <div class="lw-terminal__body">HTTP/1.1 410 Gone
-Instance-Token: {{ $session->instance_token }}
-Lab-ID:         {{ $lab->id }}
-Archetype:      {{ $archetype['short'] }}
-Expired-At:     {{ $session->expires_at?->toIso8601String() ?? 'N/A' }}
-
-This ephemeral lab instance reached its TTL and was decommissioned.
-Your SecDevLab account progress remains safely preserved.</div>
+            <div class="lw-terminal__body">{{ __('academy.expired.terminal_body', [
+    'token' => $session->instance_token,
+    'lab' => $lab->id,
+    'archetype' => $archetype['short'],
+    'expired_at' => $session->expires_at?->toIso8601String() ?? __('academy.common.na'),
+    'brand' => config('app.name') ?: 'SecDevLab',
+]) }}</div>
         </div>
 
         <h1 style="margin:0 0 8px;color:var(--lw-heading);font-size:1.35rem">{{ $lab->title }}</h1>
         <p class="lw-muted" style="margin:0 0 18px">
-            Relaunch from SecDevLab to allocate a fresh 32-hex capability token and randomized target secrets.
+            {{ __('academy.expired.relaunch_note', ['brand' => config('app.name') ?: 'SecDevLab']) }}
         </p>
 
         <div style="display:flex;flex-wrap:wrap;gap:10px">
-            <a class="lw-btn lw-btn--primary" href="/academy/labs/launch/{{ $lab->id }}">Launch Fresh Lab Instance</a>
-            <a class="lw-btn" href="{{ $lab->href }}">Back to Lab Description</a>
-            <a class="lw-btn" href="/web-security/all-labs">All Labs</a>
+            <a class="lw-btn lw-btn--primary" href="/academy/labs/launch/{{ $lab->id }}">{{ __('academy.expired.relaunch_btn') }}</a>
+            <a class="lw-btn" href="{{ $lab->href }}">{{ __('academy.expired.back_desc') }}</a>
+            <a class="lw-btn" href="/web-security/all-labs">{{ __('academy.expired.all_labs') }}</a>
         </div>
     </div>
 </main>

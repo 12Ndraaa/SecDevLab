@@ -12,7 +12,7 @@
 <div class="vla-section-head" style="margin-top:0">
     <div>
         <h1 style="margin-bottom:6px">{{ $category->title }}</h1>
-        <p class="vla-muted" style="margin:0">{{ $category->labs->count() }} {{ __('academy.nav.all_labs') }}</p>
+        <p class="vla-muted" style="margin:0">{{ __('academy.labs.category_labs_count', ['count' => $category->labs->count()]) }}</p>
     </div>
     <div class="vla-btn-group">
         <a href="/web-security/all-labs#{{ $category->id }}" class="vla-btn vla-btn--outline vla-btn--sm">{{ __('academy.nav.all_labs') }}</a>
@@ -21,7 +21,7 @@
 </div>
 
 <div class="vla-card" style="margin-bottom:24px">
-    <h2 style="margin-bottom:14px">{{ __('academy.nav.all_labs') }} — {{ $category->title }}</h2>
+    <h2 style="margin-bottom:14px">{{ __('academy.nav.all_labs') }}: {{ $category->title }}</h2>
     @forelse ($category->labs as $lab)
         @include('partials.widgets.lab-status-card', ['lab' => $lab, 'isSolved' => isset($solvedMap[strtolower($lab->id)])])
     @empty

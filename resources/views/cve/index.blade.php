@@ -9,8 +9,8 @@
         <p class="vla-muted" style="margin:0">{{ __('academy.cve.subtitle') }}</p>
     </div>
     <div class="vla-badge-row">
-        <span class="vla-badge vla-badge--accent vla-mono">{{ $totalPublished }} Published</span>
-        <span class="vla-badge vla-badge--orange vla-mono">{{ $hotCount }} Hot CVEs</span>
+        <span class="vla-badge vla-badge--accent vla-mono">{{ __('academy.cve.published_count', ['count' => $totalPublished]) }}</span>
+        <span class="vla-badge vla-badge--orange vla-mono">{{ __('academy.cve.hot_count', ['count' => $hotCount]) }}</span>
         @if (Auth::user()?->isOwner())
             <a href="/owner/cves" class="vla-btn vla-btn--primary vla-btn--sm">{{ __('academy.owner.nav_cves') }}</a>
         @endif

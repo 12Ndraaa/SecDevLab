@@ -26,7 +26,7 @@
 @section('content')
 <div class="vla-section-head" style="margin-top:0;margin-bottom:14px">
     <h1 class="heading-2" style="margin:0">{{ __('academy.labs.all_labs_title') }}</h1>
-    <span class="vla-mono-chip" id="stats-summary">{{ $visibleCount }} / {{ $totalLabs }} labs ({{ $solvedTotal }} solved)</span>
+    <span class="vla-mono-chip" id="stats-summary">{{ __('academy.labs.stats_summary', ['visible' => $visibleCount, 'total' => $totalLabs, 'solved' => $solvedTotal]) }}</span>
 </div>
 
 <div class="highlightedarea">
@@ -39,16 +39,16 @@
     </div>
 </div>
 
-<form class="vla-filter-card" method="GET" action="/web-security/all-labs" role="search" aria-label="Filter labs">
+<form class="vla-filter-card" method="GET" action="/web-security/all-labs" role="search" aria-label="{{ __('academy.labs.filter_aria') }}">
     <div class="vla-filter-row">
-        <input type="search" id="filter-search" name="search" value="{{ $search }}" aria-label="Search labs" placeholder="{{ __('academy.labs.search_placeholder') }}">
-        <select id="filter-difficulty" name="difficulty" aria-label="Filter by difficulty">
+        <input type="search" id="filter-search" name="search" value="{{ $search }}" aria-label="{{ __('academy.labs.search_aria') }}" placeholder="{{ __('academy.labs.search_placeholder') }}">
+        <select id="filter-difficulty" name="difficulty" aria-label="{{ __('academy.labs.difficulty_aria') }}">
             <option value="ALL" @selected($difficulty === 'ALL')>{{ __('academy.labs.all_levels') }} ({{ $totalLabs }})</option>
             <option value="APPRENTICE" @selected($difficulty === 'APPRENTICE')>Apprentice ({{ $difficultyTotals['APPRENTICE'] ?? 0 }})</option>
             <option value="PRACTITIONER" @selected($difficulty === 'PRACTITIONER')>Practitioner ({{ $difficultyTotals['PRACTITIONER'] ?? 0 }})</option>
             <option value="EXPERT" @selected($difficulty === 'EXPERT')>Expert ({{ $difficultyTotals['EXPERT'] ?? 0 }})</option>
         </select>
-        <select id="filter-status" name="status" aria-label="Filter by status">
+        <select id="filter-status" name="status" aria-label="{{ __('academy.labs.status_aria') }}">
             <option value="ALL" @selected($status === 'ALL')>{{ __('academy.labs.all_statuses') }}</option>
             <option value="UNSOLVED" @selected($status === 'UNSOLVED')>{{ __('academy.labs.not_solved') }}</option>
             <option value="SOLVED" @selected($status === 'SOLVED')>{{ __('academy.labs.solved') }}</option>

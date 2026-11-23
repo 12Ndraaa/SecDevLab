@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 
 class LabSession extends Model
 {
@@ -95,10 +96,16 @@ class LabSession extends Model
         ];
     }
 
-    public static function forUserAndLab(int $userId, string $labId, ?string $uiTheme = null): self
+    public static function forUserAndLab(int $userId, string $labId, ?string $uiTheme = null, ?string $uiLocale = null): self
     {
         $normalizedLabId = strtolower($labId);
         $theme = in_array($uiTheme, ['dark', 'light'], true) ? $uiTheme : 'light';
+        $resolvedLocale = in_array($uiLocale, ['en', 'id'], true)
+            ? $uiLocale
+            : (string) Cache::get("secdevlab_user_locale:{$userId}", '');
+        if (! in_array($resolvedLocale, ['en', 'id'], true)) {
+            $resolvedLocale = in_array(app()->getLocale(), ['en', 'id'], true) ? app()->getLocale() : 'en';
+        }
 
         $existing = self::where('user_id', $userId)
             ->where('lab_id', $normalizedLabId)
@@ -110,10 +117,15 @@ class LabSession extends Model
                 || empty($existing->session_secrets)
                 || $existing->isExpired()
             ) {
-                $existing->resetState($uiTheme, true);
-            } elseif ($uiTheme && in_array($uiTheme, ['dark', 'light'], true) && $existing->ui_theme !== $uiTheme) {
-                $existing->ui_theme = $uiTheme;
-                $existing->save();
+                $existing->resetState($uiTheme, true, $uiLocale);
+            } else {
+                if ($uiTheme && in_array($uiTheme, ['dark', 'light'], true) && $existing->ui_theme !== $uiTheme) {
+                    $existing->ui_theme = $uiTheme;
+                    $existing->save();
+                }
+                if ($uiLocale && in_array($uiLocale, ['en', 'id'], true) && $existing->uiLocale() !== $uiLocale) {
+                    $existing->setUiLocale($uiLocale, false);
+                }
             }
 
             return $existing;
@@ -122,7 +134,7 @@ class LabSession extends Model
         $token = self::generateInstanceToken();
         $secrets = self::generateSessionSecrets($token);
 
-        return self::create([
+        $created = self::create([
             'user_id' => $userId,
             'lab_id' => $normalizedLabId,
             'instance_token' => $token,
@@ -137,9 +149,55 @@ class LabSession extends Model
             'session_secrets' => $secrets,
             'chat_history' => [],
             'exploit_state' => null,
-            'workbench_state' => null,
+            'workbench_state' => $resolvedLocale !== 'en' ? ['_ui_locale' => $resolvedLocale] : null,
             'ui_theme' => $theme,
         ]);
+
+        if ($resolvedLocale !== 'en') {
+            Cache::forever("secdevlab_session_locale:{$created->id}", $resolvedLocale);
+        }
+
+        return $created;
+    }
+
+    public function uiLocale(?string $fallbackLocale = null): string
+    {
+        $wb = is_array($this->workbench_state) ? $this->workbench_state : [];
+        if (isset($wb['_ui_locale']) && in_array($wb['_ui_locale'], ['en', 'id'], true)) {
+            return (string) $wb['_ui_locale'];
+        }
+
+        $sessionCached = (string) Cache::get("secdevlab_session_locale:{$this->id}", '');
+        if (in_array($sessionCached, ['en', 'id'], true)) {
+            return $sessionCached;
+        }
+
+        if ($this->user_id) {
+            $userCached = (string) Cache::get("secdevlab_user_locale:{$this->user_id}", '');
+            if (in_array($userCached, ['en', 'id'], true)) {
+                return $userCached;
+            }
+        }
+
+        if ($fallbackLocale && in_array($fallbackLocale, ['en', 'id'], true)) {
+            return $fallbackLocale;
+        }
+
+        return in_array(app()->getLocale(), ['en', 'id'], true) ? app()->getLocale() : 'en';
+    }
+
+    public function setUiLocale(string $locale, bool $persistUser = true): void
+    {
+        $clean = in_array(strtolower($locale), ['en', 'id'], true) ? strtolower($locale) : 'en';
+        $wb = is_array($this->workbench_state) ? $this->workbench_state : [];
+        $wb['_ui_locale'] = $clean;
+        $this->workbench_state = $wb;
+        $this->save();
+
+        Cache::forever("secdevlab_session_locale:{$this->id}", $clean);
+        if ($persistUser && $this->user_id) {
+            Cache::forever("secdevlab_user_locale:{$this->user_id}", $clean);
+        }
     }
 
     public static function findByToken(string $token): ?self
@@ -177,11 +235,12 @@ class LabSession extends Model
         return max(0, (int) now()->diffInSeconds($this->expires_at, false));
     }
 
-    public function remainingLabel(): string
+    public function remainingLabel(?string $locale = null): string
     {
+        $lang = in_array($locale, ['en', 'id'], true) ? $locale : app()->getLocale();
         $secs = $this->remainingSeconds();
         if ($secs <= 0) {
-            return 'Expired';
+            return $lang === 'id' ? 'Kedaluwarsa' : 'Expired';
         }
 
         $mins = intdiv($secs, 60);
@@ -191,10 +250,14 @@ class LabSession extends Model
             $hrs = intdiv($mins, 60);
             $remMins = $mins % 60;
 
-            return sprintf('%dh %02dm', $hrs, $remMins);
+            return $lang === 'id'
+                ? sprintf('%dj %02dm', $hrs, $remMins)
+                : sprintf('%dh %02dm', $hrs, $remMins);
         }
 
-        return sprintf('%dm %02ds', $mins, $remSecs);
+        return $lang === 'id'
+            ? sprintf('%dm %02dd', $mins, $remSecs)
+            : sprintf('%dm %02ds', $mins, $remSecs);
     }
 
     public function renewTtl(?int $minutes = null): void
@@ -204,13 +267,16 @@ class LabSession extends Model
         $this->save();
     }
 
-    public function resetState(?string $uiTheme = null, bool $rotateToken = true): void
+    public function resetState(?string $uiTheme = null, bool $rotateToken = true, ?string $uiLocale = null): void
     {
         $token = $rotateToken || empty($this->instance_token)
             ? self::generateInstanceToken()
             : (string) $this->instance_token;
 
         $secrets = self::generateSessionSecrets($token);
+        $preservedLocale = in_array($uiLocale, ['en', 'id'], true)
+            ? $uiLocale
+            : $this->uiLocale();
 
         $this->fill([
             'instance_token' => $token,
@@ -224,12 +290,14 @@ class LabSession extends Model
             'session_secrets' => $secrets,
             'chat_history' => [],
             'exploit_state' => null,
-            'workbench_state' => null,
+            'workbench_state' => $preservedLocale !== 'en' ? ['_ui_locale' => $preservedLocale] : null,
             'ui_theme' => in_array($uiTheme, ['dark', 'light'], true)
                 ? $uiTheme
                 : ($this->ui_theme ?: 'light'),
         ]);
         $this->save();
+
+        Cache::forever("secdevlab_session_locale:{$this->id}", $preservedLocale);
 
         LabUploadedFile::where('user_id', $this->user_id)
             ->where('lab_id', $this->lab_id)

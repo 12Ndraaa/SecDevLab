@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LabSession;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class PreferenceController extends Controller
 {
@@ -15,8 +18,28 @@ class PreferenceController extends Controller
         }
 
         $request->session()->put('locale', $locale);
+        $request->session()->save();
 
-        return $this->safeBack($request);
+        if (Auth::check()) {
+            $userId = (int) Auth::id();
+            Cache::forget("secdevlab_pending_locale:{$userId}");
+            Cache::forever("secdevlab_user_locale:{$userId}", $locale);
+            LabSession::where('user_id', $userId)
+                ->get()
+                ->each(static fn (LabSession $s) => $s->setUiLocale($locale, false));
+        }
+
+        return $this->safeBack($request)->withCookie(cookie(
+            'secdevlab_locale',
+            $locale,
+            60 * 24 * 365,
+            '/',
+            null,
+            null,
+            true,
+            false,
+            'lax'
+        ));
     }
 
     public function toggleTheme(Request $request): RedirectResponse
@@ -25,13 +48,24 @@ class PreferenceController extends Controller
         if (in_array($requested, ['dark', 'light'], true)) {
             $next = $requested;
         } else {
-            $current = (string) $request->session()->get('ui_theme', 'light');
+            $current = (string) $request->session()->get('ui_theme', $request->cookie('secdevlab_theme', 'light'));
             $next = $current === 'dark' ? 'light' : 'dark';
         }
 
         $request->session()->put('ui_theme', $next);
+        $request->session()->save();
 
-        return $this->safeBack($request);
+        return $this->safeBack($request)->withCookie(cookie(
+            'secdevlab_theme',
+            $next,
+            60 * 24 * 365,
+            '/',
+            null,
+            null,
+            true,
+            false,
+            'lax'
+        ));
     }
 
     private function safeBack(Request $request): RedirectResponse

@@ -12,11 +12,11 @@
 
 <form method="GET" action="/owner/users" class="vla-filter-card">
     <div class="vla-filter-row">
-        <input type="search" name="search" value="{{ $search }}" placeholder="Search name or email...">
+        <input type="search" name="search" value="{{ $search }}" placeholder="{{ __('academy.owner.user_search_placeholder') }}">
         <select name="role">
-            <option value="ALL">All roles</option>
-            <option value="owner" @selected($role === 'owner')>Owner</option>
-            <option value="user" @selected($role === 'user')>User</option>
+            <option value="ALL">{{ __('academy.common.all_roles') }}</option>
+            <option value="owner" @selected($role === 'owner')>{{ __('academy.common.role_owner') }}</option>
+            <option value="user" @selected($role === 'user')>{{ __('academy.common.role_user') }}</option>
         </select>
         <button type="submit" class="vla-btn vla-btn--primary vla-btn--sm">{{ __('academy.labs.filter') }}</button>
     </div>
@@ -26,11 +26,11 @@
     <table class="vla-table">
         <thead>
             <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Solved Labs</th>
+                <th>{{ __('academy.owner.col_id') }}</th>
+                <th>{{ __('academy.owner.col_name') }}</th>
+                <th>{{ __('academy.owner.col_email') }}</th>
+                <th>{{ __('academy.owner.col_role') }}</th>
+                <th>{{ __('academy.owner.col_solved_labs') }}</th>
                 <th>{{ __('academy.owner.actions') }}</th>
             </tr>
         </thead>
@@ -40,7 +40,7 @@
                     <td>#{{ $u->id }}</td>
                     <td><strong>{{ $u->name }}</strong></td>
                     <td>{{ $u->email }}</td>
-                    <td><span class="vla-role-pill {{ $u->isOwner() ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper($u->role) }}</span></td>
+                    <td><span class="vla-role-pill {{ $u->isOwner() ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper($u->isOwner() ? __('academy.common.role_owner') : __('academy.common.role_user')) }}</span></td>
                     <td><strong>{{ $u->solved_count }}</strong></td>
                     <td>
                         <div class="vla-btn-group">

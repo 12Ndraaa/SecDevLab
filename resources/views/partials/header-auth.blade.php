@@ -4,7 +4,7 @@
             <summary class="vla-account-pill" title="{{ Auth::user()->name }}">
                 <span class="vla-account-pill__avatar" aria-hidden="true">{{ strtoupper(substr((string) Auth::user()->name, 0, 1)) }}</span>
                 <span class="vla-account-pill__name">{{ Auth::user()->name }}</span>
-                <span class="vla-role-pill {{ Auth::user()->isOwner() ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper(Auth::user()->role) }}</span>
+                <span class="vla-role-pill {{ Auth::user()->isOwner() ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper(Auth::user()->isOwner() ? __('academy.common.role_owner') : __('academy.common.role_user')) }}</span>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
             <div class="vla-account-dropdown__menu">

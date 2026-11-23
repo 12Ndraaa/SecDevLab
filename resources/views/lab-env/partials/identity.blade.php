@@ -7,40 +7,40 @@
             </svg>
         </span>
         <div>
-            <span class="lw-pill lw-pill--info">IDENTITY &amp; ACCESS // {{ strtoupper($lab->category_id) }}</span>
+            <span class="lw-pill lw-pill--info">{{ __('academy.archetypes.identity.short') }} // {{ strtoupper($lab->category_id) }}</span>
             <h2 style="margin:4px 0 0;color:var(--lw-heading);font-size:1.18rem">
                 @if ($activeView === 'jwt-workbench')
-                    JWT Token &amp; Claim Verification Workbench
+                    {{ __('academy.workbench.iam_title_jwt') }}
                 @elseif ($activeView === 'oauth-workbench')
-                    OAuth 2.0 Client &amp; Redirect Workbench
+                    {{ __('academy.workbench.iam_title_oauth') }}
                 @elseif ($lab->category_id === 'cross-site-request-forgery-csrf')
-                    Account Profile &amp; CSRF Email Target
+                    {{ __('academy.workbench.iam_title_csrf') }}
                 @else
-                    SSO / Identity &amp; Access Control Portal
+                    {{ __('academy.workbench.iam_title_default') }}
                 @endif
             </h2>
         </div>
     </div>
-    <span class="lw-token-chip">Principal: {{ $currentUser === 'administrator' ? 'ADMIN' : ($currentUser !== '' ? strtoupper($currentUser) : 'ANONYMOUS') }}</span>
+    <span class="lw-token-chip">{{ __('academy.workbench.principal_label') }} {{ $currentUser === 'administrator' ? 'ADMIN' : ($currentUser !== '' ? strtoupper($currentUser) : __('academy.workbench.anonymous')) }}</span>
 </div>
 
 <div class="lw-identity-grid">
     <div class="lw-card">
         @if ($currentUser !== '')
             <div id="account-details" style="padding:14px;border-radius:10px;background:var(--lw-surface-2);border:1px solid var(--lw-border);margin-bottom:16px">
-                <p style="margin:0 0 6px">Your username is: <strong>{{ $currentUser }}</strong></p>
-                <p style="margin:0">Your API Key is: <code>{{ $wienerApiKey }}</code></p>
+                <p style="margin:0 0 6px">{{ __('academy.workbench.username_is') }} <strong>{{ $currentUser }}</strong></p>
+                <p style="margin:0">{{ __('academy.workbench.api_key_is') }} <code>{{ $wienerApiKey }}</code></p>
             </div>
         @else
             <form id="login-form" method="POST" action="{{ $basePath }}/login" class="lw-form">
-                <h3 style="margin-bottom:4px">SSO / Account Sign In</h3>
-                <p class="lw-muted" style="margin-top:0">Standard test credentials: <code>wiener:peter</code></p>
-                <label for="login-user">Username</label>
+                <h3 style="margin-bottom:4px">{{ __('academy.workbench.sso_signin') }}</h3>
+                <p class="lw-muted" style="margin-top:0">{!! __('academy.workbench.standard_creds_html') !!}</p>
+                <label for="login-user">{{ __('academy.workbench.username_label') }}</label>
                 <input type="text" name="username" id="login-user" value="{{ $userParam }}" required>
-                <label for="login-pass">Password</label>
+                <label for="login-pass">{{ __('academy.workbench.password_label') }}</label>
                 <input type="password" name="password" id="login-pass">
                 <div style="margin-top:12px">
-                    <button type="submit" class="lw-btn lw-btn--primary">Log in</button>
+                    <button type="submit" class="lw-btn lw-btn--primary">{{ __('academy.workbench.login_btn') }}</button>
                 </div>
             </form>
         @endif
@@ -48,12 +48,12 @@
         @if (!empty($profile['hasChangeEmail']) || $currentUser !== '')
             <hr style="border:none;border-top:1px solid var(--lw-border);margin:18px 0">
             <form class="lw-form" method="POST" action="{{ $basePath }}/my-account/change-email">
-                <h4 style="margin:0 0 4px">Update Account Email</h4>
+                <h4 style="margin:0 0 4px">{{ __('academy.workbench.update_email_title') }}</h4>
                 <input type="hidden" name="action" value="change-email">
-                <label for="acct-email">Email</label>
+                <label for="acct-email">{{ __('academy.workbench.email_label') }}</label>
                 <input type="email" name="email" id="acct-email" value="wiener@normal-user.net" required>
                 <div style="margin-top:10px">
-                    <button type="submit" class="lw-btn lw-btn--primary">Update email</button>
+                    <button type="submit" class="lw-btn lw-btn--primary">{{ __('academy.workbench.update_email_btn') }}</button>
                 </div>
             </form>
         @endif
@@ -61,11 +61,11 @@
         @if ($activeView === 'jwt-workbench' || $lab->category_id === 'jwt')
             <hr style="border:none;border-top:1px solid var(--lw-border);margin:18px 0">
             <form method="POST" action="{{ $basePath }}/jwt" class="lw-form">
-                <h4 style="margin:0 0 4px">Submit / Replay Forged JWT</h4>
-                <label for="jwt-token-input">Bearer / Session JWT:</label>
+                <h4 style="margin:0 0 4px">{{ __('academy.workbench.forged_jwt_title') }}</h4>
+                <label for="jwt-token-input">{{ __('academy.workbench.bearer_jwt_label') }}</label>
                 <textarea id="jwt-token-input" name="jwtToken" rows="3" class="lw-mono" placeholder="eyJ...">{{ $params['jwtToken'] ?? $sessionJwt }}</textarea>
                 <div style="margin-top:10px">
-                    <button type="submit" class="lw-btn lw-btn--primary">Verify JWT Against Endpoint</button>
+                    <button type="submit" class="lw-btn lw-btn--primary">{{ __('academy.workbench.verify_jwt_btn') }}</button>
                 </div>
             </form>
         @endif
@@ -73,7 +73,7 @@
         @if ($activeView === 'oauth-workbench' || $lab->category_id === 'oauth-authentication')
             <hr style="border:none;border-top:1px solid var(--lw-border);margin:18px 0">
             <form method="GET" action="{{ $basePath }}/oauth" class="lw-form">
-                <h4 style="margin:0 0 4px">OAuth 2.0 Authorization Request Simulator</h4>
+                <h4 style="margin:0 0 4px">{{ __('academy.workbench.oauth_sim_title') }}</h4>
                 <label for="oauth-client">client_id:</label>
                 <input type="text" id="oauth-client" name="client_id" value="{{ $params['client_id'] ?? 'secdevlab_oauth_client' }}">
                 <label for="oauth-redirect">redirect_uri:</label>
@@ -84,7 +84,7 @@
                     <option value="token" @selected(($params['response_type'] ?? '') === 'token')>token</option>
                 </select>
                 <div style="margin-top:10px">
-                    <button type="submit" class="lw-btn lw-btn--primary">Send OAuth Authorization Request</button>
+                    <button type="submit" class="lw-btn lw-btn--primary">{{ __('academy.workbench.send_oauth_btn') }}</button>
                 </div>
             </form>
         @endif
@@ -92,15 +92,15 @@
 
     <div style="display:flex;flex-direction:column;gap:16px">
         <div class="lw-card">
-            <h3 style="margin-bottom:10px">Identity Security Posture</h3>
-            <div class="lw-receipt-row"><span>Session Principal</span><strong class="lw-mono">{{ $currentUser !== '' ? $currentUser : 'unauthenticated' }}</strong></div>
-            <div class="lw-receipt-row"><span>Admin Boundary</span><span class="lw-pill {{ ($validLoginTriggered || str_contains($cookieHeader, 'Admin=true')) ? 'lw-pill--emerald' : 'lw-pill--warning' }}">{{ ($validLoginTriggered || str_contains($cookieHeader, 'Admin=true')) ? 'UNLOCKED' : 'RESTRICTED' }}</span></div>
-            <div class="lw-receipt-row"><span>Anti-CSRF Token</span><code class="lw-mono" style="font-size:0.74rem">{{ substr((string) $csrfToken, 0, 14) }}&hellip;</code></div>
+            <h3 style="margin-bottom:10px">{{ __('academy.workbench.posture_title') }}</h3>
+            <div class="lw-receipt-row"><span>{{ __('academy.workbench.session_principal') }}</span><strong class="lw-mono">{{ $currentUser !== '' ? $currentUser : __('academy.workbench.unauthenticated') }}</strong></div>
+            <div class="lw-receipt-row"><span>{{ __('academy.workbench.admin_boundary') }}</span><span class="lw-pill {{ ($validLoginTriggered || str_contains($cookieHeader, 'Admin=true')) ? 'lw-pill--emerald' : 'lw-pill--warning' }}">{{ ($validLoginTriggered || str_contains($cookieHeader, 'Admin=true')) ? __('academy.workbench.unlocked') : __('academy.workbench.restricted') }}</span></div>
+            <div class="lw-receipt-row"><span>{{ __('academy.workbench.anti_csrf_token') }}</span><code class="lw-mono" style="font-size:0.74rem">{{ substr((string) $csrfToken, 0, 14) }}&hellip;</code></div>
 
             @if ($lab->category_id === 'jwt')
                 @php $jwtParts = explode('.', (string) $sessionJwt); @endphp
                 <div style="margin-top:14px">
-                    <div class="lw-muted" style="font-size:0.78rem;margin-bottom:6px">Issued Session JWT (Header . Payload . Signature)</div>
+                    <div class="lw-muted" style="font-size:0.78rem;margin-bottom:6px">{{ __('academy.workbench.issued_jwt_label') }}</div>
                     <div class="lw-jwt-segments">
                         <span class="lw-jwt-part--hdr">{{ $jwtParts[0] ?? '' }}</span>.<span class="lw-jwt-part--pld">{{ $jwtParts[1] ?? '' }}</span>.<span class="lw-jwt-part--sig">{{ $jwtParts[2] ?? '' }}</span>
                     </div>

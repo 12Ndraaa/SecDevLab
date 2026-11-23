@@ -68,7 +68,7 @@ class UserManagementController extends Controller
         $user->role = $data['role'];
         $user->save();
 
-        return redirect('/owner/users')->with('status', "User '{$user->name}' ({$user->role}) created.");
+        return redirect('/owner/users')->with('status', __('academy.owner.flash_user_created', ['name' => $user->name, 'role' => $user->role]));
     }
 
     public function edit(User $user): View
@@ -94,7 +94,7 @@ class UserManagementController extends Controller
         ]);
 
         if ($user->id === Auth::id() && $data['role'] !== User::ROLE_OWNER) {
-            return back()->withErrors(['role' => 'You cannot demote your own active owner account.']);
+            return back()->withErrors(['role' => __('academy.owner.flash_user_demote_err')]);
         }
 
         $user->name = trim($data['name']);
@@ -105,19 +105,19 @@ class UserManagementController extends Controller
         $user->role = $data['role'];
         $user->save();
 
-        return redirect('/owner/users')->with('status', "User '{$user->name}' updated.");
+        return redirect('/owner/users')->with('status', __('academy.owner.flash_user_updated', ['name' => $user->name]));
     }
 
     public function destroy(User $user): RedirectResponse
     {
         if ($user->id === Auth::id()) {
-            return redirect('/owner/users')->with('error', 'Cannot delete your own active owner account.');
+            return redirect('/owner/users')->with('error', __('academy.owner.flash_user_delete_err'));
         }
 
         $name = $user->name;
         $user->delete();
 
-        return redirect('/owner/users')->with('status', "User '{$name}' deleted.");
+        return redirect('/owner/users')->with('status', __('academy.owner.flash_user_deleted', ['name' => $name]));
     }
 
     public function resetProgress(User $user): RedirectResponse
@@ -126,6 +126,6 @@ class UserManagementController extends Controller
         LabUploadedFile::where('user_id', $user->id)->delete();
 
         return redirect()->back(302, [], '/owner/users')
-            ->with('status', "Progress reset for {$user->name} ({$deletedSessions} lab sessions cleared).");
+            ->with('status', __('academy.owner.flash_progress_reset', ['name' => $user->name, 'count' => $deletedSessions]));
     }
 }

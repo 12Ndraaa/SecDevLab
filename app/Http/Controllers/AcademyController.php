@@ -252,11 +252,11 @@ class AcademyController extends Controller
         $completionPct = (int) round(($summary['total_solved'] / $totalLabs) * 100);
 
         $tier = match (true) {
-            $summary['expert'] >= 10 || $summary['total_solved'] >= 150 => 'Offensive Security Master',
-            $summary['practitioner'] >= 20 || $summary['total_solved'] >= 50 => 'Security Practitioner',
-            $summary['total_solved'] >= 10 => 'Web Security Challenger',
-            $summary['total_solved'] >= 1 => 'Cyber Apprentice',
-            default => 'Enrolled Researcher',
+            $summary['expert'] >= 10 || $summary['total_solved'] >= 150 => __('academy.common.tier_master'),
+            $summary['practitioner'] >= 20 || $summary['total_solved'] >= 50 => __('academy.common.tier_practitioner'),
+            $summary['total_solved'] >= 10 => __('academy.common.tier_challenger'),
+            $summary['total_solved'] >= 1 => __('academy.common.tier_apprentice'),
+            default => __('academy.common.tier_enrolled'),
         };
 
         $verificationCode = 'VLA-'.str_pad((string) $user->id, 4, '0', STR_PAD_LEFT).'-'.strtoupper(substr(hash('sha256', $user->id.'|'.$user->email.'|'.$summary['total_solved']), 0, 10));
@@ -318,7 +318,8 @@ class AcademyController extends Controller
         /** @var int $userId */
         $userId = (int) Auth::id();
         $theme = (string) $request->session()->get('ui_theme', 'light');
-        $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
+        $locale = app()->getLocale();
+        $session = LabSession::forUserAndLab($userId, $lab->id, $theme, $locale);
 
         $target = $urlService->launchRedirectTarget($session, ['mystery' => 1], $request);
 
@@ -335,7 +336,8 @@ class AcademyController extends Controller
         /** @var int $userId */
         $userId = (int) Auth::id();
         $theme = (string) $request->session()->get('ui_theme', 'light');
-        $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
+        $locale = app()->getLocale();
+        $session = LabSession::forUserAndLab($userId, $lab->id, $theme, $locale);
 
         $target = $urlService->launchRedirectTarget($session, [], $request);
 
@@ -353,7 +355,7 @@ class AcademyController extends Controller
             abort(404);
         }
         if ((int) $session->user_id !== (int) Auth::id()) {
-            abort(403, 'You do not own this lab instance.');
+            abort(403, __('academy.labs.forbidden_instance'));
         }
 
         return view('lab-env.control', [
@@ -373,15 +375,16 @@ class AcademyController extends Controller
             abort(404);
         }
         if ((int) $session->user_id !== (int) Auth::id()) {
-            abort(403, 'You do not own this lab instance.');
+            abort(403, __('academy.labs.forbidden_instance'));
         }
 
         $theme = (string) $request->session()->get('ui_theme', 'light');
-        $session->resetState($theme, true);
+        $locale = app()->getLocale();
+        $session->resetState($theme, true, $locale);
 
         if ($request->input('return_to') === 'detail') {
             return redirect($session->lab->href)
-                ->with('status', 'Lab instance reset with a fresh 32-hex capability token and randomized secrets.');
+                ->with('status', __('academy.labs.reset_flash'));
         }
 
         $target = $urlService->launchRedirectTarget($session, [], $request);
@@ -396,14 +399,14 @@ class AcademyController extends Controller
             abort(404);
         }
         if ((int) $session->user_id !== (int) Auth::id()) {
-            abort(403, 'You do not own this lab instance.');
+            abort(403, __('academy.labs.forbidden_instance'));
         }
 
         $session->renewTtl();
 
         if ($request->input('return_to') === 'detail') {
             return redirect($session->lab->href)
-                ->with('status', 'Lab session TTL renewed (+'.LabSession::ttlMinutes().' minutes).');
+                ->with('status', __('academy.labs.renew_flash', ['minutes' => LabSession::ttlMinutes()]));
         }
 
         $target = $urlService->launchRedirectTarget($session, [], $request);
@@ -421,12 +424,13 @@ class AcademyController extends Controller
         /** @var int $userId */
         $userId = (int) Auth::id();
         $theme = (string) $request->session()->get('ui_theme', 'light');
-        $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
-        $session->resetState($theme, true);
+        $locale = app()->getLocale();
+        $session = LabSession::forUserAndLab($userId, $lab->id, $theme, $locale);
+        $session->resetState($theme, true, $locale);
 
         if ($request->input('return_to') === 'detail') {
             return redirect($lab->href)
-                ->with('status', 'Lab instance reset with a fresh 32-hex capability token and randomized secrets.');
+                ->with('status', __('academy.labs.reset_flash'));
         }
 
         $target = $urlService->launchRedirectTarget($session, [], $request);
@@ -444,12 +448,13 @@ class AcademyController extends Controller
         /** @var int $userId */
         $userId = (int) Auth::id();
         $theme = (string) $request->session()->get('ui_theme', 'light');
-        $session = LabSession::forUserAndLab($userId, $lab->id, $theme);
+        $locale = app()->getLocale();
+        $session = LabSession::forUserAndLab($userId, $lab->id, $theme, $locale);
         $session->renewTtl();
 
         if ($request->input('return_to') === 'detail') {
             return redirect($lab->href)
-                ->with('status', 'Lab session TTL renewed (+'.LabSession::ttlMinutes().' minutes).');
+                ->with('status', __('academy.labs.renew_flash', ['minutes' => LabSession::ttlMinutes()]));
         }
 
         $target = $urlService->launchRedirectTarget($session, [], $request);
@@ -561,17 +566,27 @@ class AcademyController extends Controller
 
         $hintSections = [];
         $otherSections = [];
+        $isIdLocale = app()->getLocale() === 'id';
         foreach (is_array($lab->sections) ? $lab->sections : [] as $sec) {
             $title = (string) ($sec['title'] ?? '');
             $bodyHtml = $this->normalizeSectionBody((string) ($sec['bodyHtml'] ?? ''));
+            $displayTitle = $title;
+            if ($isIdLocale) {
+                $displayTitle = match (true) {
+                    preg_match('/^hint$/i', trim($title)) === 1 => 'Petunjuk',
+                    preg_match('/^solution$/i', trim($title)) === 1 => 'Solusi',
+                    preg_match('/community/i', $title) === 1 => 'Solusi Komunitas',
+                    default => $title,
+                };
+            }
             if (preg_match('/hint/i', $title)) {
                 $hintSections[] = [
-                    'title' => $title,
+                    'title' => $displayTitle,
                     'normalizedBodyHtml' => $bodyHtml,
                 ];
             } else {
                 $otherSections[] = [
-                    'title' => $title,
+                    'title' => $displayTitle,
                     'iconClass' => preg_match('/community/i', $title) ? 'icon-bulbs' : 'icon-bulb',
                     'normalizedBodyHtml' => $bodyHtml,
                 ];
@@ -580,10 +595,17 @@ class AcademyController extends Controller
 
         $topicView = 'partials.topic-navs.'.$category->id;
         $topicAsideHtml = view()->exists($topicView) ? view($topicView)->render() : '';
+        if ($topicAsideHtml !== '' && app()->getLocale() === 'id') {
+            $topicAsideHtml = str_replace(
+                'Back to all topics',
+                e(__('academy.labs.back_to_topics')),
+                $topicAsideHtml
+            );
+        }
 
         $pathSegments = array_values(array_filter(explode('/', $lab->href)));
         $breadcrumbs = [
-            ['href' => '/web-security', 'name' => 'Web Security Academy'],
+            ['href' => '/web-security', 'name' => __('academy.labs.breadcrumb_academy')],
             ['href' => $category->topic_route, 'name' => $category->title],
         ];
         if (count($pathSegments) >= 4) {
@@ -595,7 +617,7 @@ class AcademyController extends Controller
                 'name' => implode(' ', $words),
             ];
         }
-        $breadcrumbs[] = ['href' => $lab->href, 'name' => 'Lab'];
+        $breadcrumbs[] = ['href' => $lab->href, 'name' => __('academy.labs.breadcrumb_lab')];
 
         $relatedCves = CveArticle::published()
             ->where(function ($q) use ($lab, $category) {

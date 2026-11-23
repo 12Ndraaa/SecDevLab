@@ -69,7 +69,7 @@ class CveManagementController extends Controller
 
         CveArticle::create($data);
 
-        return redirect('/owner/cves')->with('status', "CVE {$data['cve_id']} created.");
+        return redirect('/owner/cves')->with('status', __('academy.owner.flash_cve_created', ['id' => $data['cve_id']]));
     }
 
     public function edit(CveArticle $cve): View
@@ -92,7 +92,7 @@ class CveManagementController extends Controller
 
         $cve->update($data);
 
-        return redirect('/owner/cves')->with('status', "CVE {$cve->cve_id} updated.");
+        return redirect('/owner/cves')->with('status', __('academy.owner.flash_cve_updated', ['id' => $cve->cve_id]));
     }
 
     public function destroy(CveArticle $cve): RedirectResponse
@@ -100,7 +100,7 @@ class CveManagementController extends Controller
         $cveId = $cve->cve_id;
         $cve->delete();
 
-        return redirect('/owner/cves')->with('status', "CVE {$cveId} deleted.");
+        return redirect('/owner/cves')->with('status', __('academy.owner.flash_cve_deleted', ['id' => $cveId]));
     }
 
     public function toggleStatus(CveArticle $cve): RedirectResponse
@@ -112,7 +112,7 @@ class CveManagementController extends Controller
         }
         $cve->save();
 
-        return redirect()->back(302, [], '/owner/cves')->with('status', "CVE {$cve->cve_id} status changed to {$next}.");
+        return redirect()->back(302, [], '/owner/cves')->with('status', __('academy.owner.flash_cve_status', ['id' => $cve->cve_id, 'status' => $next === 'published' ? __('academy.common.published') : __('academy.common.draft')]));
     }
 
     public function importTrickest(Request $request, TrickestCveImporter $importer): RedirectResponse
@@ -141,7 +141,7 @@ class CveManagementController extends Controller
             @set_time_limit(0);
             $cloneRes = $importer->sparseCloneOrUpdate($years, $targetDir);
             if (! $cloneRes['ok']) {
-                return redirect('/owner/cves')->with('error', 'Sparse clone failed: '.$cloneRes['message']);
+                return redirect('/owner/cves')->with('error', __('academy.owner.flash_clone_failed', ['msg' => $cloneRes['message']]));
             }
         }
 

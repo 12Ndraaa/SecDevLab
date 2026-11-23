@@ -1,16 +1,12 @@
 @extends('layouts.academy')
 
-@section('title', (config('app.name') ?: 'SecDevLab').' — Cyber Security Academy & CVE Practice Lab')
+@section('title', (config('app.name') ?: 'SecDevLab').' - '.__('academy.home.meta_title'))
 
 @section('content')
 <section class="vla-hero">
     <div class="vla-hero-grid">
         <div>
-            <div class="vla-badge-row" style="margin-bottom:10px">
-                <span class="vla-badge vla-badge--accent">{{ __('academy.home.badge') }}</span>
-                <span class="vla-mono-chip">ZERO-JS SSR // 8 ARCHETYPES</span>
-            </div>
-            <h1>{{ __('academy.home.hero_title') }}</h1>
+            <h1 style="margin-top:0">{{ __('academy.home.hero_title') }}</h1>
             <p>{{ __('academy.home.hero_sub') }}</p>
             <div class="vla-btn-group">
                 <a href="/web-security/all-labs" class="vla-btn vla-btn--primary">
@@ -29,18 +25,18 @@
             </div>
         </div>
 
-        <div class="vla-terminal-card" aria-label="Platform runtime specification">
+        <div class="vla-terminal-card" aria-label="{{ __('academy.home.spec_label') }}">
             <div class="vla-terminal-card__bar">
                 <span class="vla-terminal-dots"><span></span><span></span><span></span></span>
-                <span>SECDEVLAB // RUNTIME SPEC</span>
+                <span>{{ __('academy.home.spec_header') }}</span>
             </div>
             <div class="vla-terminal-card__body">
-                <div><span class="vla-term-prompt">$</span> <span class="vla-term-cmd">target.launch</span> --isolation=per-session</div>
-                <div class="vla-term-ok">+ Capability URL : /lab/&lt;32-hex-token&gt;</div>
-                <div>+ Cookie Scope   : Path=/lab/&lt;token&gt; SameSite=Lax</div>
-                <div>+ CSP Sandbox    : script-src 'none'; object-src 'none'</div>
-                <div>+ Lab Archetypes : 8 distinct interactive targets</div>
-                <div>+ Catalog Ready  : {{ $labsCount }} labs across {{ $categoriesCount }} topics</div>
+                <div><span class="vla-term-prompt">$</span> <span class="vla-term-cmd">{{ __('academy.home.spec_cmd') }}</span></div>
+                <div class="vla-term-ok">+ {{ __('academy.home.spec_capability') }}</div>
+                <div>+ {{ __('academy.home.spec_cookie') }}</div>
+                <div>+ {{ __('academy.home.spec_csp') }}</div>
+                <div>+ {{ __('academy.home.spec_archetypes') }}</div>
+                <div>+ {{ __('academy.home.spec_catalog', ['labs' => $labsCount, 'categories' => $categoriesCount]) }}</div>
             </div>
         </div>
     </div>
@@ -73,8 +69,8 @@
     @foreach ($featuredCategories as $cat)
         <div class="vla-card vla-card--compact vla-card-hover">
             <div class="vla-badge-row" style="justify-content:space-between;margin-bottom:10px">
-                <span class="vla-badge vla-badge--accent">{{ $cat->labs_count }} Labs</span>
-                <a href="/web-security/all-labs#{{ $cat->id }}" class="vla-muted-sm">Catalog &rarr;</a>
+                <span class="vla-badge vla-badge--accent">{{ $cat->labs_count }} {{ __('academy.common.labs') }}</span>
+                <a href="/web-security/all-labs#{{ $cat->id }}" class="vla-muted-sm">{{ __('academy.common.catalog') }} &rarr;</a>
             </div>
             <h3 style="margin-bottom:12px;font-size:1.05rem"><a href="{{ $cat->topic_route }}">{{ $cat->title }}</a></h3>
             <div class="vla-btn-group">
@@ -161,7 +157,7 @@
                     <td class="vla-mono"><strong>#{{ $leader['rank'] }}</strong></td>
                     <td><strong>{{ $leader['name'] }}</strong></td>
                     <td class="vla-mono">{{ $leader['solved_total'] }} / {{ $labsCount }}</td>
-                    <td><span class="vla-badge vla-badge--accent vla-mono">{{ $leader['points'] }} pts</span></td>
+                    <td><span class="vla-badge vla-badge--accent vla-mono">{{ $leader['points'] }} {{ __('academy.common.pts') }}</span></td>
                 </tr>
             @empty
                 <tr><td colspan="4" class="vla-muted">{{ __('academy.leaderboard.empty') }}</td></tr>

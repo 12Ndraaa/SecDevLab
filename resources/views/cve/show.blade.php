@@ -1,6 +1,6 @@
 @extends('layouts.academy')
 
-@section('title', $article->cve_id.' — '.$article->title.' | '.config('app.name'))
+@section('title', $article->cve_id.' - '.$article->title.' | '.config('app.name'))
 
 @section('content')
 <ul class="breadcrumb-list" style="margin-bottom:14px">
@@ -73,7 +73,7 @@
                     <span class="vla-terminal-dots"><span></span><span></span><span></span></span>
                     <span>PoC // {{ $article->cve_id }}</span>
                 </div>
-                <pre class="vla-code-block" style="margin:0;border:none;border-radius:0">{{ $article->poc_content ?: 'No PoC recorded.' }}</pre>
+                <pre class="vla-code-block" style="margin:0;border:none;border-radius:0">{{ $article->poc_content ?: __('academy.cve.no_poc') }}</pre>
             </div>
         </div>
 

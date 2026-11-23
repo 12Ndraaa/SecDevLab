@@ -48,7 +48,7 @@
                             <a href="{{ $sess->lab->href }}"><strong>{{ $sess->lab->title }}</strong></a>
                             <div class="vla-badge-row" style="margin-top:4px">
                                 <span class="{{ $sess->lab->difficulty_class }}">{{ $sess->lab->difficulty }}</span>
-                                <span class="vla-muted-sm">{{ $sess->solved_at?->format('d M Y H:i') }}</span>
+                                <span class="vla-muted-sm">{{ $sess->solved_at?->translatedFormat('d M Y H:i') }}</span>
                             </div>
                         </li>
                     @endif

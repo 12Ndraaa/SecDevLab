@@ -1,10 +1,10 @@
 @extends('layouts.academy')
 
-@section('title', 'All learning materials - detailed | Web Security Academy | '.config('app.name'))
+@php $isId = ($uiLocale ?? app()->getLocale()) === 'id'; @endphp
+@section('title', ($isId ? 'Semua materi belajar - detail' : 'All learning materials - detailed').' | '.($isId ? 'Akademi Keamanan Web' : 'Web Security Academy').' | '.config('app.name'))
 @section('legacy_css', '/content/pswebsecacademy.css')
 
 @section('academy_body')
-@verbatim
 <div class="wrapper-large">
     <div class="container-academy">
 
@@ -20,9 +20,9 @@
 
 
 
-<ul class="breadcrumb-list" itemscope itemtype="http://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a itemprop="item" href="/web-security"><span itemprop="name">Web Security Academy</span></a><meta itemprop="position" content="1" /></li><li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a itemprop="item" href="/web-security/all-materials"><span itemprop="name">All materials</span></a><meta itemprop="position" content="2" /></li><li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a itemprop="item" href="/web-security/all-materials/detailed"><span itemprop="name">Detailed</span></a><meta itemprop="position" content="3" /></li></ul>    <div class="section theme-white">
+<ul class="breadcrumb-list" itemscope itemtype="http://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a itemprop="item" href="/web-security"><span itemprop="name">{{ $isId ? 'Akademi Keamanan Web' : 'Web Security Academy' }}</span></a><meta itemprop="position" content="1" /></li><li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a itemprop="item" href="/web-security/all-materials"><span itemprop="name">{{ $isId ? 'Semua materi' : 'All materials' }}</span></a><meta itemprop="position" content="2" /></li><li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a itemprop="item" href="/web-security/all-materials/detailed"><span itemprop="name">{{ $isId ? 'Detail' : 'Detailed' }}</span></a><meta itemprop="position" content="3" /></li></ul>    <div class="section theme-white">
 
-        <h1 class="heading-2">All learning materials - detailed</h1><table class="is-nonresponsive-table">
+        <h1 class="heading-2">{{ $isId ? 'Semua materi belajar - detail' : 'All learning materials - detailed' }}</h1>@verbatim<table class="is-nonresponsive-table">
             <tr>
                 <td colspan="5">
                     <strong><a href="/web-security/learning-paths">Web Security Academy Learning Paths</a></strong>

@@ -740,6 +740,11 @@ pre code {
   gap: 16px;
 }
 
+.vla-grid > *,
+.vla-hero-grid > * {
+  min-width: 0;
+}
+
 .vla-grid--2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
 .vla-grid--3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
 .vla-grid--4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
@@ -781,7 +786,7 @@ pre code {
 .vla-hero h1 {
   font-size: clamp(1.85rem, 3.2vw, 2.65rem);
   font-weight: 700;
-  margin: 12px 0 14px;
+  margin: 0 0 14px;
   letter-spacing: -0.035em;
   line-height: 1.12;
 }
@@ -1218,6 +1223,18 @@ pre code {
   display: none !important;
 }
 
+.wrapper-large .container-academy > .nav-lhs .nav-lhs-scrollable {
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.nav-lhs-toggle-input,
+.wrapper-large .container-academy > .nav-lhs input[type="checkbox"],
+.wrapper-large .container-academy > .nav-lhs .nav-lhs-toggle-label,
+.wrapper-large .container-academy > .nav-lhs label.nav-label {
+  display: none !important;
+}
+
 .wrapper-large .container-academy > .nav-lhs h3 {
   color: var(--vla-heading) !important;
   font-family: var(--vla-font-display) !important;
@@ -1238,14 +1255,88 @@ pre code {
   line-height: 1.4;
 }
 
+.wrapper-large .container-academy > .nav-lhs .nav-back {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-weight: 600 !important;
+}
+
+.wrapper-large .container-academy > .nav-lhs .nav-back .icon-arrow-head-left {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 10px !important;
+  height: 10px !important;
+  font-size: 0 !important;
+}
+
+.wrapper-large .container-academy > .nav-lhs .nav-back .icon-arrow-head-left::before {
+  content: '' !important;
+  display: inline-block !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-left: 1.8px solid currentColor !important;
+  border-bottom: 1.8px solid currentColor !important;
+  transform: rotate(45deg) !important;
+}
+
 .wrapper-large .container-academy > .nav-lhs a:hover {
   color: var(--vla-accent) !important;
 }
 
 .wrapper-large .container-academy > .nav-lhs ul {
   list-style: none !important;
-  padding-left: 10px !important;
+  padding-left: 0 !important;
   margin: 4px 0 !important;
+}
+
+.wrapper-large .container-academy > .nav-lhs li > label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  padding: 2px 0 !important;
+}
+
+.wrapper-large .container-academy > .nav-lhs li > label .icon-arrow-head-down {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  color: var(--vla-text-muted) !important;
+  font-size: 0 !important;
+}
+
+.wrapper-large .container-academy > .nav-lhs li > label .icon-arrow-head-down::before {
+  content: '' !important;
+  display: inline-block !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-right: 1.8px solid currentColor !important;
+  border-bottom: 1.8px solid currentColor !important;
+  transform: rotate(-45deg) !important;
+  transition: transform 0.14s ease !important;
+}
+
+.wrapper-large .container-academy > .nav-lhs li > input[type="checkbox"]:checked + label .icon-arrow-head-down::before {
+  transform: rotate(45deg) !important;
+}
+
+.wrapper-large .container-academy > .nav-lhs li > ul {
+  display: none !important;
+  border-left: 1px solid var(--vla-border) !important;
+  margin-left: 6px !important;
+  padding-left: 10px !important;
+}
+
+.wrapper-large .container-academy > .nav-lhs li > input[type="checkbox"]:checked ~ ul {
+  display: block !important;
 }
 
 .wrapper-large .container-academy main {
@@ -1907,6 +1998,10 @@ pre code {
   color: var(--vla-accent);
 }
 
+.vla-cert-report-user {
+  text-align: right;
+}
+
 /* ---------- Responsive Rules ---------- */
 @media (max-width: 1179px) {
   .vla-topbar__inner {
@@ -1950,14 +2045,13 @@ pre code {
     width: 100% !important;
     max-width: 100% !important;
     flex: none !important;
-    max-height: 220px !important;
+    max-height: 260px !important;
+    padding: 14px !important;
   }
 
   .wrapper-large .container-academy > .nav-lhs ul {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 4px 12px !important;
-    padding-left: 0 !important;
+    display: block !important;
+    width: 100% !important;
   }
 
   .vla-mystery-grid {
@@ -1974,8 +2068,41 @@ pre code {
 @media (max-width: 640px) {
   .vla-topbar__inner,
   .vla-container {
-    padding-left: 14px;
-    padding-right: 14px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .wrapper-large {
+    padding: 16px 12px 36px !important;
+  }
+
+  .wrapper-large .container-academy main > .section,
+  .section.theme-white {
+    padding: 18px 14px !important;
+  }
+
+  .widgetcontainer-lab-link {
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+  }
+
+  .vla-filter-row input[type="text"],
+  .vla-filter-row input[type="search"],
+  .vla-filter-row select {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .vla-subnav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .vla-subnav a {
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .vla-actions {
@@ -1986,17 +2113,63 @@ pre code {
   }
 
   .vla-hero {
-    padding: 24px 18px;
+    padding: 20px 16px;
   }
 
   .vla-account-pill__name {
     max-width: 72px;
   }
+
+  .vla-cert-report-user {
+    text-align: left;
+  }
 }
 
 @media (max-width: 480px) {
+  .vla-topbar__inner {
+    gap: 8px;
+  }
+
+  .vla-brand {
+    font-size: 0.96rem;
+    gap: 7px;
+  }
+
   .vla-theme-label {
     display: none;
+  }
+
+  .vla-hero {
+    padding: 18px 14px;
+    border-radius: 12px;
+  }
+
+  .vla-hero h1 {
+    font-size: 1.55rem;
+    margin-bottom: 10px;
+  }
+
+  .vla-terminal-card__body {
+    padding: 12px;
+    font-size: 0.74rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .vla-card {
+    padding: 16px 14px;
+  }
+
+  .vla-instance-bar {
+    padding: 14px;
+  }
+
+  .vla-certificate-sheet {
+    padding: 22px 14px;
+  }
+
+  .vla-certificate-meta {
+    grid-template-columns: 1fr;
   }
 }
 

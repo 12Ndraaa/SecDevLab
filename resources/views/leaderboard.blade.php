@@ -16,11 +16,11 @@
         <div class="vla-badge-row" style="justify-content:space-between">
             <div>
                 <span class="vla-badge vla-badge--accent">{{ __('academy.leaderboard.your_position') }}</span>
-                <strong style="margin-left:10px">#{{ $currentUserEntry['rank'] }} &mdash; {{ $currentUserEntry['name'] }}</strong>
+                <strong style="margin-left:10px">#{{ $currentUserEntry['rank'] }} - {{ $currentUserEntry['name'] }}</strong>
             </div>
             <div class="vla-badge-row">
-                <span class="vla-badge vla-badge--solved">{{ $currentUserEntry['solved_total'] }} Solved</span>
-                <span class="vla-badge vla-badge--orange">{{ $currentUserEntry['points'] }} pts</span>
+                <span class="vla-badge vla-badge--solved">{{ __('academy.leaderboard.solved_badge', ['count' => $currentUserEntry['solved_total']]) }}</span>
+                <span class="vla-badge vla-badge--orange">{{ $currentUserEntry['points'] }} {{ __('academy.common.pts') }}</span>
             </div>
         </div>
     </div>
@@ -60,15 +60,15 @@
                 <tr class="{{ Auth::id() === $row['user_id'] ? 'is-highlight' : '' }}">
                     <td><strong>#{{ $row['rank'] }}</strong></td>
                     <td><strong>{{ $row['name'] }}</strong></td>
-                    <td><span class="vla-role-pill {{ $row['role'] === 'owner' ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper($row['role']) }}</span></td>
+                    <td><span class="vla-role-pill {{ $row['role'] === 'owner' ? 'vla-role-pill--owner' : 'vla-role-pill--user' }}">{{ strtoupper($row['role'] === 'owner' ? __('academy.common.role_owner') : __('academy.common.role_user')) }}</span></td>
                     <td class="vla-mono"><strong>{{ $row['solved_total'] }}</strong></td>
                     <td>
                         <span class="label-light-green-small">A: {{ $row['apprentice'] }}</span>
                         <span class="label-light-blue-small">P: {{ $row['practitioner'] }}</span>
                         <span class="label-purple-small">E: {{ $row['expert'] }}</span>
                     </td>
-                    <td><span class="vla-badge vla-badge--accent vla-mono">{{ $row['points'] }} pts</span></td>
-                    <td class="vla-muted-sm">{{ $row['last_solved_at'] ? $row['last_solved_at']->format('d M Y H:i') : '-' }}</td>
+                    <td><span class="vla-badge vla-badge--accent vla-mono">{{ $row['points'] }} {{ __('academy.common.pts') }}</span></td>
+                    <td class="vla-muted-sm">{{ $row['last_solved_at'] ? $row['last_solved_at']->translatedFormat('d M Y H:i') : '-' }}</td>
                 </tr>
             @empty
                 <tr><td colspan="7">{{ __('academy.leaderboard.empty') }}</td></tr>

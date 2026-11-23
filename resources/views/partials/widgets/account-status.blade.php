@@ -8,17 +8,17 @@
 <div class="dashboard-progress-grid">
     <div class="dashboard-progress-card">
         <span class="label-light-green-small">APPRENTICE</span>
-        <h4>{{ $counts['APPRENTICE']['solved'] }} / {{ $counts['APPRENTICE']['total'] }} Labs Solved ({{ $appPct }}%)</h4>
+        <h4>{{ __('academy.widgets.labs_solved_ratio', ['solved' => $counts['APPRENTICE']['solved'], 'total' => $counts['APPRENTICE']['total'], 'pct' => $appPct]) }}</h4>
         <div class="dashboard-bar-track"><div class="dashboard-bar-fill vla-fill-apprentice" style="width:{{ $appPct }}%"></div></div>
     </div>
     <div class="dashboard-progress-card">
         <span class="label-light-blue-small">PRACTITIONER</span>
-        <h4>{{ $counts['PRACTITIONER']['solved'] }} / {{ $counts['PRACTITIONER']['total'] }} Labs Solved ({{ $pracPct }}%)</h4>
+        <h4>{{ __('academy.widgets.labs_solved_ratio', ['solved' => $counts['PRACTITIONER']['solved'], 'total' => $counts['PRACTITIONER']['total'], 'pct' => $pracPct]) }}</h4>
         <div class="dashboard-bar-track"><div class="dashboard-bar-fill vla-fill-practitioner" style="width:{{ $pracPct }}%"></div></div>
     </div>
     <div class="dashboard-progress-card">
         <span class="label-purple-small">EXPERT</span>
-        <h4>{{ $counts['EXPERT']['solved'] }} / {{ $counts['EXPERT']['total'] }} Labs Solved ({{ $expPct }}%)</h4>
+        <h4>{{ __('academy.widgets.labs_solved_ratio', ['solved' => $counts['EXPERT']['solved'], 'total' => $counts['EXPERT']['total'], 'pct' => $expPct]) }}</h4>
         <div class="dashboard-bar-track"><div class="dashboard-bar-fill vla-fill-expert" style="width:{{ $expPct }}%"></div></div>
     </div>
     <div class="dashboard-progress-card dashboard-progress-card--summary">
@@ -39,7 +39,7 @@
 <input class="hidden" id="trackerpopup" type="checkbox">
 <div class="widgetcontainer-box is-twobtns academy-account-status pin-to-bottom {{ $user ? 'is-logged-in' : 'is-logged-out' }}" id="AcademyAccountStatusWidget">
     @if($user)
-        <p class="hidden-when-collapsed">{{ $user->name }}: {{ $totalSolved }} / {{ $allTotal }} Labs Solved</p>
+        <p class="hidden-when-collapsed">{{ __('academy.widgets.user_labs_solved', ['name' => $user->name, 'solved' => $totalSolved, 'total' => $allTotal]) }}</p>
         <div class="flex-center">
             <a class="button-orange-small" href="/web-security/dashboard">{{ __('academy.nav.dashboard') }}</a>
             <a class="button-white-small" href="/web-security/all-labs">{{ __('academy.nav.all_labs') }}</a>

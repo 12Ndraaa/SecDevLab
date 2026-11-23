@@ -503,7 +503,7 @@ class LabTriggerService
             }
         }
 
-        $reply = 'All store items are currently in stock. Let me know how I can assist you.';
+        $reply = __('academy.workbench.chat_default_reply');
         $isWebsocketLab = $lab->category_id === 'websockets';
         $isExploit = $matchesToken || ($isWebsocketLab
             ? (bool) preg_match('/(<script|onerror\s*=|onload\s*=|alert\s*\(|confirm\s*\(|prompt\s*\(|wss:\/\/)/i', $message)
@@ -516,12 +516,12 @@ class LabTriggerService
                 $session->solved_at = now();
             }
             $reply = $isWebsocketLab
-                ? 'WebSocket frame delivered to connected victim client (XSS payload executed).'
-                : 'Tool call executed: delete_user("carlos") -> User carlos deleted.';
+                ? __('academy.workbench.chat_ws_solved')
+                : __('academy.workbench.chat_ai_solved');
         }
 
         $history = is_array($session->chat_history) ? $session->chat_history : [];
-        $history[] = ['sender' => 'You', 'text' => $message];
+        $history[] = ['sender' => __('academy.workbench.you_label'), 'text' => $message];
         $history[] = ['sender' => 'Arti Ficial', 'text' => $reply];
         $session->chat_history = array_slice($history, -30);
         $session->save();
