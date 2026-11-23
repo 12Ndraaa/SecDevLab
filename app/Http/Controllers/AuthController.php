@@ -45,6 +45,7 @@ class AuthController extends Controller
         $userId = (int) Auth::id();
         $sessionLocale = (string) $request->session()->get('locale', '');
         if (in_array($sessionLocale, ['en', 'id'], true)) {
+            Cache::forget("secdevlab_pending_locale:{$userId}");
             Cache::forever("secdevlab_user_locale:{$userId}", $sessionLocale);
             LabSession::where('user_id', $userId)
                 ->get()
@@ -90,6 +91,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $sessionLocale = (string) $request->session()->get('locale', '');
         if (in_array($sessionLocale, ['en', 'id'], true)) {
+            Cache::forget("secdevlab_pending_locale:{$user->id}");
             Cache::forever("secdevlab_user_locale:{$user->id}", $sessionLocale);
         }
 

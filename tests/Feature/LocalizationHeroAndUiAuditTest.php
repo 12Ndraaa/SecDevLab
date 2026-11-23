@@ -44,6 +44,11 @@ class LocalizationHeroAndUiAuditTest extends TestCase
             '/web-security',
             '/web-security/all-topics',
             '/web-security/all-labs',
+            '/web-security/learning-paths',
+            '/web-security/getting-started',
+            '/web-security/getting-started/index.html',
+            '/web-security/certification',
+            '/web-security/certification/index.html',
             '/cve',
             '/cve/'.$cve->slug,
             '/web-security/dashboard',
@@ -60,7 +65,17 @@ class LocalizationHeroAndUiAuditTest extends TestCase
             $this->assertStringNotContainsString('<script', strtolower($html), "Unexpected <script on {$path}");
         }
 
-        // Launch lab & inspect active + expired views for favicon removal
+        // Authenticated Owner / Certificate / Lab Control views also have zero favicon & zero <script>
+        $owner = User::where('role', User::ROLE_OWNER)->firstOrFail();
+        foreach (['/certificate', '/owner', '/owner/cves'] as $authPath) {
+            $authHtml = $this->actingAs($owner)->get($authPath)->assertOk()->getContent();
+            $this->assertStringNotContainsStringIgnoringCase('rel="icon"', $authHtml, "Unexpected rel=icon on {$authPath}");
+            $this->assertStringNotContainsStringIgnoringCase('favicon.ico', $authHtml, "Unexpected favicon.ico on {$authPath}");
+            $this->assertStringNotContainsString('<script', strtolower($authHtml), "Unexpected <script on {$authPath}");
+        }
+        Auth::logout();
+
+        // Launch lab & inspect active + control + expired views for favicon removal
         $launchRes = $this->actingAs($learner)->get('/academy/labs/launch/'.$sqliLab->id);
         $labPath = (string) parse_url((string) $launchRes->headers->get('Location'), PHP_URL_PATH);
         $labHtml = $this->get($labPath)->assertOk()->getContent();
@@ -69,6 +84,11 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $this->assertStringNotContainsString('<script', strtolower($labHtml));
 
         $token = substr($labPath, 5);
+        $controlHtml = $this->actingAs($learner)->get("/academy/labs/session/{$token}/control")->assertOk()->getContent();
+        $this->assertStringNotContainsStringIgnoringCase('rel="icon"', $controlHtml);
+        $this->assertStringNotContainsStringIgnoringCase('favicon.ico', $controlHtml);
+        $this->assertStringNotContainsString('<script', strtolower($controlHtml));
+
         $session = LabSession::findByToken($token);
         $this->assertNotNull($session);
         $session->expires_at = now()->subMinute();
@@ -291,9 +311,17 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $this->assertStringContainsString('Panduan memulai Akademi Keamanan Web', $gsId);
         $this->assertStringNotContainsString('How the Web Security Academy works', $gsId);
 
+        $gsIndexId = $this->get('/web-security/getting-started/index.html')->assertOk()->getContent();
+        $this->assertStringContainsString('Panduan memulai Akademi Keamanan Web', $gsIndexId);
+        $this->assertStringNotContainsString('Follow us on twitter', $gsIndexId);
+
         $certPageId = $this->get('/web-security/certification')->assertOk()->getContent();
         $this->assertStringContainsString('Sertifikasi keamanan web', $certPageId);
         $this->assertStringNotContainsString('What is a SecDevLab Certified Practitioner?', $certPageId);
+
+        $certIndexId = $this->get('/web-security/certification/index.html')->assertOk()->getContent();
+        $this->assertStringContainsString('Sertifikasi keamanan web', $certIndexId);
+        $this->assertStringNotContainsString('What is a SecDevLab Certified Practitioner?', $certIndexId);
 
         // Indonesian validation errors & pagination
         Auth::logout();
@@ -315,6 +343,14 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         // Indonesian workbench probe output & Repeater JSON without em-dash
         $gqlSyncLaunch = $this->get('/academy/labs/launch/'.$gqlLab->id);
         $gqlSyncPath = (string) parse_url((string) $gqlSyncLaunch->headers->get('Location'), PHP_URL_PATH);
+
+        // Clean session Repeater JSON before triggering Stage 1 exfiltration
+        $repCleanJson = $this->get($gqlSyncPath, ['X-Academy-Repeater' => '1'])->assertOk()->json();
+        $this->assertFalse((bool) ($repCleanJson['exfiltrated'] ?? true));
+        $this->assertFalse((bool) ($repCleanJson['autoSolved'] ?? true));
+        $this->assertStringNotContainsString("\u{2014}", (string) ($repCleanJson['status'] ?? ''));
+        $this->assertStringContainsString('Permintaan diproses', (string) ($repCleanJson['status'] ?? ''));
+
         $gqlProbeId = $this->post($gqlSyncPath.'/graphql', ['graphqlQuery' => 'query { __schema { types { name } } }'])->assertOk()->getContent();
         $this->assertTrue(
             str_contains($gqlProbeId, '200 OK (TEREKSTRAK)') || str_contains($gqlProbeId, '200 OK (TERPICU / SELESAI)'),
@@ -329,9 +365,24 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $this->assertStringContainsString('Origin Direfleksikan: https://attacker.example', $corsProbeId);
         $this->assertStringNotContainsString('Reflected Origin:', $corsProbeId);
 
-        $repJson = $this->get($gqlSyncPath, ['X-Academy-Repeater' => '1'])->assertOk()->json();
-        $this->assertStringNotContainsString("\u{2014}", (string) ($repJson['status'] ?? ''));
-        $this->assertStringContainsString('Permintaan diproses', (string) ($repJson['status'] ?? ''));
+        // Repeater JSON after Stage 1 exfiltration on GraphQL lab
+        $repExfilJson = $this->get($gqlSyncPath, ['X-Academy-Repeater' => '1'])->assertOk()->json();
+        $this->assertTrue((bool) ($repExfilJson['exfiltrated'] ?? false));
+        $this->assertFalse((bool) ($repExfilJson['autoSolved'] ?? true));
+        $this->assertStringNotContainsString("\u{2014}", (string) ($repExfilJson['status'] ?? ''));
+        $this->assertStringContainsString('Ekstraksi tahap 1 berhasil', (string) ($repExfilJson['status'] ?? ''));
+
+        // Repeater JSON on Exploit Server with missing payload
+        $csrfLab = Lab::where('category_id', 'cross-site-request-forgery-csrf')->orderBy('sort_order')->firstOrFail();
+        $csrfSyncPath = (string) parse_url((string) $this->get('/academy/labs/launch/'.$csrfLab->id)->headers->get('Location'), PHP_URL_PATH);
+        $repEmptyExploitJson = $this->post($csrfSyncPath.'/exploit-server', [
+            'formAction' => 'DELIVER_TO_VICTIM',
+            'responseFile' => '/exploit',
+            'responseBody' => '',
+        ], ['X-Academy-Repeater' => '1'])->assertOk()->json();
+        $this->assertFalse((bool) ($repEmptyExploitJson['autoSolved'] ?? true));
+        $this->assertStringNotContainsString("\u{2014}", (string) ($repEmptyExploitJson['status'] ?? ''));
+        $this->assertSame('Isi payload exploit tidak boleh kosong.', $repEmptyExploitJson['status'] ?? '');
 
         // Indonesian AI chat reply & sender label
         $aiLab = Lab::where('category_id', 'web-llm-attacks')->orderBy('sort_order')->firstOrFail();
@@ -340,12 +391,33 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $this->assertStringContainsString('Pengguna carlos dihapus.', $aiChatRes);
         $this->assertStringContainsString('<strong>Anda:</strong>', $aiChatRes);
 
+        // Repeater JSON on solved lab
+        $repSolvedJson = $this->get($aiSyncPath, ['X-Academy-Repeater' => '1'])->assertOk()->json();
+        $this->assertTrue((bool) ($repSolvedJson['autoSolved'] ?? false));
+        $this->assertStringNotContainsString("\u{2014}", (string) ($repSolvedJson['status'] ?? ''));
+        $this->assertStringContainsString('Payload exploit terpicu - Lab selesai!', (string) ($repSolvedJson['status'] ?? ''));
+
         // Toggle locale back inside one lab and verify OTHER active lab sessions + Academy session stay synced
         $this->post($aiSyncPath.'/_locale', ['ui_locale' => 'en'])->assertRedirect($aiSyncPath);
         $this->assertStringContainsString('<html lang="en"', $this->get($gqlSyncPath)->assertOk()->getContent());
         $homeBackEn = $this->get('/')->assertOk()->getContent();
         $this->assertStringContainsString('<html lang="en"', $homeBackEn);
         $this->assertStringContainsString('Explore All Labs', $homeBackEn);
+
+        // Logout, toggle lab locale to ID from isolated lab client (leaving pending locale), then login with explicit EN preference
+        $this->post('/users/logout')->assertRedirect('/users');
+        $this->post($aiSyncPath.'/_locale', ['ui_locale' => 'id'])->assertRedirect($aiSyncPath);
+        $this->post('/preferences/locale', ['locale' => 'en', 'redirect_to' => '/users'])->assertRedirect('/users');
+        $this->post('/users', [
+            'email' => $owner->email,
+            'password' => 'owner12345',
+        ])->assertRedirect('/web-security/dashboard');
+        $dashAfterLoginEn = $this->get('/web-security/dashboard')->assertOk()->getContent();
+        $this->assertStringContainsString('<html lang="en"', $dashAfterLoginEn);
+        $this->assertStringContainsString('Learning Dashboard', $dashAfterLoginEn);
+        $homeAfterLoginEn = $this->get('/')->assertOk()->getContent();
+        $this->assertStringContainsString('<html lang="en"', $homeAfterLoginEn);
+        $this->assertStringContainsString('Explore All Labs', $homeAfterLoginEn);
 
         // Toggle back to ID inside lab, then switch Academy back to EN
         $this->post($aiSyncPath.'/_locale', ['ui_locale' => 'id'])->assertRedirect($aiSyncPath);
