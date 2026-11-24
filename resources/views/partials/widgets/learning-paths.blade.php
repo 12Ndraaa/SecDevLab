@@ -188,23 +188,21 @@
         </div>
     @endif
 
-    <div class="container-columns margin-left-small margin-right-small">
+    <div class="container-columns">
         @foreach ($paths as $item)
             <div class="progress-cards theme-navy-9">
                 <div class="progress-cards-content">
                     <div class="progress-cards-content-labels">
                         <span class="label {{ $item['badge_class'] }}">{{ $item['level'] }}</span>
                     </div>
-                    <p class="font-size-16">
-                        <h5>{{ $isId ? $item['title_id'] : $item['title'] }}</h5>
-                    </p>
-                    <p class="font-size-14">{{ $isId ? $item['desc_id'] : $item['desc'] }}</p>
-                    <hr class="margin-top-small">
+                    <h3>{{ $isId ? $item['title_id'] : $item['title'] }}</h3>
+                    <p>{{ $isId ? $item['desc_id'] : $item['desc'] }}</p>
+                    <hr>
                     <div class="progress-cards-content-buttons">
                         <a class="chevron-after no-wrap" href="{{ $item['path_url'] }}">{{ $isId ? 'Lihat jalur' : 'View path' }}</a>
-                        <a class="button-view-path button-outline-small no-wrap" href="{{ $item['start_url'] }}">
-                            <span class="button-view-path-label">{{ $isId ? 'MULAI' : 'GET STARTED' }}</span>
-                            <span class="icon-arrow2-right"></span>
+                        <a class="vla-btn vla-btn--outline vla-btn--sm" href="{{ $item['start_url'] }}">
+                            <span>{{ $isId ? 'MULAI' : 'GET STARTED' }}</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                         </a>
                     </div>
                 </div>

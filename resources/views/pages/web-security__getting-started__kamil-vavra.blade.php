@@ -1,282 +1,73 @@
 @extends('layouts.academy')
 
-@section('title', 'Interview with Kamil Vavra - Hall of Fame high flyer | Web Security Academy | '.config('app.name'))
-@section('legacy_css', '/content/psgenerictheme.css')
+@php
+    $isId = ($uiLocale ?? app()->getLocale()) === 'id';
+    $brand = config('app.name') ?: 'SecDevLab';
+@endphp
+
+@section('title', 'Kamil Vavra | '.($isId ? 'Wawancara Peserta Terbaik' : 'High Flyers Interview').' | '.$brand)
 
 @section('academy_body')
-@verbatim
-<div no-keyword-injection="" class="wrapper" id="academy-started">
+<div class="sdl-page">
+    <ul class="breadcrumb-list" style="margin-bottom:14px">
+        <li><a href="/web-security">{{ $brand }}</a></li>
+        <li><a href="/web-security/getting-started">{{ $isId ? 'Panduan memulai' : 'Getting started' }}</a></li>
+        <li>Kamil Vavra</li>
+    </ul>
 
+    <section class="sdl-hero">
+        <span class="sdl-eyebrow">{{ $isId ? 'Peserta terbaik di Papan Peringkat' : 'High flyers in the Hall of Fame' }}</span>
+        <h1>Kamil Vavra: {{ $isId ? 'Mengurai Masalah Kompleks Menjadi Langkah Terukur' : 'Breaking down complex HTTP exploits systematically' }}</h1>
+        <p class="sdl-lead">
+            @if ($isId)
+                Kamil memulai dari kategori dasar lalu menantang diri pada topik lanjutan seperti HTTP request smuggling dan deserialization melalui pendekatan analisis permintaan yang teliti.
+            @else
+                Kamil progressed from foundational topics to advanced research areas like HTTP request smuggling and insecure deserialization through disciplined request inspection.
+            @endif
+        </p>
+        <div class="sdl-hero__actions">
+            <a href="/web-security/hall-of-fame" class="vla-btn vla-btn--outline">{{ $isId ? 'Lihat Papan Peringkat' : 'View Hall of Fame' }}</a>
+            <a href="/web-security/getting-started" class="vla-btn vla-btn--primary">{{ $isId ? 'Kembali ke Panduan' : 'Back to Getting Started' }}</a>
+        </div>
+    </section>
 
-        <div class="hero theme-white">
-            <div class="container-columns-centered-image">
-                <div>
-                    <h2 cms-ignore-validation="DUPLICATE_HEADINGS" id="web-security-academy">Web Security Academy</h2>
-                    <h1 cms-ignore-validation="HEADING_CAPITALIZATION" id="kamil-vavra" class="heading-2">Kamil Vavra</h1>
-                    <h3 cms-ignore-validation="HEADING_CAPITALIZATION,DUPLICATE_HEADINGS">High flyers in the Hall of Fame</h3>
-                </div>
-                <img cms-ignore-validation="UNIQUE_IMG_ALT_TEXT" alt="Interviewing the Web Security Academy high flyers" src="/web-security/getting-started/images/wsa-hall-of-fame-interviews-smaller.jpg">
-            </div>
+    <div class="sdl-grid sdl-grid--2 sdl-section">
+        <div class="sdl-card">
+            <h3>{{ $isId ? 'Menghadapi topik tingkat lanjut' : 'Approaching advanced topics' }}</h3>
+            <p>
+                {{ $isId
+                    ? 'Saat mempelajari request smuggling atau race condition, pecah perilaku front-end dan back-end secara terpisah agar sumber desinkronisasi terlihat jelas.'
+                    : 'When tackling request smuggling or race conditions, isolate front-end vs back-end parsing behavior first so desynchronization boundaries become clear.' }}
+            </p>
         </div>
 
-        <div class="hero theme-white spacer">
-            <div class="container-columns-66-percent-left">
-                <div class="text-left">
-                    <p>Kamil is an Application Security Engineer from a small town in the Czech Republic. He got into hacking at around 14 years old, and has continued to hone his skills for the past 15 years. He's
-                    passionate about the security community, and loves how much it's developed and grown in the time he's been involved in the industry.
-                    </p>
-                    <p><strong>"When I started hacking, I didn't even know how to speak English. I knew how to exploit XSS, SQLi, everything in the OWASP Top 10, but my English was so bad. After I got comfortable
-                        with the language, when I could read books and blogs, it opened a whole new world for me."</strong>
-                    </p>
-
-                </div>
-
-                <div>
-                    <img cms-ignore-validation="UNIQUE_IMG_ALT_TEXT" alt="A high flyer in the Web Security Academy Hall of Fame" src="/web-security/getting-started/images/kamil-vavra.jpg">
-                </div>
-            </div>
-        </div>
-
-        <div class="sticky-side-menu-white">
-            <div>
-                <aside>
-                    <h4 cms-ignore-validation="HEADING_CAPITALIZATION">Getting to the top of the Hall of Fame</h4>
-                    <a class="sticky-menu-link" href="/web-security/getting-started/kamil-vavra#emma-s-portswigger-you-ve-been-hacking-since-you-were-14-what-was-your-first-paid-bug-bounty">Burp Suite</a>
-                    <a class="sticky-menu-link" href="/web-security/getting-started/kamil-vavra#es-what-was-the-first-topic-you-ever-completed-on-the-web-security-academy">Topics and labs</a>
-                    <a class="sticky-menu-link" href="/web-security/getting-started/kamil-vavra#es-are-there-any-topics-or-sets-of-labs-that-you-found-particularly-challenging-on-the-web-security-academy">Challenges</a>
-                    <a class="sticky-menu-link" href="/web-security/getting-started/kamil-vavra#es-what-do-you-think-is-the-best-thing-about-the-web-security-academy">Advice</a>
-
-                </aside>
-                <span>
-
-                    <div class="section theme-community-6 spacer">
-                        <p>After overcoming his language barriers, and self-skilling himself to the point where he's ranked in second place on our <a href="/web-security/hall-of-fame">Hall of
-                            Fame</a> leaderboard (at the time of interview), he now spends most of his time trying to give back to the community who gave so much to him.
-                        </p>
-                        <p><strong>"So many people have shared their knowledge with me over the years, so now everything I do, I try and open-source it and make it available to everyone else. I think everybody should
-                            do this, we all have things to learn and knowledge to share."</strong>
-                        </p>
-                        <p>After understanding how hard Kamil worked to get to where he is today, we wanted to find out what impact the <a href="/web-security">Web Security Academy</a> had on his
-                            road to success.
-                        </p>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION" id="emma-s-portswigger-you-ve-been-hacking-since-you-were-14-what-was-your-first-paid-bug-bounty">Emma S (SecDevLab):
-                            You've been hacking since you were 14 - what was your first paid bug bounty?</h3>
-                        <p>Kamil Vavra: It was sometime in 2016 - I was exploiting a weird vulnerability called right to left override. You basically change the file name, which lets you spoof the extension of the file. I
-                            reported it to Dropbox, and Edge Browser, along with a few others - most of them quietly issued a fix but some of the other companies gave me a bounty. I was actually invited into a
-                            private programme because of it, that's when I really started getting excited about bug bounty hunting.
-                        </p>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_CAPITALIZATION">ES: So, do you use Burp Suite?</h3>
-                        <p>KV: I used <a href="/web-security/all-labs">Burp Suite Community Edition</a> for years but after I got that first
-                            bounty, I got myself a <a href="/web-security/all-labs">Burp Suite Pro</a> license straight away! I use Burp Suite Pro in my day-to-day work, but I also spend a lot of time teaching
-                            developers so I still use the Community version for that. It's easier for them because they are still learning how it all works, so we use Community together during teaching.
-                        </p>
-                    </div>
-
-                    <div class="section theme-white">
-                        <blockquote class="callout-quote-white">
-                            <div>
-                                <img cms-ignore-validation="UNIQUE_IMG_ALT_TEXT" alt="Blockquote" src="/web-security/getting-started/images/ps-quote-left-orange.svg">
-                                <p>I like the simplicity, the amount of features, and the possibility you get with all of the extensions and different configurations. Some of the labs in the Web Security Academy will really
-                                    showcase to you how powerful Burp Suite is.
-                                </p>
-                            </div>
-                            <cite>
-                                <span>
-                                    <p><strong>Kamil Vavra</strong></p>
-                                </span>
-                            </cite>
-                        </blockquote>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION" id="es-what-was-the-first-topic-you-ever-completed-on-the-web-security-academy">ES: What was the first topic you ever completed on
-                            the Web Security Academy?</h3>
-                        <p>KV: When I first saw that the <a href="/web-security">Web Security Academy</a> had launched, I was curious. Once I realized that the learning materials and labs are free, I was
-                            sold on the whole thing and got stuck in! The first vulnerability that I ever learned about, roughly 15 years ago, was <a href="/web-security/cross-site-scripting">cross-site
-                                scripting</a>. It's my favorite vulnerability to this day, so I naturally started with XSS - I even learned a few new things.
-                        </p>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION">ES: And what has been your favorite topic on the Web Security Academy?</h3>
-                        <p>KV: I found the <a href="/web-security/authentication">authentication</a> topic really impressive - there was one where you needed to use
-                            <a href="/web-security/all-labs">Burp Intruder</a>, it focused on bypassing 2FA. I was so impressed with that lab. I started in the evening and I was at my
-                            computer all night - I remember finishing the last lab in the authentication topic at about four in the morning. I was about the eighth person to finish the topic overall, the sun was coming up, and
-                            that was when I decided I was going to try and complete every one of the topics.
-                        </p>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION">ES: Have you seen any benefits in your professional life or career from working on the Web Security Academy?</h3>
-                        <p>KV: My boss and I actually integrated the <a href="/web-security">Web Security Academy</a> into my careers skill metrics, so he never minds if I miss a morning of work because
-                            I've stayed up all night completing a lab. At work, I'm graded on my progress within the labs. I had the option from my employer to do some of the paid certifications, any of them that I wanted,
-                            but I'm not really a fan of those kinds of qualifications.
-                        </p>
-                        <p>So I suggested that he use my progress on the Web Security Academy instead, since I'd be learning all the same skills but in a much more realistic environment. So that's what we do now. My employer
-                            tracks my progress, and right now it's helping me work towards getting a more senior position within the company. So that's cool.
-                        </p>
-                    </div>
-
-                    <div class="section theme-white">
-                        <blockquote class="callout-quote-white">
-                            <div>
-                                <img cms-ignore-validation="UNIQUE_IMG_ALT_TEXT" alt="Blockquote" src="/web-security/getting-started/images/ps-quote-left-orange.svg">
-                                <p>I was allowed by my employer to spend time on the Web Security Academy regularly at work, and it definitely helped with my career growth and personal development goals. I would say that after
-                                    completing all the labs, I'm more confident in myself and my skills.
-                                </p>
-                            </div>
-                            <cite>
-                                <span>
-                                    <p><strong>Kamil Vavra</strong></p>
-                                </span>
-                            </cite>
-                        </blockquote>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION">ES: You must want to know straight away when a new topic comes out then - how do you find out?</h3>
-                        <p>KV: I get an alert when a <a href="https://twitter.com/WebSecAcademy">Tweet</a> comes out. When the new labs come out, I drop everything. The last lab to be released, before Christmas, they Tweeted
-                            that a new lab was coming so I canceled all of my plans. No shopping, no Netflix. I sat there waiting, refreshing the page  over and over. I think I waited for three days at home just refreshing
-                            the page to see if the lab had come out. That's when I realized that there might be a chance I was addicted ...
-                        </p>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION" id="es-are-there-any-topics-or-sets-of-labs-that-you-found-particularly-challenging-on-the-web-security-academy">ES: Are there any
-                            topics (or sets of labs) that you found particularly challenging on the Web Security Academy?</h3>
-                        <p>KV: Probably the <a href="/web-security/deserialization">insecure deserialization</a> and <a href="/web-security/server-side-template-injection">server-side
-                            template injection</a> topics. I don't usually focus on these vulnerability classes when I'm bug bounty hunting, so I really admire people who are skilled in those areas. The
-                            <a href="/web-security/logic-flaws/examples/lab-logic-flaws-authentication-bypass-via-encryption-oracle">authentication bypass via encryption oracle lab</a> from the
-                            <a href="/web-security/logic-flaws">business logic vulnerabilities</a> topic was probably the hardest for me. I got stuck on that one the whole night - I wouldn't have been able
-                            to exploit it without the hints from Bella DeShantz-Cook and <a href="/web-security/getting-started/johnny-villarreal">Johnny Villarreal</a>. They're also in the top five on the
-                            <a href="/web-security/hall-of-fame">Hall of Fame</a>, and it's been great connecting with them as now we share advice and tips with each other. I love that I've made two new
-                            friends because of the academy - it's brilliant having people working on the same things who I can share the experiences with.
-                        </p>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION">ES: What has training on the Web Security Academy enabled you to do/achieve that you couldn't before? </h3>
-                        <p>KV: It helped me to realize that there are attack vectors that I wasn't even aware of, or paying attention to, before - there is always something to look for if you think outside of the box. I don't
-                            think it's an industry standard right now, but I can see in the future that it could be a benchmark to be on the leaderboard and show the skills you've got from working through the
-                            <a href="/web-security">Web Security Academy</a>. There's labs I've solved where I've come across new things, and learned new skills that I never knew about before. I was able to
-                            then find that same vulnerability in my own company's code base.
-                        </p>
-                    </div>
-
-                    <div class="section theme-white">
-                        <blockquote class="callout-quote-white">
-                            <div>
-                                <img cms-ignore-validation="UNIQUE_IMG_ALT_TEXT" alt="Blockquote" src="/web-security/getting-started/images/ps-quote-left-orange.svg">
-                                <p>I saw the talk from James Kettle on web cache poisoning, then I completed the topic that came out on the same subject, then a couple of hours after that I found a few websites with that
-                                    vulnerability and I was able to exploit it. That really showed me that as soon as you've completed the labs, you can use your new skills in the wild.
-                                </p>
-                            </div>
-                            <cite>
-                                <span>
-                                    <p><strong>Kamil Vavra</strong></p>
-                                </span>
-                            </cite>
-                        </blockquote>
-                    </div>
-
-                    <div class="section theme-white">
-                        <a target="_blank" class="callout-profile-medium-orange spacer" href="https://www.youtube.com/watch?v=j2RrmNxJZ5c">
-                            <img alt="James Kettle" src="/web-security/getting-started/images/james-callout.png">
-                            <h2 id="check-out-james-s-blackhat-presentation">Check out James's BlackHat presentation</h2>
-                            <p>Practical Web Cache Poisoning: Redefining "Unexploitable"</p>
-                            <div>
-                                <span class="icon-arrow-right"></span>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION" id="es-what-do-you-think-is-the-best-thing-about-the-web-security-academy">ES: What do you think is the best thing about the Web
-                            Security Academy?</h3>
-                        <p>KV: The best thing is that it's completely free, and the value you get back from it as someone learning is so damn high! I love that the topics on the Web Security Academy are created based on
-                            <a href="https://portswigger.net/research">SecDevLab Research</a>, it's brilliant. I read everything on your website, the blogs, the research - the research for me is probably more valuable
-                            than <a href="/web-security/all-labs">Burp Suite</a> itself. I've learned so much in the past year from just reading all of the research. I can't tell you how much I appreciate the amount
-                            of time that everyone at SecDevLab puts into creating this information and making it available to everyone.
-                        </p>
-                    </div>
-
-                    <div class="section theme-white">
-                        <blockquote class="callout-quote-white">
-                            <div>
-                                <img cms-ignore-validation="UNIQUE_IMG_ALT_TEXT" alt="Blockquote" src="/web-security/getting-started/images/ps-quote-left-orange.svg">
-                                <p>SecDevLab Research is brilliant, it's always up to date and so interesting. Anytime they publish anything, it has all of the information you need to then go and find that vulnerability and
-                                    exploit it for yourself somewhere else.
-                                </p>
-                            </div>
-                            <cite>
-                                <span>
-                                    <p><strong>Kamil Vavra</strong></p>
-                                </span>
-                            </cite>
-                        </blockquote>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION">ES: What advice would you have for someone trying to get started with the Web Security Academy?</h3>
-                        <p>KV: Don't get overwhelmed with the amount of labs, it took me more than six months to solve everything. You don't need to hurry, just take your time and try to solve at least a few labs every other
-                            week or so. You will progress naturally, and it's always fun to learn something new. My methodology was to pick up a topic and stick to it, trying to finish all the labs in that topic before moving
-                            to another one.
-                        </p>
-                    </div>
-
-                    <div class="section theme-community-6 spacer">
-                        <h3 cms-ignore-validation="HEADING_CAPITALIZATION">ES: And finally, what are your plans for the future?</h3>
-                        <p>KV: I'd like to write a book someday, but I don't know if it would be possible. Maybe I need to find a ghostwriter, or write something in the Czech language. There aren't many resources out there for
-                            young people that are available in the Czech language. Right now though, I'm focussing on spreading the message out there, and sharing the knowledge I've found.
-                        </p>
-                    </div>
-
-                    <div class="section theme-white">
-                        <blockquote class="callout-quote-white">
-                            <div>
-                                <img cms-ignore-validation="UNIQUE_IMG_ALT_TEXT" alt="Blockquote" src="/web-security/getting-started/images/ps-quote-left-orange.svg">
-                                <p>I find it amazing that I'm just a guy from a small town, and I'm on the top of the leaderboard on the SecDevLab Hall of Fame. It's not just for beginners, professionals should do the labs
-                                    too to keep their skills sharp. I plan on doing it all again one day to refresh my knowledge.
-                                </p>
-                            </div>
-                            <cite>
-                                <span>
-                                    <p><strong>Kamil Vavra</strong></p>
-                                </span>
-                            </cite>
-                        </blockquote>
-                    </div>
-
-                </span>
-            </div>
-        </div>
-
-        <div class="section-full-width theme-grey-5 text-center">
-            <h3 cms-ignore-validation="HEADING_TOO_LONG,HEADING_CAPITALIZATION">Embark on the same learning journey Kamil has undertaken - get started on the Web Security Academy</h3>
-            <div class="container-cards-white-medium-space-between">
-                <a href="/web-security/all-topics">
-                    <h3>Learning path for topics</h3>
-                    <p>Not sure where to begin? We've laid it all out step by step for you.</p>
-                    <div class="chevron-after">Read more</div>
-                </a>
-                <a href="/web-security/dashboard">
-                    <h3>User dashboard</h3>
-                    <p>Can't remember where you got to? Track your progress here.</p>
-                    <div class="chevron-after">Read more</div>
-                </a>
-                <a href="/web-security/hall-of-fame">
-                    <h3>Hall of Fame</h3>
-                    <p>Want to feel inspired? Check out the leaderboard high-flyers.</p>
-                    <div class="chevron-after">Read more</div>
-                </a>
-            </div>
+        <div class="sdl-card">
+            <h3>{{ $isId ? 'Pentingnya menguji lab misteri' : 'Sharpening skills with mystery labs' }}</h3>
+            <p>
+                {{ $isId
+                    ? 'Lab misteri menghilangkan petunjuk topik, sehingga Anda terbiasa melakukan enumerasi awal sebagaimana saat mengaudit aplikasi sungguhan.'
+                    : 'Mystery labs remove category spoilers, forcing you to enumerate and triage targets just as you would on a real engagement.' }}
+            </p>
         </div>
     </div>
-@endverbatim
+
+    <div class="sdl-quote">
+        <p>{{ $isId
+            ? 'Setelah berhasil memecahkan lab sendiri tanpa melihat petunjuk, konsep teknisnya melekat jauh lebih kuat.'
+            : 'Once you solve a difficult challenge on your own after carefully analyzing the traffic, the concept stays with you permanently.' }}</p>
+        <cite>Kamil Vavra</cite>
+    </div>
+
+    <div class="sdl-cta">
+        <div>
+            <h2 style="margin:0 0 4px">{{ $isId ? 'Jelajahi wawancara lainnya' : 'Explore more learner stories' }}</h2>
+            <p class="vla-muted" style="margin:0">{{ $isId ? 'Baca wawancara praktisi lain atau pilih jalur belajar berikutnya.' : 'Read additional stories or pick your next learning pathway.' }}</p>
+        </div>
+        <div class="vla-btn-group">
+            <a href="/web-security/getting-started/johnny-villarreal" class="vla-btn vla-btn--outline">Johnny Villarreal</a>
+            <a href="/web-security/getting-started/andres-rauschecker" class="vla-btn vla-btn--outline">Andres Rauschecker</a>
+            <a href="/web-security/all-labs" class="vla-btn vla-btn--primary">{{ $isId ? 'Semua Lab' : 'All Labs' }}</a>
+        </div>
+    </div>
+</div>
 @endsection

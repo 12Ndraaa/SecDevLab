@@ -31,6 +31,23 @@ class LocalizationHeroAndUiAuditTest extends TestCase
     {
         $learner = User::where('email', 'user@secdevlab.local')->firstOrFail();
 
+        foreach ([
+            'secdevlab-favicon.png',
+            'secdevlab-logo-wide-light.png',
+            'secdevlab-logo-wide-dark.png',
+            'secdevlab-icon-square-light.png',
+            'secdevlab-icon-square-dark.png',
+            'secdevlab-mascot.png',
+        ] as $asset) {
+            $full = public_path('content/images/logos/'.$asset);
+            $this->assertFileExists($full, "Missing custom brand asset {$asset}");
+            $this->assertGreaterThan(1024, filesize($full), "Empty custom brand asset {$asset}");
+        }
+
+        foreach (['public/_home', 'public/_nav', 'public/_cms', 'public/_uploads', 'public/mega-nav', 'public/favicon.ico'] as $removedPath) {
+            $this->assertFileDoesNotExist(base_path($removedPath));
+        }
+
         $homeHtml = $this->get('/')->assertOk()->getContent();
         $this->assertStringNotContainsString('Hands-On Cyber Security Training Platform', $homeHtml);
         $this->assertStringNotContainsString('ZERO-JS SSR // 8 ARCHETYPES', $homeHtml);
@@ -58,34 +75,54 @@ class LocalizationHeroAndUiAuditTest extends TestCase
             '/users/register',
         ];
 
+        $forbiddenAssets = [
+            'favicon.ico',
+            'apple-touch-icon.png',
+            'portswigger-logo',
+            'burp-suite-icon',
+            'logoAcademy.svg',
+            'web-security-academy-logo.svg',
+            'certified-secondary-hero.png',
+            'validate-your-certification.svg',
+            'learning-path.png',
+            'portswigger.net/buy',
+        ];
+
         foreach ($academyPaths as $path) {
             $html = $this->get($path)->assertOk()->getContent();
-            $this->assertStringNotContainsStringIgnoringCase('rel="icon"', $html, "Unexpected rel=icon on {$path}");
-            $this->assertStringNotContainsStringIgnoringCase('favicon.ico', $html, "Unexpected favicon.ico on {$path}");
+            $this->assertStringContainsString('/content/images/logos/secdevlab-favicon.png?v=', $html, "Missing custom SecDevLab favicon on {$path}");
+            $this->assertStringContainsString('/content/images/logos/secdevlab-logo-wide-light.png?v=', $html, "Missing light logo on {$path}");
+            $this->assertStringContainsString('/content/images/logos/secdevlab-logo-wide-dark.png?v=', $html, "Missing dark logo on {$path}");
+            foreach ($forbiddenAssets as $bad) {
+                $this->assertStringNotContainsStringIgnoringCase($bad, $html, "Unexpected legacy brand asset {$bad} on {$path}");
+            }
             $this->assertStringNotContainsString('<script', strtolower($html), "Unexpected <script on {$path}");
         }
 
-        // Authenticated Owner / Certificate / Lab Control views also have zero favicon & zero <script>
+        // Authenticated Owner / Certificate / Lab Control views use custom SecDevLab favicon & zero <script>
         $owner = User::where('role', User::ROLE_OWNER)->firstOrFail();
         foreach (['/certificate', '/owner', '/owner/cves'] as $authPath) {
             $authHtml = $this->actingAs($owner)->get($authPath)->assertOk()->getContent();
-            $this->assertStringNotContainsStringIgnoringCase('rel="icon"', $authHtml, "Unexpected rel=icon on {$authPath}");
-            $this->assertStringNotContainsStringIgnoringCase('favicon.ico', $authHtml, "Unexpected favicon.ico on {$authPath}");
+            $this->assertStringContainsString('/content/images/logos/secdevlab-favicon.png?v=', $authHtml, "Missing custom SecDevLab favicon on {$authPath}");
+            foreach ($forbiddenAssets as $bad) {
+                $this->assertStringNotContainsStringIgnoringCase($bad, $authHtml, "Unexpected legacy brand asset {$bad} on {$authPath}");
+            }
             $this->assertStringNotContainsString('<script', strtolower($authHtml), "Unexpected <script on {$authPath}");
         }
         Auth::logout();
 
-        // Launch lab & inspect active + control + expired views for favicon removal
+        // Launch lab & inspect active + control + expired views for custom SecDevLab favicon & brand logos
         $launchRes = $this->actingAs($learner)->get('/academy/labs/launch/'.$sqliLab->id);
         $labPath = (string) parse_url((string) $launchRes->headers->get('Location'), PHP_URL_PATH);
         $labHtml = $this->get($labPath)->assertOk()->getContent();
-        $this->assertStringNotContainsStringIgnoringCase('rel="icon"', $labHtml);
+        $this->assertStringContainsString('/content/images/logos/secdevlab-favicon.png?v=', $labHtml);
+        $this->assertStringContainsString('/content/images/logos/secdevlab-logo-wide-light.png?v=', $labHtml);
         $this->assertStringNotContainsStringIgnoringCase('favicon.ico', $labHtml);
         $this->assertStringNotContainsString('<script', strtolower($labHtml));
 
         $token = substr($labPath, 5);
         $controlHtml = $this->actingAs($learner)->get("/academy/labs/session/{$token}/control")->assertOk()->getContent();
-        $this->assertStringNotContainsStringIgnoringCase('rel="icon"', $controlHtml);
+        $this->assertStringContainsString('/content/images/logos/secdevlab-favicon.png?v=', $controlHtml);
         $this->assertStringNotContainsStringIgnoringCase('favicon.ico', $controlHtml);
         $this->assertStringNotContainsString('<script', strtolower($controlHtml));
 
@@ -95,7 +132,7 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $session->save();
 
         $expiredHtml = $this->get($labPath)->assertStatus(410)->getContent();
-        $this->assertStringNotContainsStringIgnoringCase('rel="icon"', $expiredHtml);
+        $this->assertStringContainsString('/content/images/logos/secdevlab-favicon.png?v=', $expiredHtml);
         $this->assertStringNotContainsStringIgnoringCase('favicon.ico', $expiredHtml);
         $this->assertStringNotContainsString('<script', strtolower($expiredHtml));
     }
@@ -738,5 +775,96 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $this->assertStringContainsString('.vla-actions', $academyCss);
         $this->assertStringContainsString('.vla-account-dropdown__menu', $academyCss);
         $this->assertStringContainsString('.vla-learning-content .container-columns-block > a', $academyCss);
+    }
+
+    public function test_legacy_css_collisions_broken_learning_path_steps_and_external_iframes_are_fixed(): void
+    {
+        $academyCss = (string) file_get_contents(public_path('content/academy-modern.css'));
+        $workbenchCss = (string) file_get_contents(public_path('content/lab-workbench.css'));
+
+        // High-specificity protections against legacy CSS form/button/contrast/icon collisions
+        $this->assertStringContainsString('header.vla-topbar .vla-pill-switch button', $academyCss);
+        $this->assertStringContainsString('header.vla-topbar button.vla-btn', $academyCss);
+        $this->assertStringContainsString('.vla-learning-content .heading1-white', $academyCss);
+        $this->assertStringContainsString('.vla-learning-content .ps-breadcrumbs li a::after', $academyCss);
+        $this->assertStringContainsString('.vla-learning-content .icon-arrow-right::before', $academyCss);
+        $this->assertStringContainsString('.vla-brand__logo--dark', $academyCss);
+        $this->assertStringContainsString('.sdl-command-brand__logo--dark', $workbenchCss);
+
+        // Redesigned hub & certification & cheat-sheet routes drop legacy CSS & commercial links
+        $redesignedRoutes = [
+            '/web-security',
+            '/web-security/learning-paths',
+            '/web-security/getting-started',
+            '/web-security/getting-started/johnny-villarreal',
+            '/web-security/getting-started/kamil-vavra',
+            '/web-security/getting-started/andres-rauschecker',
+            '/web-security/certification',
+            '/web-security/certification/how-it-works',
+            '/web-security/certification/how-to-prepare',
+            '/web-security/certification/practice-exam',
+            '/web-security/certification/exam-hints-and-guidance',
+            '/web-security/certification/exam-hints-and-guidance/retaking-your-exam',
+            '/web-security/certification/verify-your-certification',
+            '/web-security/certification/frequently-asked-questions/index.html',
+            '/web-security/certification/how-to-prepare/practitioner-labs-prep-step-one',
+            '/web-security/certification/terms-and-conditions',
+            '/web-security/certification/terms-and-conditions/website-terms-of-use',
+            '/web-security/lab-telemetry-privacy-notice',
+            '/web-security/ssrf/url-validation-bypass-cheat-sheet',
+        ];
+
+        foreach ($redesignedRoutes as $route) {
+            $html = $this->get($route)->assertOk()->getContent();
+            $this->assertStringNotContainsString('pslandingpages.css', $html, "Unexpected pslandingpages.css on {$route}");
+            $this->assertStringNotContainsString('psproducts.css', $html, "Unexpected psproducts.css on {$route}");
+            $this->assertStringNotContainsString('psgenerictheme.css', $html, "Unexpected psgenerictheme.css on {$route}");
+            $this->assertStringNotContainsString('pslearningpaths.css', $html, "Unexpected pslearningpaths.css on {$route}");
+            $this->assertStringNotContainsString('cheat-sheets.portswigger.net', $html, "Unexpected external iframe on {$route}");
+            $this->assertStringNotContainsString('/buy/certification', $html, "Unexpected commercial link on {$route}");
+            $this->assertStringNotContainsString('wsa-hall-of-fame', $html, "Unexpected promo graphic on {$route}");
+            $this->assertStringNotContainsString('<script', strtolower($html), "Unexpected <script on {$route}");
+        }
+
+        // All 17 learning path "GET STARTED" step pages resolve to real content (no "An error occurred" / psdefault.css)
+        $stepRoutes = [
+            '/web-security/learning-paths/api-testing/api-testing-api-recon/api-testing/api-recon',
+            '/web-security/learning-paths/authentication-vulnerabilities/what-is-authentication/authentication/what-is-authentication',
+            '/web-security/learning-paths/clickjacking/clickjacking-what-is-clickjacking/clickjacking/what-is-clickjacking',
+            '/web-security/learning-paths/cors/cors-what-is-cors-cross-origin-resource-sharing/cors/what-is-cors-cross-origin-resource-sharing',
+            '/web-security/learning-paths/csrf/csrf-what-is-csrf/csrf/what-is-csrf',
+            '/web-security/learning-paths/file-upload-vulnerabilities/what-are-file-upload-vulnerabilities/file-upload/what-are-file-upload-vulnerabilities',
+            '/web-security/learning-paths/graphql-api-vulnerabilities/finding-graphql-endpoints/graphql/finding-graphql-endpoints',
+            '/web-security/learning-paths/llm-attacks/llm-attacks-what-is-a-large-language-model/llm-attacks/what-is-a-large-language-model',
+            '/web-security/learning-paths/nosql-injection/types-of-nosql-injection/nosql-injection/types-of-nosql-injection',
+            '/web-security/learning-paths/path-traversal/what-is-path-traversal/file-path-traversal/what-is-path-traversal',
+            '/web-security/learning-paths/prototype-pollution/prototype-pollution/prototype-pollution/what-is-prototype-pollution',
+            '/web-security/learning-paths/race-conditions/race-conditions-limit-overrun/race-conditions/limit-overrun-race-conditions',
+            '/web-security/learning-paths/server-side-vulnerabilities-apprentice/path-traversal-apprentice/file-path-traversal/what-is-path-traversal',
+            '/web-security/learning-paths/sql-injection/sql-injection-what-is-sql-injection/sql-injection/what-is-sql-injection-sqli',
+            '/web-security/learning-paths/ssrf-attacks/ssrf-attacks-what-is-ssrf/ssrf/what-is-ssrf',
+            '/web-security/learning-paths/web-cache-deception/wcd-web-caches/web-cache-deception/web-caches',
+            '/web-security/learning-paths/websockets-security-vulnerabilities/websockets/websockets/websockets',
+        ];
+
+        $this->post('/preferences/locale', ['locale' => 'id', 'redirect_to' => '/web-security'])->assertRedirect('/web-security');
+
+        foreach ($stepRoutes as $stepRoute) {
+            $stepHtml = $this->get($stepRoute)->assertOk()->getContent();
+            $this->assertStringNotContainsString('An error occurred', $stepHtml, "Broken Error stub remaining on {$stepRoute}");
+            $this->assertStringNotContainsString('psdefault.css', $stepHtml, "Legacy psdefault.css remaining on {$stepRoute}");
+            $this->assertStringContainsString('<html lang="id"', $stepHtml, "Missing Indonesian locale on {$stepRoute}");
+        }
+
+        // Indonesian & Dark-theme rendering on key redesigned routes & XSS cheat sheet breadcrumb
+        $this->post('/preferences/theme', ['redirect_to' => '/web-security'])->assertRedirect('/web-security');
+        $darkHome = $this->get('/web-security')->assertOk()->getContent();
+        $this->assertStringContainsString('data-theme="dark"', $darkHome);
+        $this->assertStringContainsString('Platform pelatihan keamanan web praktis', $darkHome);
+        $this->assertStringContainsString('secdevlab-icon-square-dark.png', $darkHome);
+
+        $xssHtml = $this->get('/web-security/cross-site-scripting/cheat-sheet')->assertOk()->getContent();
+        $this->assertStringContainsString('<span itemprop="name">SecDevLab</span>', $xssHtml);
+        $this->assertStringContainsString('data-theme="dark"', $xssHtml);
     }
 }

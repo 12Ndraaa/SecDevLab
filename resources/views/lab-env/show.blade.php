@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="/content/images/logos/secdevlab-favicon.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-favicon.png')) ?: '1' }}">
     <link href="/content/fonts/fonts.css?v={{ @filemtime(public_path('content/fonts/fonts.css')) ?: '1' }}" rel="stylesheet">
     <link href="/content/lab-workbench.css?v={{ @filemtime(public_path('content/lab-workbench.css')) ?: '2' }}" rel="stylesheet">
     <title>{{ $isMystery && !$revealMystery ? __('academy.workbench.mystery_title') : $lab->localizedTitle($labUiLocale ?? app()->getLocale()) }} | {{ config('app.name') ?: 'SecDevLab' }}</title>
@@ -39,14 +40,16 @@
 
     <section class="sdl-command-bar">
         <div class="sdl-command-bar__top">
-            <a class="sdl-command-brand" href="/">
+            <a class="sdl-command-brand" href="/" aria-label="{{ $brandName }}">
                 <span class="sdl-command-brand__badge" aria-hidden="true">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                         <path d="M9 12l2 2 4-4"/>
                     </svg>
                 </span>
-                <span>{{ $brandName }}</span>
+                <img src="/content/images/logos/secdevlab-logo-wide-light.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-light.png')) ?: '1' }}" alt="{{ $brandName }}" class="sdl-command-brand__logo sdl-command-brand__logo--light" height="28">
+                <img src="/content/images/logos/secdevlab-logo-wide-dark.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-dark.png')) ?: '1' }}" alt="{{ $brandName }}" class="sdl-command-brand__logo sdl-command-brand__logo--dark" height="28">
+                <span class="lw-sr-only">{{ $brandName }}</span>
             </a>
 
             <div class="sdl-command-title">

@@ -1,400 +1,176 @@
 @extends('layouts.academy')
 
-@php $isId = ($uiLocale ?? app()->getLocale()) === 'id'; @endphp
-@section('title', ($isId ? 'Akademi Keamanan Web: Latihan Gratis Offline' : 'Web Security Academy: Free Online Training').' | '.(config('app.name') ?: 'SecDevLab'))
-@section('legacy_css', '/content/pslandingpages.css')
+@php
+    $isId = ($uiLocale ?? app()->getLocale()) === 'id';
+    $brand = config('app.name') ?: 'SecDevLab';
+@endphp
+
+@section('title', ($isId ? 'Akademi Keamanan Web' : 'Web Security Academy').' | '.$brand)
 
 @section('academy_body')
-<div class="container-section --center --gap-xlarge banner-academy-hero">
-            <div class="container2 --width-narrow">
-                <img alt="Web Security Academy" src="/web-security/images/landing-page/web-security-academy-logo.svg">
-                <div class="container-h1 margin-top-m">
-                    <h1 class="charcoal heading-2">{{ $isId ? 'Platform pelatihan keamanan web praktis dan lab CVE' : 'Free, hands-on web security training & CVE lab platform' }}</h1>
-                </div>
-                @include('partials.widget', ['id' => 'academy-startlearningcta'])
-            </div>
-        </div><div class="container-section --gap-small --width-fixed">
-            <div class="container-keypoints">
-                <div>
-                    <img alt="{{ $isId ? 'Tingkatkan karier Anda' : 'Boost your career' }}" src="/web-security/images/landing-page/key-feature-icon-target.svg">
-                    <div>
-                        <p>{{ $isId ? 'Bekal karier keamanan siber' : 'Boost your career' }}</p>
-                        <p>{{ $isId ? 'Latihan di Akademi Keamanan Web membantu membangun dasar kuat di bidang keamanan aplikasi.' : 'The Web Security Academy is a strong step toward a career in cybersecurity.' }}</p>
-                    </div>
-                </div>
-                <div>
-                    <img alt="{{ $isId ? 'Belajar fleksibel' : 'Flexible learning' }}" src="/web-security/images/landing-page/key-feature-icon-pencil.svg">
-                    <div>
-                        <p>{{ $isId ? 'Belajar sesuai ritme Anda' : 'Flexible learning' }}</p>
-                        <p>{{ $isId ? 'Akses materi dan lab interaktif kapan saja dengan pelacakan progres otomatis.' : 'Learn anywhere, anytime, with free interactive labs and progress-tracking.' }}</p>
-                    </div>
-                </div>
-                <div>
-                    <img alt="{{ $isId ? 'Materi terkurasi' : 'Learn from experts' }}" src="/web-security/images/landing-page/key-feature-icon-book.svg">
-                    <div>
-                        <p>{{ $isId ? 'Materi teknis mendalam' : 'Learn from experts' }}</p>
-                        <p>{{ $isId ? 'Disusun berdasarkan riset kerentanan web dan teknik eksploitasi yang teruji.' : "Produced by a world-class team - led by the author of The Web Application Hacker's Handbook." }}</p>
-                    </div>
+<div class="sdl-page">
+    <section class="sdl-hero">
+        <div class="sdl-hero__grid">
+            <div>
+                <span class="sdl-eyebrow">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    {{ $brand }} &bull; {{ $isId ? 'Platform Pelatihan Keamanan Web' : 'Hands-On Security Training' }}
+                </span>
+                <h1>{{ $isId ? 'Platform pelatihan keamanan web praktis' : 'Hands-on web security training, from fundamentals to exploit chains' }}</h1>
+                <p class="sdl-lead">
+                    @if ($isId)
+                        Pelajari cara kerja kerentanan web secara langsung di lingkungan lab yang terisolasi. Mulai dari teori dasar, uji payload nyata di workbench per sesi, lalu catat seluruh progres belajar Anda secara gratis.
+                    @else
+                        Learn how web vulnerabilities work by reading concise technical deep dives and exploiting isolated per-session labs directly inside your browser. Track your solved labs, explore real CVEs, and sharpen your defensive and offensive intuition.
+                    @endif
+                </p>
+                <div class="sdl-hero__actions">
+                    <a href="/web-security/getting-started" class="vla-btn vla-btn--primary">
+                        {{ $isId ? 'Mulai Belajar' : 'Get started' }}
+                    </a>
+                    <a href="/web-security/all-labs" class="vla-btn vla-btn--accent">
+                        {{ $isId ? 'Jelajahi 273 Lab' : 'Browse 273 Labs' }}
+                    </a>
+                    <a href="/web-security/learning-paths" class="vla-btn vla-btn--outline">
+                        {{ $isId ? 'Jalur Belajar' : 'Learning paths' }}
+                    </a>
                 </div>
             </div>
-        </div><div class="section-full-width theme-white">
-            <div class="container-columns-block">
-                <a class="" href="/web-security/llm-attacks/ai-powered-scanner-vulnerabilities">
-                    <img alt="AI-powered scanner vulnerabilities" class="desktop-show" src="/web-security/dashboard/images/hero-academy-getting-started-light-blue.jpg">
-                    <div>
-                        <h2>{{ $isId ? 'Lab baru: kerentanan pemindai berbasis AI' : 'New labs: AI-powered scanner vulnerabilities' }}</h2>
-                        <p>
-                            @if ($isId)
-                                Pelajari bagaimana indirect prompt injection dapat memanipulasi pemindai aplikasi berbasis AI untuk menjalankan aksi tidak sah, membocorkan data, dan mengirim permintaan internal tanpa izin.
-                            @else
-                                Learn how indirect prompt injection can be used to manipulate AI-powered web application scanners into performing unintended actions, exfiltrating sensitive data, and making unauthorized internal requests.
-                            @endif
-                        </p>
-                        <span class="chevron-after">{{ $isId ? 'Pelajari lebih lanjut' : 'Learn more' }}</span>
+
+            <div class="sdl-brand-panel">
+                <img
+                    src="/content/images/logos/secdevlab-icon-square-light.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-icon-square-light.png')) ?: '1' }}"
+                    alt="{{ $brand }}"
+                    class="sdl-brand-panel__art sdl-brand-panel__art--light"
+                    width="240"
+                    height="240"
+                >
+                <img
+                    src="/content/images/logos/secdevlab-icon-square-dark.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-icon-square-dark.png')) ?: '1' }}"
+                    alt="{{ $brand }}"
+                    class="sdl-brand-panel__art sdl-brand-panel__art--dark"
+                    width="240"
+                    height="240"
+                >
+                <div class="sdl-stat-strip">
+                    <div class="sdl-stat">
+                        <div class="sdl-stat__val">273</div>
+                        <div class="sdl-stat__lbl">{{ $isId ? 'Lab Interaktif' : 'Interactive Labs' }}</div>
                     </div>
-                </a>
-            </div>
-        </div><div class="container-section --center --gap-xlarge container-academy-vulnerabilities">
-            <div class="container2 --width-fixed">
-                <h2 id="learning-materials-and-labs">{{ $isId ? 'Materi belajar dan lab' : 'Learning materials and labs' }}</h2>
-                <div class="container-cards-academy">
-                    <input id="vulnerabilities-latest-1" type="radio" class="hidden ph-no-capture" name="slider-vulnerabilities-latest" value="1" checked="checked">
-                    <input id="vulnerabilities-latest-2" type="radio" class="hidden ph-no-capture" name="slider-vulnerabilities-latest" value="2">
-                    <input id="vulnerabilities-latest-3" type="radio" class="hidden ph-no-capture" name="slider-vulnerabilities-latest" value="3">
-                    <input id="vulnerabilities-latest-4" type="radio" class="hidden ph-no-capture" name="slider-vulnerabilities-latest" value="4">
-                    <p>{{ $isId ? 'Terbaru' : 'Latest' }}</p>
-                    <div>
-                        <div class="container-cards__nav-previous">
-                            <label for="vulnerabilities-latest-1"></label>
-                            <label for="vulnerabilities-latest-2"></label>
-                            <label for="vulnerabilities-latest-3"></label>
-                            <label for="vulnerabilities-latest-4"></label>
-                        </div>
-                        <a class="item-4 card-requestsmuggling" href="/web-security/web-cache-deception">
-                            <div>
-                                <p>Web cache deception</p>
-                                <p>5 {{ $isId ? 'lab' : 'labs' }}</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                                    <g transform="translate(-617.419 -1116.68)">
-                                        <g transform="translate(618.419 1117.68)">
-                                            <g>
-                                                <path d="M16,0A16,16,0,1,1,0,16,16,16,0,0,1,16,0Z" fill="none" stroke="#f63" stroke-width="2"></path>
-                                            </g>
-                                            <path d="M621.475,1126.156l6.121,7.564-6.121,7.435" transform="translate(-607.762 -1117.317)" fill="none" stroke="#f63" stroke-miterlimit="10" stroke-width="2"></path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </a>
-                        <a class="item-1 card-ssrf" href="/web-security/llm-attacks">
-                            <div>
-                                <p>Web LLM attacks</p>
-                                <p>7 {{ $isId ? 'lab' : 'labs' }}</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                                    <g transform="translate(-617.419 -1116.68)">
-                                        <g transform="translate(618.419 1117.68)">
-                                            <g>
-                                                <path d="M16,0A16,16,0,1,1,0,16,16,16,0,0,1,16,0Z" fill="none" stroke="#f63" stroke-width="2"></path>
-                                            </g>
-                                            <path d="M621.475,1126.156l6.121,7.564-6.121,7.435" transform="translate(-607.762 -1117.317)" fill="none" stroke="#f63" stroke-miterlimit="10" stroke-width="2"></path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </a>
-                        <a class="item-2 card-clickjacking" href="/web-security/api-testing">
-                            <div>
-                                <p>API testing</p>
-                                <p>5 {{ $isId ? 'lab' : 'labs' }}</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                                    <g transform="translate(-617.419 -1116.68)">
-                                        <g transform="translate(618.419 1117.68)">
-                                            <g>
-                                                <path d="M16,0A16,16,0,1,1,0,16,16,16,0,0,1,16,0Z" fill="none" stroke="#f63" stroke-width="2"></path>
-                                            </g>
-                                            <path d="M621.475,1126.156l6.121,7.564-6.121,7.435" transform="translate(-607.762 -1117.317)" fill="none" stroke="#f63" stroke-miterlimit="10" stroke-width="2"></path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </a>
-                        <a class="item-3 card-websockets" href="/web-security/nosql-injection">
-                            <div>
-                                <p>NoSQL injection</p>
-                                <p>4 {{ $isId ? 'lab' : 'labs' }}</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                                    <g transform="translate(-617.419 -1116.68)">
-                                        <g transform="translate(618.419 1117.68)">
-                                            <g>
-                                                <path d="M16,0A16,16,0,1,1,0,16,16,16,0,0,1,16,0Z" fill="none" stroke="#f63" stroke-width="2"></path>
-                                            </g>
-                                            <path d="M621.475,1126.156l6.121,7.564-6.121,7.435" transform="translate(-607.762 -1117.317)" fill="none" stroke="#f63" stroke-miterlimit="10" stroke-width="2"></path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </a>
-                        <div class="container-cards__nav-next">
-                            <label for="vulnerabilities-latest-1"></label>
-                            <label for="vulnerabilities-latest-2"></label>
-                            <label for="vulnerabilities-latest-3"></label>
-                            <label for="vulnerabilities-latest-4"></label>
-                        </div>
-                        <div class="container-cards__indicators">
-                            <label for="vulnerabilities-latest-1"></label>
-                            <label for="vulnerabilities-latest-2"></label>
-                            <label for="vulnerabilities-latest-3"></label>
-                            <label for="vulnerabilities-latest-4"></label>
-                        </div>
+                    <div class="sdl-stat">
+                        <div class="sdl-stat__val">31</div>
+                        <div class="sdl-stat__lbl">{{ $isId ? 'Topik Keamanan' : 'Security Topics' }}</div>
+                    </div>
+                    <div class="sdl-stat">
+                        <div class="sdl-stat__val">8</div>
+                        <div class="sdl-stat__lbl">{{ $isId ? 'Tipe Workbench' : 'Lab Archetypes' }}</div>
                     </div>
                 </div>
-                <div class="container-cards-academy">
-                    <input id="vulnerabilities-featured-1" type="radio" class="hidden ph-no-capture" name="slider-vulnerabilities-featured" value="1" checked="checked">
-                    <input id="vulnerabilities-featured-2" type="radio" class="hidden ph-no-capture" name="slider-vulnerabilities-featured" value="2">
-                    <input id="vulnerabilities-featured-3" type="radio" class="hidden ph-no-capture" name="slider-vulnerabilities-featured" value="3">
-                    <input id="vulnerabilities-featured-4" type="radio" class="hidden ph-no-capture" name="slider-vulnerabilities-featured" value="4">
-                    <p>{{ $isId ? 'Unggulan' : 'Featured' }}</p>
-                    <div>
-                        <div class="container-cards__nav-previous">
-                            <label for="vulnerabilities-featured-1"></label>
-                            <label for="vulnerabilities-featured-2"></label>
-                            <label for="vulnerabilities-featured-3"></label>
-                            <label for="vulnerabilities-featured-4"></label>
-                        </div>
-                        <a class="item-1 card-sqlinjection" href="/web-security/sql-injection">
-                            <div>
-                                <p>SQL injection</p>
-                                <p>16 {{ $isId ? 'lab' : 'labs' }}</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                                    <g transform="translate(-617.419 -1116.68)">
-                                        <g transform="translate(618.419 1117.68)">
-                                            <g>
-                                                <path d="M16,0A16,16,0,1,1,0,16,16,16,0,0,1,16,0Z" fill="none" stroke="#f63" stroke-width="2"></path>
-                                            </g>
-                                            <path d="M621.475,1126.156l6.121,7.564-6.121,7.435" transform="translate(-607.762 -1117.317)" fill="none" stroke="#f63" stroke-miterlimit="10" stroke-width="2"></path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </a>
-                        <a class="item-2 card-xss" href="/web-security/cross-site-scripting">
-                            <div>
-                                <p>Cross-site scripting (XSS)</p>
-                                <p>30 {{ $isId ? 'lab' : 'labs' }}</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                                    <g transform="translate(-617.419 -1116.68)">
-                                        <g transform="translate(618.419 1117.68)">
-                                            <g>
-                                                <path d="M16,0A16,16,0,1,1,0,16,16,16,0,0,1,16,0Z" fill="none" stroke="#f63" stroke-width="2"></path>
-                                            </g>
-                                            <path d="M621.475,1126.156l6.121,7.564-6.121,7.435" transform="translate(-607.762 -1117.317)" fill="none" stroke="#f63" stroke-miterlimit="10" stroke-width="2"></path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </a>
-                        <a class="item-3 card-csrf" href="/web-security/csrf">
-                            <div>
-                                <p>Cross-site request forgery (CSRF)</p>
-                                <p>8 {{ $isId ? 'lab' : 'labs' }}</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                                    <g transform="translate(-617.419 -1116.68)">
-                                        <g transform="translate(618.419 1117.68)">
-                                            <g>
-                                                <path d="M16,0A16,16,0,1,1,0,16,16,16,0,0,1,16,0Z" fill="none" stroke="#f63" stroke-width="2"></path>
-                                            </g>
-                                            <path d="M621.475,1126.156l6.121,7.564-6.121,7.435" transform="translate(-607.762 -1117.317)" fill="none" stroke="#f63" stroke-miterlimit="10" stroke-width="2"></path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </a>
-                        <a class="item-4 card-directorytraversal" href="/web-security/xxe">
-                            <div>
-                                <p>XXE injection</p>
-                                <p>9 {{ $isId ? 'lab' : 'labs' }}</p>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
-                                    <g transform="translate(-617.419 -1116.68)">
-                                        <g transform="translate(618.419 1117.68)">
-                                            <g>
-                                                <path d="M16,0A16,16,0,1,1,0,16,16,16,0,0,1,16,0Z" fill="none" stroke="#f63" stroke-width="2"></path>
-                                            </g>
-                                            <path d="M621.475,1126.156l6.121,7.564-6.121,7.435" transform="translate(-607.762 -1117.317)" fill="none" stroke="#f63" stroke-miterlimit="10" stroke-width="2"></path>
-                                        </g>
-                                    </g>
-                                </svg>
-                            </div>
-                        </a>
-                        <div class="container-cards__nav-next">
-                            <label for="vulnerabilities-featured-1"></label>
-                            <label for="vulnerabilities-featured-2"></label>
-                            <label for="vulnerabilities-featured-3"></label>
-                            <label for="vulnerabilities-featured-4"></label>
-                        </div>
-                        <div class="container-cards__indicators">
-                            <label for="vulnerabilities-featured-1"></label>
-                            <label for="vulnerabilities-featured-2"></label>
-                            <label for="vulnerabilities-featured-3"></label>
-                            <label for="vulnerabilities-featured-4"></label>
-                        </div>
-                    </div>
-                </div>
-                <a class="h4 chevron-after2" href="/web-security/all-materials">{{ $isId ? 'Lihat semua materi belajar' : 'View all learning materials' }}</a><span class="padding-left-m"></span><a class="h4 chevron-after2" href="/web-security/all-labs">{{ $isId ? 'Lihat semua lab' : 'View all labs' }}</a>
             </div>
-        </div><div class="container-section --gap-xlarge --center --text-large --width-narrow">
-            <h2 id="up-to-the-minute-learning-resources">{{ $isId ? 'Sumber belajar praktis terkini' : 'Up-to-the-minute learning resources' }}</h2>
-            @if ($isId)
-                <p>Akademi Keamanan Web menyediakan materi keamanan aplikasi web secara teratur, memadukan catatan teknis dasar, panduan langkah demi langkah, dan <a href="/cve">artikel analisis CVE</a> serta <a href="/web-security/web-application-hackers-handbook">metodologi pengujian aplikasi</a>.</p>
-                <p>Materi di sini disertai lab interaktif agar Anda bisa langsung mempraktikkan setiap konsep dan memahami cara celah ditemukan serta diperbaiki.</p>
+        </div>
+    </section>
+
+    <section class="sdl-section">
+        <div class="sdl-section__head">
+            <div>
+                <h2>{{ $isId ? 'Bagaimana Anda berlatih di ' . $brand : 'Everything you need to practice effectively' }}</h2>
+                <p class="vla-muted" style="margin:0">
+                    {{ $isId ? 'Alur belajar yang menggabungkan dokumentasi teknis, lab terisolasi, dan indeks CVE nyata.' : 'Structured documentation paired with live per-session labs, progress tracking, and curated CVE references.' }}
+                </p>
+            </div>
+        </div>
+
+        <div class="sdl-grid sdl-grid--4">
+            <a href="/web-security/all-topics" class="sdl-card">
+                <span class="sdl-card__icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                </span>
+                <h3>{{ $isId ? 'Materi & Referensi Teknis' : 'Technical Documentation' }}</h3>
+                <p>{{ $isId ? 'Pelajari mekanisme SQL injection, XSS, SSRF, OAuth, dan kerentanan modern lainnya beserta langkah mitigasinya.' : 'Study the mechanics behind SQL injection, XSS, SSRF, OAuth, deserialization, and race conditions.' }}</p>
+                <span class="sdl-card__footer">{{ $isId ? 'Lihat semua topik' : 'Explore 31 topics' }} &rarr;</span>
+            </a>
+
+            <a href="/web-security/all-labs" class="sdl-card">
+                <span class="sdl-card__icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </span>
+                <h3>{{ $isId ? 'Lab Eksploitasi Terisolasi' : 'Isolated Lab Workbench' }}</h3>
+                <p>{{ $isId ? 'Setiap peluncuran lab memberi sesi sandbox terpisah lengkap dengan token unik, batas waktu, dan inspektor HTTP.' : 'Launch dedicated per-user instances with capability tokens, TTL lifecycle controls, and realistic target UIs.' }}</p>
+                <span class="sdl-card__footer">{{ $isId ? 'Buka katalog lab' : 'Browse all labs' }} &rarr;</span>
+            </a>
+
+            <a href="/web-security/learning-paths" class="sdl-card">
+                <span class="sdl-card__icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                </span>
+                <h3>{{ $isId ? 'Jalur Belajar Terarah' : 'Structured Learning Paths' }}</h3>
+                <p>{{ $isId ? 'Ikuti urutan modul bertahap mulai dari tingkat Apprentice hingga skenario eksploitasi lanjutan.' : 'Follow step-by-step pathways organized by vulnerability topic and difficulty tier from Apprentice upward.' }}</p>
+                <span class="sdl-card__footer">{{ $isId ? 'Pilih jalur belajar' : 'View learning paths' }} &rarr;</span>
+            </a>
+
+            <a href="/web-security/dashboard" class="sdl-card">
+                <span class="sdl-card__icon" aria-hidden="true">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </span>
+                <h3>{{ $isId ? 'Pantau Progres & Peringkat' : 'Progress & Leaderboard' }}</h3>
+                <p>{{ $isId ? 'Rekam jumlah lab terselesaikan per tingkat kesulitan, cetak sertifikat progres lokal, dan bandingkan skor di papan peringkat.' : 'Monitor solved labs by Apprentice, Practitioner, and Expert tiers, print reports, and check the hall of fame.' }}</p>
+                <span class="sdl-card__footer">{{ $isId ? 'Buka dasbor' : 'Open dashboard' }} &rarr;</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="sdl-section">
+        <div class="sdl-section__head">
+            <div>
+                <h2>{{ $isId ? 'Akses Cepat Modul Unggulan' : 'Quick Links & Skill Checks' }}</h2>
+                <p class="vla-muted" style="margin:0">{{ $isId ? 'Latih kemampuan deteksi celah secara acak atau telaah referensi cheat sheet.' : 'Test yourself without spoilers or jump straight into high-signal references.' }}</p>
+            </div>
+        </div>
+
+        <div class="sdl-grid sdl-grid--3">
+            <a href="/web-security/mystery-lab-challenge" class="sdl-card">
+                <span class="sdl-badge">{{ $isId ? 'Uji Acak' : 'Blind Challenge' }}</span>
+                <h3>{{ $isId ? 'Lab Misteri' : 'Mystery Lab Challenge' }}</h3>
+                <p>{{ $isId ? 'Selesaikan skenario acak tanpa mengetahui kategori kerentanan sebelumnya untuk melatih analisis black-box.' : 'Launch a randomized lab with hidden category hints to sharpen real-world vulnerability discovery.' }}</p>
+                <span class="sdl-card__footer">{{ $isId ? 'Coba lab misteri' : 'Try mystery lab' }} &rarr;</span>
+            </a>
+
+            <a href="/web-security/certification" class="sdl-card">
+                <span class="sdl-badge">{{ $isId ? 'Persiapan Ujian' : 'Assessment' }}</span>
+                <h3>{{ $isId ? 'Sertifikasi & Ujian Praktik' : 'Practical Certification Guide' }}</h3>
+                <p>{{ $isId ? 'Pelajari alur persiapan ujian praktik keamanan aplikasi web dan panduan pengerjaan terstruktur.' : 'Review assessment format, methodology checklists, exam hints, and readiness criteria.' }}</p>
+                <span class="sdl-card__footer">{{ $isId ? 'Lihat panduan sertifikasi' : 'View certification guide' }} &rarr;</span>
+            </a>
+
+            <a href="/cve" class="sdl-card">
+                <span class="sdl-badge">CVE Index</span>
+                <h3>{{ $isId ? 'Ensiklopedia CVE' : 'CVE Advisory Encyclopedia' }}</h3>
+                <p>{{ $isId ? 'Telusuri referensi CVE berdasarkan tingkat keparahan dan hubungkan langsung dengan lab terkait.' : 'Inspect searchable CVE writeups mapped directly to hands-on vulnerability categories.' }}</p>
+                <span class="sdl-card__footer">{{ $isId ? 'Jelajahi CVE' : 'Browse CVEs' }} &rarr;</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="sdl-cta">
+        <div>
+            <h2 style="margin:0 0 6px">{{ $isId ? 'Siap mencoba lab pertama Anda?' : 'Ready to launch your first lab?' }}</h2>
+            <p class="vla-muted" style="margin:0">
+                @auth
+                    {{ $isId ? 'Akun Anda aktif. Lanjutkan progres dari katalog lab atau halaman dasbor.' : 'Your session is active. Pick a topic from the catalog or resume from your dashboard.' }}
+                @else
+                    {{ $isId ? 'Masuk atau buat akun gratis untuk menyimpan riwayat penyelesaian lab dan skor Anda.' : 'Sign in or create a free account to persist solved lab state and track your progress.' }}
+                @endauth
+            </p>
+        </div>
+        <div class="vla-btn-group">
+            @auth
+                <a href="/web-security/dashboard" class="vla-btn vla-btn--primary">{{ $isId ? 'Buka Dasbor' : 'Open Dashboard' }}</a>
+                <a href="/web-security/all-labs" class="vla-btn vla-btn--outline">{{ $isId ? 'Semua Lab' : 'All Labs' }}</a>
             @else
-                <p>The Web Security Academy is a structured training center for web application security. It combines foundational research materials, practical exploitation walkthroughs, and <a href="/cve">CVE analysis articles</a> alongside <a href="/web-security/web-application-hackers-handbook">application security methodology</a>.</p>
-                <p>Unlike a textbook, the Academy also includes interactive labs where you can put what you learn to the test. If you want to improve your knowledge of ethical hacking, or you'd like to become a security researcher or pentester, you're in the right place.</p>
-            @endif
-        </div><div class="container-section --gap-xlarge --width-fixed --text-large --layout-column no-padding-top no-padding-bottom container-academy-steps ph-no-capture">
-            <input id="step-learn" type="radio" class="hidden" name="slider-steps" value="learn" checked="checked">
-            <label for="step-learn">
-                <img alt="Learn" src="/web-security/images/landing-page/vulnerabilities-icon.svg"> {{ $isId ? 'Pelajari celah keamanan' : 'Learn about security vulnerabilities' }}
-            </label>
-            <div>
-                <img alt="Learn visual" src="/web-security/images/landing-page/carousel-vulnerabilities.jpg">
-            </div>
-            <input id="step-signup" type="radio" class="hidden" name="slider-steps" value="signup">
-            <label for="step-signup">
-                <img alt="Practice" src="/web-security/images/landing-page/practice-hacking-icon.svg"> {{ $isId ? 'Praktik eksploitasi langsung' : 'Practice hacking like a professional' }}
-            </label>
-            <div>
-                <img alt="Practice visual" src="/web-security/images/landing-page/carousel-practice-hacking.png">
-            </div>
-            <input id="step-test" type="radio" class="hidden" name="slider-steps" value="test">
-            <label for="step-test">
-                <img alt="Test" src="/web-security/images/landing-page/lab-icon.svg"> {{ $isId ? 'Uji kemampuan di lab interaktif' : 'Test yourself in our interactive labs' }}
-            </label>
-            <div>
-                <img alt="Test visual" src="/web-security/images/landing-page/carousel-lab.jpg">
-            </div>
-            <input id="step-track" type="radio" class="hidden" name="slider-steps" value="track">
-            <label for="step-track">
-                <img alt="Track" src="/web-security/images/landing-page/progress-icon.svg"> {{ $isId ? 'Pantau progres Anda' : 'Track your progress' }}
-            </label>
-            <div>
-                <img alt="Track visual" src="/web-security/images/landing-page/carousel-track-progress.png">
-            </div>
-        </div><div class="container-section --center --gap-xlarge">
-            @include('partials.widget', ['id' => 'academy-startlearningcta'])
-        </div><div class="container-section --gap-xlarge --width-fixed --text-large --layout-column no-padding-top">
-            <div class="column-block --width-medium smallscreen-center">
-                <h2 id="satisfy-your-curiosity-safely-and-legally">{{ $isId ? 'Belajar eksploitasi secara aman dan legal' : 'Satisfy your curiosity - safely and legally' }}</h2>
-                @if ($isId)
-                    <p>Latihan keamanan paling efektif dilakukan di lingkungan lokal terisolasi tanpa mengganggu sistem produksi. Karena itu setiap lab di {{ config('app.name') ?: 'SecDevLab' }} berjalan terpisah per pengguna.</p>
-                    <p>Anda bisa mengakses seluruh lab dan mencatat progres secara teratur dengan <a href="/users/register">membuat akun</a>.</p>
-                @else
-                    <p>Interactive security training works best in an isolated local environment where you can test payloads safely without risking production systems. That's why every lab in {{ config('app.name') ?: 'SecDevLab' }} runs per-user in isolated storage.</p>
-                    <p>The Web Security Academy exists to help anyone who wants to learn about web security in a safe and legal manner. You can access everything and track your progress by <a href="/users/register">creating an account</a>.</p>
-                @endif
-            </div>
-            <div class="column-block --center --width-medium">
-                <img alt="Student" src="/web-security/images/landing-page/student.png">
-            </div>
-        </div><div class="container-section --gap-xlarge --width-fixed --text-large --layout-column no-padding-top">
-            <div class="column-block --center --width-medium smallscreen-flex--order-2">
-                <img cms-ignore-validation="UNIQUE_IMG_ALT_TEXT" alt="Security Practice" src="/web-security/images/landing-page/community.png">
-            </div>
-            <div class="column-block --width-medium smallscreen-center">
-                <h2 id="hack-like-the-pros-do">{{ $isId ? 'Uji aplikasi dengan metode penguji keamanan' : 'Hack like the pros do' }}</h2>
-                @if ($isId)
-                    <p>Keamanan aplikasi web paling cepat dipahami lewat praktik langsung, bukan hanya teori. {{ config('app.name') ?: 'SecDevLab' }} memudahkan Anda mencoba skenario pengujian aplikasi secara langsung.</p>
-                    <p>Beberapa lab menuntut pemeriksaan permintaan HTTP, header, dan payload respons secara teliti. Jelajahi <a href="/web-security/all-labs">katalog lab lengkap</a> atau hubungkan tekniknya dengan artikel di <a href="/cve">Ensiklopedia CVE</a>.</p>
-                @else
-                    <p>Web security and ethical hacking are rewarding disciplines, and shouldn't be hidden behind opaque theory. {{ config('app.name') ?: 'SecDevLab' }} brings practical application security testing to every learner.</p>
-                    <p>Some interactive labs require inspecting HTTP requests, headers, and response payloads carefully. Explore our <a href="/web-security/all-labs">full lab catalog</a> or correlate techniques with advisories in our <a href="/cve">CVE Encyclopedia</a>.</p>
-                @endif
-            </div>
-        </div><div class="container-section --gap-xlarge --width-fixed --text-large --layout-column no-padding-top">
-            <div class="column-block --width-medium smallscreen-center">
-                <h2 id="web-security-training-built-for-humans-not-robots">{{ $isId ? 'Materi web security yang nyaman diikuti' : 'Web security training built for humans, not robots' }}</h2>
-                @if ($isId)
-                    <p>Membaca teori keamanan aplikasi bisa terasa membosankan bila tidak langsung dicoba. Karena itu setiap topik di sini dirancang berpasangan dengan lab praktik interaktif.</p>
-                    <p>Setiap modul memuat penjelasan teknis yang ringkas sekaligus tantangan terisolasi untuk mengasah kemampuan analisis dan mitigasi.</p>
-                @else
-                    <p>Let's face it, some of the online web application training out there can be a bit dull. That's why we've taken a fully interactive approach to web security training.</p>
-                    <p>While each topic in the Academy is explained in text, every module is paired with hands-on interactive labs designed to sharpen both offensive and defensive security skills.</p>
-                @endif
-            </div>
-            <div class="column-block --center --width-medium">
-                <img class="box-shadow2" alt="Video" src="/web-security/images/landing-page/video-graphic.jpg">
-            </div>
-        </div><div class="container-section --gap-xlarge --width-fixed --text-large --layout-column no-padding-top">
-            <div class="column-block --center --width-medium smallscreen-flex--order-2">
-                <img alt="Progress and Leaderboard" src="/web-security/images/landing-page/t-shirt-and-progress-bar.jpg">
-            </div>
-            <div class="column-block --width-medium smallscreen-center">
-              <h2 id="track-your-progress-win-cool-swag">{{ $isId ? 'Pantau progres dan cetak sertifikat Anda' : 'Track your progress & earn your certificate' }}</h2>
-              @if ($isId)
-                  <p>Lab disusun bertahap agar menantang sekaligus menyenangkan untuk dipecahkan. Anda bisa membandingkan skor penyelesaian di <a href="/web-security/hall-of-fame">Papan Peringkat Akademi</a>.</p>
-                  <p>Setiap lab yang diselesaikan menambah poin sesuai tingkat kesulitan di MySQL dan tercatat di <a href="/certificate">Sertifikat &amp; Laporan Progres</a> Anda.</p>
-              @else
-                  <p>Although we designed the labs to be fun, that doesn't necessarily mean they're easy. You can compare scores on the <a href="/web-security/hall-of-fame">Academy Leaderboard</a>.</p>
-                  <p>Every solved lab awards difficulty-weighted points in MySQL, updates your live ranking, and contributes toward your printable <a href="/certificate">Academic Certificate &amp; Progress Report</a>.</p>
-              @endif
-            </div>
-        </div><div class="container-section --width-fixed --text-large container-academy-topics">
-            <h2 id="all-topics">{{ $isId ? 'Semua topik' : 'All topics' }}</h2>
-            <div>
-                <a href="/web-security/sql-injection">SQL injection</a>
-                <a href="/web-security/cross-site-scripting">XSS</a>
-                <a href="/web-security/csrf">CSRF</a>
-                <a href="/web-security/clickjacking">Clickjacking</a>
-                <a href="/web-security/cors">CORS</a>
-                <a href="/web-security/xxe">XXE</a>
-                <a href="/web-security/ssrf">SSRF</a>
-                <a href="/web-security/request-smuggling">Request smuggling</a>
-                <a href="/web-security/os-command-injection">Command injection</a>
-                <a href="/web-security/server-side-template-injection">Server-side template injection</a>
-                <a href="/web-security/deserialization">Insecure deserialization</a>
-                <a href="/web-security/file-path-traversal">Path traversal</a>
-                <a href="/web-security/access-control">{{ $isId ? 'Kontrol akses' : 'Access control' }}</a>
-                <a href="/web-security/authentication">{{ $isId ? 'Autentikasi' : 'Authentication' }}</a>
-                <a href="/web-security/oauth">{{ $isId ? 'Autentikasi OAuth' : 'OAuth authentication' }}</a>
-                <a href="/web-security/logic-flaws">{{ $isId ? 'Logika bisnis' : 'Business logic vulnerabilities' }}</a>
-                <a href="/web-security/websockets">WebSockets</a>
-                <a href="/web-security/dom-based">DOM-based</a>
-                <a href="/web-security/web-cache-poisoning">Web cache poisoning</a>
-                <a href="/web-security/host-header">HTTP Host header attacks</a>
-                <a href="/web-security/information-disclosure">{{ $isId ? 'Kebocoran informasi' : 'Information disclosure' }}</a>
-                <a href="/web-security/file-upload">{{ $isId ? 'Unggah berkas' : 'File upload vulnerabilities' }}</a>
-                <a href="/web-security/jwt">{{ $isId ? 'Serangan JWT' : 'JWT attacks' }}</a>
-                <a href="/web-security/essential-skills">{{ $isId ? 'Keterampilan dasar' : 'Essential skills' }}</a>
-                <a href="/web-security/prototype-pollution">Prototype pollution</a>
-                <a href="/web-security/graphql">GraphQL API</a>
-                <a href="/web-security/race-conditions">Race conditions</a>
-                <a href="/web-security/nosql-injection">NoSQL injection</a>
-                <a href="/web-security/api-testing">{{ $isId ? 'Pengujian API' : 'API testing' }}</a>
-                <a href="/web-security/llm-attacks">{{ $isId ? 'Serangan Web LLM' : 'Web LLM attacks' }}</a>
-                <a href="/web-security/web-cache-deception">Web cache deception</a>
-                <a href="/web-security/video-guidelines">{{ $isId ? 'Panduan video' : 'Video guidelines' }}</a>
-                <a href="/web-security/credits">{{ $isId ? 'Kredit' : 'Credits' }}</a>
-                <a href="/web-security/lab-telemetry-privacy-notice">{{ $isId ? 'Kebijakan privasi telemetri lab' : 'Lab telemetry privacy notice' }}</a>
-            </div>
-        </div><div class="container-section --gap-xlarge --width-fixed">
-            <div class="container-keypoints">
-                <div>
-                    <a href="/web-security/getting-started">
-                        <p class="intro">{{ $isId ? 'Panduan memulai Akademi Keamanan Web' : 'Getting started with the Web Security Academy' }}</p>
-                        <div class="chevron-after">{{ $isId ? 'Selengkapnya' : 'Find out more' }}</div>
-                    </a>
-                </div>
-                <div>
-                    <a href="/web-security/all-topics">
-                        <p class="intro">{{ $isId ? 'Lihat semua topik materi' : 'View all Web Security Academy topics' }}</p>
-                        <div class="chevron-after">{{ $isId ? 'Selengkapnya' : 'Find out more' }}</div>
-                    </a>
-                </div>
-                <div>
-                    <a href="/web-security/hall-of-fame">
-                        <p class="intro">{{ $isId ? 'Pantau posisi di Papan Peringkat' : 'Track your progress in the Hall of Fame' }}</p>
-                        <div class="chevron-after">{{ $isId ? 'Selengkapnya' : 'Find out more' }}</div>
-                    </a>
-                </div>
-            </div>
-        </div>@include('partials.widget', ['id' => 'academy-startlearningbanner'])
+                <a href="/users/register" class="vla-btn vla-btn--primary">{{ $isId ? 'Buat Akun Gratis' : 'Create Free Account' }}</a>
+                <a href="/users" class="vla-btn vla-btn--outline">{{ $isId ? 'Masuk' : 'Log In' }}</a>
+            @endauth
+        </div>
+    </section>
+</div>
 @endsection

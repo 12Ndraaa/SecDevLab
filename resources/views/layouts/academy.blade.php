@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', config('app.name') ?: 'SecDevLab')</title>
+    <link rel="icon" type="image/png" href="/content/images/logos/secdevlab-favicon.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-favicon.png')) ?: '1' }}">
     @hasSection('legacy_css')
         @php
             $legacyCssHref = trim((string) $__env->yieldContent('legacy_css'));
@@ -12,8 +13,6 @@
             $legacyCssVer = @filemtime(public_path(ltrim($legacyCssPath, '/'))) ?: '1';
         @endphp
         <link href="{{ $legacyCssPath }}?v={{ $legacyCssVer }}" rel="stylesheet" type="text/css">
-        <link rel="preload" href="/content/fonts/ps-icons-small/ps-icons-small.woff?td2uot" as="font" crossorigin="anonymous">
-        <link rel="preload" href="/content/fonts/ps-main/ps-icons.woff?l1la2n" as="font" crossorigin="anonymous">
     @endif
     <link href="/content/fonts/fonts.css?v={{ @filemtime(public_path('content/fonts/fonts.css')) ?: '1' }}" rel="stylesheet" type="text/css">
     <link href="/content/academy-modern.css?v={{ @filemtime(public_path('content/academy-modern.css')) ?: '2' }}" rel="stylesheet" type="text/css">
@@ -25,14 +24,10 @@
 @endphp
 <header class="vla-topbar no-print" id="top">
     <div class="vla-topbar__inner">
-        <a class="vla-brand" href="/">
-            <span class="vla-brand__icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                    <path d="M9 12l2 2 4-4"/>
-                </svg>
-            </span>
-            <span>{{ $brandName }}</span>
+        <a class="vla-brand" href="/" aria-label="{{ $brandName }}">
+            <img src="/content/images/logos/secdevlab-logo-wide-light.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-light.png')) ?: '1' }}" alt="{{ $brandName }}" class="vla-brand__logo vla-brand__logo--light" height="34">
+            <img src="/content/images/logos/secdevlab-logo-wide-dark.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-dark.png')) ?: '1' }}" alt="{{ $brandName }}" class="vla-brand__logo vla-brand__logo--dark" height="34">
+            <span class="vla-sr-only">{{ $brandName }}</span>
         </a>
 
         <input type="checkbox" id="vla-mobile-nav" class="vla-mobile-toggle-input">
@@ -133,10 +128,13 @@
 
 <footer class="vla-footer no-print">
     <div class="vla-footer__inner">
-        <div>
-            <strong>{{ $brandName }}</strong>
-            <div class="vla-muted-sm">{{ __('academy.footer.tagline') }}</div>
-            <div class="vla-muted-sm">&copy; {{ date('Y') }} {{ $brandName }}. {{ __('academy.footer.copyright') }}</div>
+        <div class="vla-footer__brand">
+            <img src="/content/images/logos/secdevlab-mascot.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-mascot.png')) ?: '1' }}" alt="" class="vla-footer__mascot" width="32" height="32" aria-hidden="true">
+            <div>
+                <strong>{{ $brandName }}</strong>
+                <div class="vla-muted-sm">{{ __('academy.footer.tagline') }}</div>
+                <div class="vla-muted-sm">&copy; {{ date('Y') }} {{ $brandName }}. {{ __('academy.footer.copyright') }}</div>
+            </div>
         </div>
         <div class="vla-footer__links">
             <a href="/">{{ __('academy.nav.home') }}</a>

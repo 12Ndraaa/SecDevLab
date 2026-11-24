@@ -503,6 +503,9 @@ class PageLocalization
         if (str_starts_with($slug, 'web-security__')) {
             $rest = substr($slug, strlen('web-security__'));
             $parts = explode('__', $rest);
+            if ($parts[0] === 'learning-paths' && isset($parts[3]) && $parts[3] !== '') {
+                return $parts[3];
+            }
 
             return $parts[0] ?: 'hubs';
         }
