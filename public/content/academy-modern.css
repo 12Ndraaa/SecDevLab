@@ -77,11 +77,6 @@
   --vla-shadow: 0 1px 2px rgba(10, 10, 10, 0.04);
   --vla-shadow-md: 0 6px 20px rgba(10, 10, 10, 0.06);
   --vla-nav-bg: rgba(255, 255, 255, 0.92);
-
-  color-scheme: light;
-  --vla-scrollbar-track: var(--vla-bg);
-  --vla-scrollbar-thumb: #8D8D95;
-  --vla-scrollbar-code-thumb: #58626E;
 }
 
 [data-theme="dark"] {
@@ -153,45 +148,17 @@
   --vla-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   --vla-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
   --vla-nav-bg: rgba(13, 17, 23, 0.92);
-
-  color-scheme: dark;
-  --vla-scrollbar-track: var(--vla-bg);
-  --vla-scrollbar-thumb: #6D757E;
-  --vla-scrollbar-code-thumb: #58626E;
-}
-
-@supports (color: color-mix(in srgb, #000 50%, #fff)) {
-  :root,
-  [data-theme="light"],
-  [data-theme="dark"] {
-    --vla-scrollbar-thumb: color-mix(in srgb, var(--vla-text-muted) 55%, var(--vla-border-strong));
-    --vla-scrollbar-code-thumb: color-mix(in srgb, #8B949E 55%, var(--vla-terminal-border));
-  }
 }
 
 *, *::before, *::after {
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 76px;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-scrollbar-track);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-}
-
 html, body {
   margin: 0;
   padding: 0;
   max-width: 100%;
-  overflow-x: clip;
+  overflow-x: hidden;
   background-color: var(--vla-bg) !important;
   color: var(--vla-text) !important;
   font-family: var(--vla-font-sans) !important;
@@ -199,11 +166,6 @@ html, body {
   line-height: 1.62;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Override legacy ps*.css body horizontal-hidden rule so html remains the single viewport scroller */
-html body {
-  overflow-x: clip;
 }
 
 a {
@@ -1033,9 +995,6 @@ header.vla-topbar a.vla-btn--primary:hover {
   font-size: 0.82rem;
   line-height: 1.58;
   overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vla-scrollbar-code-thumb) var(--vla-terminal-bg);
 }
 
 .vla-instance-bar {
@@ -1182,13 +1141,6 @@ header.vla-topbar a.vla-btn--primary:hover {
   box-shadow: 0 0 0 3px var(--vla-accent-soft);
 }
 
-.vla-form textarea,
-.vla-learning-content textarea {
-  overscroll-behavior-y: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-bg-elevated);
-}
-
 .vla-filter-row input[type="text"],
 .vla-filter-row input[type="search"] {
   flex: 1 1 220px;
@@ -1222,9 +1174,6 @@ header.vla-topbar a.vla-btn--primary:hover {
 /* ---------- Tables ---------- */
 .vla-table-wrap {
   overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-surface);
   border: 1px solid var(--vla-border);
   border-radius: 12px;
   background: var(--vla-surface);
@@ -1274,9 +1223,6 @@ header.vla-topbar a.vla-btn--primary:hover {
   border-radius: 10px;
   padding: 14px 16px;
   overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vla-scrollbar-code-thumb) var(--vla-code-bg);
   font-size: 0.84rem;
   line-height: 1.55;
   white-space: pre-wrap;
@@ -1380,11 +1326,6 @@ header.vla-topbar a.vla-btn--primary:hover {
   top: 78px !important;
   max-height: calc(100vh - 96px) !important;
   overflow-y: auto !important;
-  overscroll-behavior: contain;
-  overscroll-behavior-y: contain;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-surface);
   box-shadow: var(--vla-shadow) !important;
 }
 
@@ -1939,9 +1880,6 @@ header.vla-topbar a.vla-btn--primary:hover {
   font-size: 0.84rem !important;
   line-height: 1.55 !important;
   overflow-x: auto !important;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vla-scrollbar-code-thumb) var(--vla-code-bg);
   white-space: pre-wrap;
   box-sizing: border-box !important;
 }
@@ -1949,8 +1887,6 @@ header.vla-topbar a.vla-btn--primary:hover {
 .vla-learning-content pre code {
   border: none !important;
   padding: 0 !important;
-  overflow-x: visible !important;
-  overscroll-behavior: auto;
 }
 
 .code-scrollable {
@@ -2383,10 +2319,6 @@ footer.vla-footer,
 
 /* ---------- Responsive Rules ---------- */
 @media (max-width: 1179px) {
-  html {
-    scroll-padding-top: 124px;
-  }
-
   .vla-topbar__inner {
     height: auto;
     min-height: 60px;
@@ -2487,9 +2419,6 @@ footer.vla-footer,
     max-width: 100%;
     width: 100%;
     overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
-    scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-surface);
     -webkit-overflow-scrolling: touch;
   }
 
@@ -2597,9 +2526,6 @@ footer.vla-footer,
   .vla-subnav {
     flex-wrap: nowrap;
     overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
-    scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-surface);
     -webkit-overflow-scrolling: touch;
     padding-bottom: 4px;
   }
@@ -2744,12 +2670,6 @@ footer.vla-footer,
     --vla-emerald: #047857;
   }
 
-  html {
-    scroll-behavior: auto;
-    scroll-padding-top: 0;
-    scrollbar-gutter: auto;
-  }
-
   html, body {
     background: #FFFFFF !important;
     color: #0F172A !important;
@@ -2877,9 +2797,6 @@ footer.vla-footer,
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
-    scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-surface);
     -webkit-overflow-scrolling: touch;
   }
 
@@ -2931,7 +2848,6 @@ footer.vla-footer,
   .vla-learning-content code.code-scrollable {
     max-width: 100%;
     overflow-x: auto;
-    overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box;
   }
@@ -2946,9 +2862,6 @@ footer.vla-footer,
     flex-wrap: nowrap;
     max-width: 100%;
     overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: thin;
-    scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-surface);
     -webkit-overflow-scrolling: touch;
   }
 
@@ -3092,12 +3005,6 @@ footer.vla-footer,
 
   .sdl-cta {
     padding: 18px 16px;
-  }
-}
-
-@media (max-width: 360px) {
-  html {
-    scroll-padding-top: 152px;
   }
 }
 
@@ -3389,39 +3296,10 @@ a.sdl-card:hover {
   flex-shrink: 0;
 }
 
-.vla-learning-content table:not(.vla-table),
-.vla-learning-content table.is-nonresponsive-table {
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-surface);
-}
-
-.vla-learning-content table.is-nonresponsive-table {
+.vla-learning-content .maincontainer table.is-nonresponsive-table {
   max-width: 100%;
   display: block;
   overflow-x: auto;
-}
-
-.vla-learning-content .tg-wrap,
-.vla-learning-content .tg-wrap .tg-wrap,
-.vla-learning-content .container-code,
-.vla-learning-content .container-code code,
-.vla-learning-content .maincontainer table,
-.vla-learning-content .xss-cheat-sheet-table {
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--vla-scrollbar-thumb) var(--vla-surface);
-}
-
-.vla-learning-content .tg-wrap,
-.vla-learning-content .tg-wrap .tg-wrap,
-.vla-learning-content .xss-cheat-sheet-table {
-  max-width: 100%;
-  overflow-x: auto;
-}
-
-.vla-learning-content .maincontainer table.nonresponsive-table-container {
-  overscroll-behavior: contain;
 }
 
 @media (max-width: 900px) {
