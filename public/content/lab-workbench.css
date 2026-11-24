@@ -76,6 +76,11 @@
 
   --lw-shadow: 0 1px 2px rgba(10, 10, 10, 0.04);
   --lw-shadow-md: 0 6px 20px rgba(10, 10, 10, 0.07);
+
+  color-scheme: light;
+  --lw-scrollbar-track: var(--lw-bg);
+  --lw-scrollbar-thumb: #8D8D95;
+  --lw-scrollbar-code-thumb: #58626E;
 }
 
 [data-theme="dark"] {
@@ -146,6 +151,20 @@
 
   --lw-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
   --lw-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+
+  color-scheme: dark;
+  --lw-scrollbar-track: var(--lw-bg);
+  --lw-scrollbar-thumb: #6D757E;
+  --lw-scrollbar-code-thumb: #58626E;
+}
+
+@supports (color: color-mix(in srgb, #000 50%, #fff)) {
+  :root,
+  [data-theme="light"],
+  [data-theme="dark"] {
+    --lw-scrollbar-thumb: color-mix(in srgb, var(--lw-muted) 55%, var(--lw-border-strong));
+    --lw-scrollbar-code-thumb: color-mix(in srgb, #8B949E 55%, var(--lw-terminal-border));
+  }
 }
 
 /* ---------- 8 Distinct Archetype Visual Signatures ---------- */
@@ -319,6 +338,24 @@ body.lw-archetype--http-inspector {
 
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 164px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lw-scrollbar-thumb) var(--lw-scrollbar-track);
+}
+
+html:has(.notification-labsolved) {
+  scroll-padding-top: 216px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 html, body {
@@ -984,6 +1021,10 @@ code {
   font-family: var(--lw-font-mono);
   font-size: 0.83rem;
   line-height: 1.58;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lw-scrollbar-code-thumb) var(--lw-terminal-bg);
   white-space: pre-wrap;
   word-break: break-word;
   min-height: 150px;
@@ -1150,6 +1191,9 @@ code {
   font-size: 0.83rem;
   line-height: 1.58;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lw-scrollbar-code-thumb) var(--lw-terminal-bg);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -1245,8 +1289,26 @@ code {
   font-size: 0.83rem;
 }
 
+.lw-form textarea {
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lw-scrollbar-thumb) var(--lw-surface);
+}
+
+.lw-card pre,
+.lw-ide-pane__body pre {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lw-scrollbar-thumb) var(--lw-surface);
+}
+
 .lw-table-wrap {
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lw-scrollbar-thumb) var(--lw-surface);
   border: 1px solid var(--lw-border);
   border-radius: 10px;
   background: var(--lw-surface);
@@ -1374,6 +1436,11 @@ code {
 .lw-chat-log {
   height: 310px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--lw-scrollbar-thumb) var(--lw-surface-2);
   padding: 14px;
   background: var(--lw-surface-2);
   color: var(--lw-text);
@@ -1428,6 +1495,14 @@ code {
 }
 
 @media (max-width: 900px) {
+  html {
+    scroll-padding-top: 232px;
+  }
+
+  html:has(.notification-labsolved) {
+    scroll-padding-top: 288px;
+  }
+
   .lw-grid--split,
   .lw-grid--balanced,
   .lw-identity-grid,
@@ -1457,6 +1532,14 @@ code {
 }
 
 @media (max-width: 640px) {
+  html {
+    scroll-padding-top: 284px;
+  }
+
+  html:has(.notification-labsolved) {
+    scroll-padding-top: 368px;
+  }
+
   .sdl-command-bar,
   .lw-shell {
     padding-left: 12px;
@@ -1466,6 +1549,9 @@ code {
   .lw-subnav__links {
     flex-wrap: nowrap;
     overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--lw-scrollbar-thumb) var(--lw-surface);
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
     padding-bottom: 2px;
@@ -1484,6 +1570,14 @@ code {
 }
 
 @media (max-width: 480px) {
+  html {
+    scroll-padding-top: 364px;
+  }
+
+  html:has(.notification-labsolved) {
+    scroll-padding-top: 476px;
+  }
+
   .sdl-command-bar__top {
     gap: 8px;
   }
@@ -1611,5 +1705,13 @@ code {
   .lw-diag-console__body,
   .lw-terminal__body {
     padding: 12px;
+  }
+}
+
+@media print {
+  html {
+    scroll-behavior: auto;
+    scroll-padding-top: 0;
+    scrollbar-gutter: auto;
   }
 }
