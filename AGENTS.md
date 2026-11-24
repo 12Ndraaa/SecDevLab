@@ -11,5 +11,6 @@
 - Semua link CSS di layout Academy maupun Lab Workbench wajib menyertakan cache-busting `?v={{ @filemtime(...) }}`.
 - Webfont baru harus di-bundle sebagai aset lokal (`.woff2` + `@font-face`) di `public/content/fonts/` agar lolos CSP `font-src 'self'` dan Zero-JS.
 - Dilarang mengedit file migrasi yang sudah ter-deploy ke Railway/Laragon MySQL; selalu buat file migrasi aditif baru.
+- Jika user meminta menjalankan/menguji perubahan di lokal terlebih dahulu sebelum masuk repo, berhenti setelah verifikasi lokal dan minta konfirmasi user sebelum menjalankan `git push`.
 - Setelah push perubahan UI ke `main`, verifikasi deployment live menggunakan `browseros-neo` (cek screenshot serta `getComputedStyle` & `document.fonts`) sebelum menutup tugas.
 - Setiap audit UI wajib mengecek rute yang memuat CSS legacy (`psacademy.css`, `ps*.css`) untuk ukuran form `.vla-topbar`, kontras heading, nol gambar 404/merek PortSwigger/Web Security Academy, sambil mempertahankan diagram konsep teknis kerentanan.
