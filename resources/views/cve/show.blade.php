@@ -34,7 +34,7 @@
         <div class="vla-card vla-card--compact" style="background:var(--vla-surface-2);box-shadow:none">
             <div class="vla-muted-sm">{{ __('academy.cve.related_category') }}</div>
             @if ($article->category)
-                <a href="{{ $article->category->topic_route }}"><strong>{{ $article->category->title }}</strong></a>
+                <a href="{{ $article->category->topic_route }}"><strong>{{ $article->category->localizedTitle() }}</strong></a>
             @else
                 <strong>{{ __('academy.cve.uncategorized') }}</strong>
             @endif
@@ -82,7 +82,7 @@
             @if ($article->lab)
                 <div class="highlightedarea" style="margin-top:0">
                     <div class="vla-badge vla-badge--orange" style="margin-bottom:8px">{{ __('academy.cve.direct_lab') }}</div>
-                    <div><strong><a href="{{ $article->lab->href }}">{{ $article->lab->title }}</a></strong></div>
+                    <div><strong><a href="{{ $article->lab->href }}">{{ $article->lab->localizedTitle() }}</a></strong></div>
                     <div class="vla-btn-group" style="margin-top:10px">
                         <a href="{{ $article->lab->href }}" class="vla-btn vla-btn--outline vla-btn--sm">{{ __('academy.cve.lab_details') }}</a>
                         <a href="/academy/labs/launch/{{ $article->lab->id }}" class="vla-btn vla-btn--primary vla-btn--sm">{{ __('academy.cve.launch_lab') }}</a>
@@ -95,7 +95,7 @@
                     @foreach ($relatedLabs as $rl)
                         <li style="margin-bottom:10px">
                             <span class="{{ $rl->difficulty_class }}">{{ $rl->difficulty }}</span>
-                            <a href="{{ $rl->href }}"><strong>{{ $rl->title }}</strong></a>
+                            <a href="{{ $rl->href }}"><strong>{{ $rl->localizedTitle() }}</strong></a>
                         </li>
                     @endforeach
                 </ul>

@@ -124,8 +124,8 @@
                     @forelse ($solvedSessions as $idx => $sess)
                         <tr>
                             <td>{{ $idx + 1 }}</td>
-                            <td>{{ $sess->lab?->title ?? $sess->lab_id }}</td>
-                            <td>{{ $sess->lab?->category?->title ?? '-' }}</td>
+                            <td>{{ $sess->lab?->localizedTitle() ?? $sess->lab_id }}</td>
+                            <td>{{ $sess->lab?->category?->localizedTitle() ?? '-' }}</td>
                             <td>{{ $sess->lab?->difficulty ?? '-' }}</td>
                             <td>{{ $sess->solved_at?->translatedFormat('d M Y H:i') ?? '-' }}</td>
                         </tr>

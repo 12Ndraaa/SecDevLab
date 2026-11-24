@@ -20,7 +20,7 @@ class CveController extends Controller
 
         $isOwner = Auth::user()?->isOwner() ?? false;
 
-        $query = CveArticle::with(['category:id,title,topic_route', 'lab:id,title,href,difficulty']);
+        $query = CveArticle::with(['category:id,title,topic_route', 'lab:id,category_id,title,href,difficulty']);
         if (! $isOwner) {
             $query->published();
         }

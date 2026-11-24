@@ -431,4 +431,312 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $this->assertStringContainsString('<html lang="en"', $homeEn);
         $this->assertStringContainsString('Explore All Labs', $homeEn);
     }
+
+    public function test_all_31_categories_and_273_labs_and_id_dictionaries_pass_strict_localization_audits(): void
+    {
+        $categories = Category::orderBy('sort_order')->get();
+        $this->assertCount(31, $categories);
+
+        $labs = Lab::orderBy('category_id')->orderBy('sort_order')->get();
+        $this->assertCount(273, $labs);
+
+        $expectedSectionTitlesId = [
+            'Hint' => 'Petunjuk',
+            'Tip' => 'Tips',
+            'Passwords' => 'Daftar Kata Sandi',
+            'Solution' => 'Solusi',
+            'Manual solution' => 'Solusi manual',
+            'DOM Invader solution' => 'Solusi DOM Invader',
+            'Solution - Burp Suite Professional' => 'Solusi Burp Suite Professional',
+            'Solution - Burp Suite Community Edition' => 'Solusi Burp Suite Community Edition',
+            'Community solutions' => 'Solusi komunitas',
+        ];
+
+        $unresolvedTokenPattern = '/\[\[(?:[CAS]\d+|\/[CAS]\d+)\]\]/';
+        $codeBlockPattern = '/<pre\b[^>]*>.*?<\/pre>|<code\b[^>]*>.*?<\/code>/is';
+
+        foreach ($categories as $category) {
+            $this->assertSame($category->title, $category->localizedTitle('en'));
+            $idTitle = $category->localizedTitle('id');
+            $this->assertNotSame('', trim($idTitle), "Missing ID title for category {$category->id}");
+            $this->assertFileExists(lang_path("id/catalog_labs/{$category->id}.php"));
+        }
+
+        foreach ($labs as $lab) {
+            // EN preservation
+            $this->assertSame($lab->title, $lab->localizedTitle('en'));
+            $this->assertSame((string) ($lab->description_html ?? ''), $lab->localizedDescriptionHtml('en'));
+            $this->assertSame(is_array($lab->sections) ? $lab->sections : [], $lab->localizedSections('en'));
+
+            // ID translation & verbatim code preservation
+            $idTitle = $lab->localizedTitle('id');
+            $this->assertNotSame('', trim($idTitle), "Missing ID title for lab {$lab->id}");
+            $this->assertDoesNotMatchRegularExpression($unresolvedTokenPattern, $idTitle, "Unresolved token in title for {$lab->id}");
+
+            $enDesc = (string) ($lab->description_html ?? '');
+            $idDesc = $lab->localizedDescriptionHtml('id');
+            $this->assertNotSame('', trim($idDesc), "Missing ID description for lab {$lab->id}");
+            $this->assertDoesNotMatchRegularExpression($unresolvedTokenPattern, $idDesc, "Unresolved token in description for {$lab->id}");
+
+            if (preg_match_all($codeBlockPattern, $enDesc, $descCodeMatches)) {
+                foreach ($descCodeMatches[0] as $verbatimCode) {
+                    $this->assertStringContainsString(
+                        $verbatimCode,
+                        $idDesc,
+                        "Code/pre block altered in ID description for lab {$lab->id}"
+                    );
+                }
+            }
+
+            $enSections = is_array($lab->sections) ? $lab->sections : [];
+            $idSections = $lab->localizedSections('id');
+            $this->assertCount(count($enSections), $idSections, "Section count mismatch for lab {$lab->id}");
+
+            foreach ($enSections as $idx => $enSec) {
+                if (! is_array($enSec)) {
+                    continue;
+                }
+                $idSec = $idSections[$idx] ?? [];
+                $origTitle = (string) ($enSec['title'] ?? '');
+                $expectedTitle = $expectedSectionTitlesId[$origTitle] ?? $origTitle;
+                $this->assertSame($expectedTitle, (string) ($idSec['title'] ?? ''), "Section title mismatch for {$lab->id}#{$idx}");
+
+                $enBody = (string) ($enSec['bodyHtml'] ?? '');
+                $idBody = (string) ($idSec['bodyHtml'] ?? '');
+                $this->assertDoesNotMatchRegularExpression($unresolvedTokenPattern, $idBody, "Unresolved token in section body for {$lab->id}#{$idx}");
+
+                if (preg_match_all($codeBlockPattern, $enBody, $secCodeMatches)) {
+                    foreach ($secCodeMatches[0] as $verbatimCode) {
+                        $this->assertStringContainsString(
+                            $verbatimCode,
+                            $idBody,
+                            "Code/pre block altered in ID section {$idx} for lab {$lab->id}"
+                        );
+                    }
+                }
+            }
+        }
+
+        // Audit all Indonesian dictionary files for dashes, syntax, and balanced placeholders
+        $dictFiles = array_merge(
+            glob(lang_path('id/pages/*.php')) ?: [],
+            glob(lang_path('id/catalog_labs/*.php')) ?: [],
+            [lang_path('id/catalog_categories.php'), lang_path('id/lab_runtime.php')]
+        );
+        $this->assertGreaterThanOrEqual(63, count($dictFiles));
+
+        $walkStrings = static function (mixed $node, callable $visitor) use (&$walkStrings): void {
+            if (is_array($node)) {
+                foreach ($node as $k => $v) {
+                    if (is_string($v)) {
+                        $visitor($v, is_string($k) ? $k : null);
+                    } else {
+                        $walkStrings($v, $visitor);
+                    }
+                }
+            }
+        };
+
+        foreach ($dictFiles as $file) {
+            $data = require $file;
+            $this->assertIsArray($data, "Dictionary must return an array: {$file}");
+            $basename = basename($file);
+            $isPageDict = dirname($file) === lang_path('id/pages');
+
+            $walkStrings($data, function (string $val, ?string $key) use ($basename, $isPageDict): void {
+                $this->assertStringNotContainsString("\u{2014}", $val, "Em-dash forbidden in ID dictionary {$basename}: {$val}");
+                $this->assertStringNotContainsString("\u{2013}", $val, "En-dash forbidden in ID dictionary {$basename}: {$val}");
+
+                if (preg_match_all('/\[\[([AS])(\d+)\]\]/', $val, $opens)) {
+                    foreach ($opens[0] as $i => $openTag) {
+                        $closeTag = '[['.'/'.$opens[1][$i].$opens[2][$i].']]';
+                        $this->assertStringContainsString($closeTag, $val, "Unclosed placeholder {$openTag} in {$basename}");
+                    }
+                }
+
+                if ($isPageDict && $key !== null && preg_match_all('/\[\[(?:[CAS]\d+|\/[CAS]\d+)\]\]/', $val, $valTokens)) {
+                    foreach ($valTokens[0] as $tok) {
+                        $this->assertStringContainsString($tok, $key, "Placeholder {$tok} missing from English key in {$basename}: {$key}");
+                    }
+                }
+            });
+        }
+    }
+
+    public function test_curriculum_pages_render_full_indonesian_localization_with_intact_code_and_english_fallback(): void
+    {
+        // Verify 375px responsive CSS markers in both Academy and Lab Workbench stylesheets
+        $academyCss = (string) file_get_contents(public_path('content/academy-modern.css'));
+        $workbenchCss = (string) file_get_contents(public_path('content/lab-workbench.css'));
+        $this->assertStringContainsString('overflow-x: clip;', $academyCss);
+        $this->assertStringContainsString('overflow-x: clip;', $workbenchCss);
+        $this->assertStringContainsString('@media screen and (max-width: 760px)', $academyCss);
+        $this->assertStringContainsString('@media screen and (max-width: 480px)', $academyCss);
+        $this->assertStringContainsString('.container-cards-white-medium-space-between > *', $academyCss);
+        $this->assertStringContainsString('@media (max-width: 390px)', $workbenchCss);
+        $this->assertStringContainsString('.lw-card pre,', $workbenchCss);
+
+        // Switch session locale to Indonesian
+        $this->post('/preferences/locale', ['locale' => 'id', 'redirect_to' => '/'])
+            ->assertRedirect('/');
+
+        $curriculumChecks = [
+            '/web-security/sql-injection' => [
+                'expected' => ['SQL injection', 'LAB PRAKTIK'],
+                'code' => ["SELECT * FROM products WHERE category = 'Gifts' AND released = 1"],
+            ],
+            '/web-security/cross-site-scripting' => [
+                'expected' => ['Cross-site scripting'],
+                'code' => ['&lt;script&gt;'],
+            ],
+            '/web-security/csrf' => [
+                'expected' => ['Cross-site request forgery'],
+                'code' => ['POST'],
+            ],
+            '/web-security/ssrf' => [
+                'expected' => ['Server-side request forgery'],
+                'code' => ['127.0.0.1', 'http://192.168.0.68/admin', '2130706433'],
+            ],
+            '/web-security/host-header' => [
+                'expected' => ['Serangan HTTP Host header', 'Apa itu HTTP Host header?', 'Cara mencegah serangan HTTP Host header'],
+                'code' => ['ALLOWED_HOSTS', 'X-Forwarded-Host'],
+            ],
+            '/web-security/host-header/exploiting' => [
+                'expected' => ['Cara mengidentifikasi dan mengeksploitasi kerentanan HTTP Host header', 'Tambahkan indentasi baris header', 'Jika frontend mengabaikan baris berspasi'],
+                'code' => ['vulnerable-website.com', 'X-Forwarded-Host', 'X-HTTP-Host-Override'],
+            ],
+            '/web-security/authentication' => [
+                'expected' => ['autentikasi', 'LAB PRAKTIK'],
+                'code' => [],
+            ],
+            '/web-security/access-control' => [
+                'expected' => ['kontrol akses', 'LAB PRAKTIK'],
+                'code' => [],
+            ],
+            '/web-security/dom-based' => [
+                'expected' => ['Kerentanan berbasis DOM'],
+                'code' => ['location.search'],
+            ],
+            '/web-security/information-disclosure' => [
+                'expected' => ['kebocoran informasi'],
+                'code' => [],
+            ],
+            '/web-security/file-upload' => [
+                'expected' => ['Kerentanan file upload', 'unggah berkas'],
+                'code' => ['Content-Type'],
+            ],
+            '/web-security/graphql' => [
+                'expected' => ['Kerentanan API GraphQL'],
+                'code' => ['__schema'],
+            ],
+            '/web-security/race-conditions' => [
+                'expected' => ['Race conditions'],
+                'code' => [],
+            ],
+            '/web-security/nosql-injection' => [
+                'expected' => ['NoSQL injection', 'Injeksi sintaks NoSQL', 'Injeksi operator NoSQL', 'Mencocokkan dokumen yang memenuhi ekspresi JavaScript tertentu'],
+                'code' => ['$ne', '$where'],
+            ],
+            '/web-security/prototype-pollution' => [
+                'expected' => ['Prototype pollution'],
+                'code' => ['__proto__'],
+            ],
+            '/web-security/api-testing' => [
+                'expected' => ['Pengujian API'],
+                'code' => [],
+            ],
+            '/web-security/llm-attacks' => [
+                'expected' => ['Serangan Web LLM'],
+                'code' => [],
+            ],
+            '/web-security/learning-paths/sql-injection' => [
+                'expected' => ['SQL injection', 'Jalur belajar', 'Mengambil data tersembunyi', 'Serangan SQL injection UNION'],
+                'code' => [],
+            ],
+            '/web-security/learning-paths/server-side-vulnerabilities-apprentice' => [
+                'expected' => ['Kerentanan sisi server'],
+                'code' => [],
+            ],
+            '/web-security/certification/how-to-prepare' => [
+                'expected' => ['Dapatkan Sertifikasi Burp Suite', 'Gratis (Mode Offline Lokal)'],
+                'code' => [],
+            ],
+            '/web-security/certification/practice-exam' => [
+                'expected' => ['Ujian', 'praktik'],
+                'code' => [],
+            ],
+            '/web-security/credits' => [
+                'expected' => ['Siapa di balik Akademi Keamanan Web?', 'Kontribusi komunitas'],
+                'code' => [],
+            ],
+            '/web-security/video-guidelines' => [
+                'expected' => ['Panduan pengiriman video solusi'],
+                'code' => ['support@portswigger.net'],
+            ],
+            '/web-security/lab-telemetry-privacy-notice' => [
+                'expected' => ['Pemberitahuan Privasi Telemetri Lab Akademi', '1. Siapa kami'],
+                'code' => [],
+            ],
+            '/web-security/web-application-hackers-handbook' => [
+                'expected' => ['Buka Akademi Keamanan Web'],
+                'code' => [],
+            ],
+            '/web-security/getting-started/andres-rauschecker' => [
+                'expected' => ['Peserta terbaik di Papan Peringkat'],
+                'code' => [],
+            ],
+        ];
+
+        $unresolvedTokenPattern = '/\[\[(?:[CAS]\d+|\/[CAS]\d+)\]\]/';
+
+        foreach ($curriculumChecks as $path => $checks) {
+            $html = $this->get($path)->assertOk()->getContent();
+            $this->assertStringContainsString('<html lang="id"', $html, "Expected Indonesian locale on {$path}");
+            $this->assertStringNotContainsString('<script', strtolower($html), "Zero-JS violated on {$path}");
+            $this->assertDoesNotMatchRegularExpression($unresolvedTokenPattern, $html, "Unresolved placeholder leaked on {$path}");
+
+            foreach ($checks['expected'] as $phrase) {
+                $this->assertStringContainsStringIgnoringCase($phrase, $html, "Expected Indonesian phrase '{$phrase}' on {$path}");
+            }
+            foreach ($checks['code'] as $snippet) {
+                $this->assertStringContainsString($snippet, $html, "Expected verbatim code/term '{$snippet}' preserved on {$path}");
+            }
+        }
+
+        // Switch back to English and verify original prose remains completely intact
+        $this->post('/preferences/locale', ['locale' => 'en', 'redirect_to' => '/'])
+            ->assertRedirect('/');
+
+        $creditsEn = $this->get('/web-security/credits')->assertOk()->getContent();
+        $this->assertStringContainsString('<html lang="en"', $creditsEn);
+        $this->assertStringContainsString('Who is behind the Web Security Academy?', $creditsEn);
+        $this->assertStringNotContainsString('Siapa di balik Akademi Keamanan Web?', $creditsEn);
+
+        $sqliEn = $this->get('/web-security/sql-injection')->assertOk()->getContent();
+        $this->assertStringContainsString('<html lang="en"', $sqliEn);
+        $this->assertStringContainsString('What is SQL injection (SQLi)?', $sqliEn);
+
+        $hostHeaderEn = $this->get('/web-security/host-header')->assertOk()->getContent();
+        $this->assertStringContainsString('<html lang="en"', $hostHeaderEn);
+        $this->assertStringContainsString('HTTP Host header attacks', $hostHeaderEn);
+        $this->assertStringContainsString('ALLOWED_HOSTS', $hostHeaderEn);
+        $this->assertStringNotContainsString('Serangan HTTP Host header', $hostHeaderEn);
+
+        $hostHeaderExploitingEn = $this->get('/web-security/host-header/exploiting')->assertOk()->getContent();
+        $this->assertStringContainsString('<html lang="en"', $hostHeaderExploitingEn);
+        $this->assertStringContainsString('Now let\'s say the back-end ignores the leading space', $hostHeaderExploitingEn);
+    }
+
+    public function test_mobile_topbar_and_column_blocks_use_live_selectors_without_dead_vla_header_classes(): void
+    {
+        $academyCss = file_get_contents(public_path('content/academy-modern.css'));
+        $this->assertIsString($academyCss);
+
+        $this->assertStringNotContainsString('.vla-header__inner', $academyCss);
+        $this->assertStringNotContainsString('.vla-header__controls', $academyCss);
+        $this->assertStringContainsString('.vla-topbar__inner', $academyCss);
+        $this->assertStringContainsString('.vla-actions', $academyCss);
+        $this->assertStringContainsString('.vla-account-dropdown__menu', $academyCss);
+        $this->assertStringContainsString('.vla-learning-content .container-columns-block > a', $academyCss);
+    }
 }

@@ -25,6 +25,41 @@ class Lab extends Model
         'sort_order',
     ];
 
+    public function localizedTitle(?string $locale = null): string
+    {
+        return \App\Services\CatalogLocalization::labTitle(
+            (string) $this->id,
+            (string) $this->category_id,
+            (string) $this->title,
+            $locale
+        );
+    }
+
+    public function localizedDescriptionHtml(?string $locale = null): string
+    {
+        return \App\Services\CatalogLocalization::labDescriptionHtml(
+            (string) $this->id,
+            (string) $this->category_id,
+            (string) ($this->description_html ?? ''),
+            $locale
+        );
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function localizedSections(?string $locale = null): array
+    {
+        $sections = is_array($this->sections) ? $this->sections : [];
+
+        return \App\Services\CatalogLocalization::labSections(
+            (string) $this->id,
+            (string) $this->category_id,
+            $sections,
+            $locale
+        );
+    }
+
     protected function casts(): array
     {
         return [

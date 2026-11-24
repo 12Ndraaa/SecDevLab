@@ -45,7 +45,7 @@
                 @foreach ($recentSolves as $sess)
                     @if ($sess->lab)
                         <li style="margin-bottom:10px">
-                            <a href="{{ $sess->lab->href }}"><strong>{{ $sess->lab->title }}</strong></a>
+                            <a href="{{ $sess->lab->href }}"><strong>{{ $sess->lab->localizedTitle() }}</strong></a>
                             <div class="vla-badge-row" style="margin-top:4px">
                                 <span class="{{ $sess->lab->difficulty_class }}">{{ $sess->lab->difficulty }}</span>
                                 <span class="vla-muted-sm">{{ $sess->solved_at?->translatedFormat('d M Y H:i') }}</span>
@@ -65,7 +65,7 @@
                     <span class="vla-badge {{ $cve->severityBadgeClass() }}">{{ $cve->cve_id }}</span>
                     <a href="/cve/{{ $cve->slug }}"><strong>{{ \Illuminate\Support\Str::limit($cve->title, 70) }}</strong></a>
                     @if ($cve->category)
-                        <div class="vla-muted-sm">{{ $cve->category->title }}</div>
+                        <div class="vla-muted-sm">{{ $cve->category->localizedTitle() }}</div>
                     @endif
                 </li>
             @endforeach

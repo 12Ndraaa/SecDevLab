@@ -32,7 +32,7 @@ class AcademyController extends Controller
             ->get();
 
         $hotCves = CveArticle::published()
-            ->with(['category:id,title', 'lab:id,title,href'])
+            ->with(['category:id,title', 'lab:id,category_id,title,href'])
             ->orderByDesc('is_hot')
             ->orderByDesc('cve_year')
             ->orderByDesc('cvss_score')
@@ -108,8 +108,11 @@ class AcademyController extends Controller
                 }
                 if ($qLower !== '') {
                     $inTitle = str_contains(mb_strtolower($lab->title), $qLower)
-                        || str_contains(mb_strtolower($cat->title), $qLower);
-                    $inDesc = str_contains(mb_strtolower($lab->description_html), $qLower);
+                        || str_contains(mb_strtolower($lab->localizedTitle()), $qLower)
+                        || str_contains(mb_strtolower($cat->title), $qLower)
+                        || str_contains(mb_strtolower($cat->localizedTitle()), $qLower);
+                    $inDesc = str_contains(mb_strtolower($lab->description_html), $qLower)
+                        || str_contains(mb_strtolower($lab->localizedDescriptionHtml()), $qLower);
                     if (! $inTitle && ! $inDesc) {
                         return false;
                     }
@@ -162,7 +165,7 @@ class AcademyController extends Controller
             }
             $categoryStats[] = [
                 'id' => $cat->id,
-                'title' => $cat->title,
+                'title' => $cat->localizedTitle(),
                 'topic_route' => $cat->topic_route,
                 'total' => $total,
                 'solved' => $solved,
@@ -274,7 +277,7 @@ class AcademyController extends Controller
             }
             if ($solved > 0 || $mode === 'report') {
                 $categoryBreakdown[] = [
-                    'title' => $cat->title,
+                    'title' => $cat->localizedTitle(),
                     'solved' => $solved,
                     'total' => $total,
                     'pct' => $total > 0 ? (int) round(($solved / $total) * 100) : 0,
@@ -522,7 +525,12 @@ class AcademyController extends Controller
             ?? ($cleanPath === '/web-security-academy' ? ($routes['/web-security'] ?? null) : null);
 
         if ($matchedView && view()->exists($matchedView)) {
-            return view($matchedView);
+            $rendered = view($matchedView)->render();
+            if (app()->getLocale() === 'id') {
+                $rendered = \App\Services\PageLocalization::translateRenderedHtml($matchedView, $rendered);
+            }
+
+            return response($rendered, 200, ['Content-Type' => 'text/html; charset=utf-8']);
         }
 
         // 3. Dynamic Owner-created Category Topic Pages (/web-security/<custom-topic>)
@@ -558,28 +566,34 @@ class AcademyController extends Controller
         $solvedMap = $user ? $user->solvedLabIdMap() : [];
         $isSolved = isset($solvedMap[strtolower($lab->id)]);
 
+        $rawDescriptionHtml = $lab->localizedDescriptionHtml();
         $cleanDescriptionHtml = preg_replace(
             '/<div class="component-solution expandable-container">[\s\S]*$/i',
             '',
-            (string) $lab->description_html
-        ) ?? (string) $lab->description_html;
+            $rawDescriptionHtml
+        ) ?? $rawDescriptionHtml;
 
         $hintSections = [];
         $otherSections = [];
         $isIdLocale = app()->getLocale() === 'id';
-        foreach (is_array($lab->sections) ? $lab->sections : [] as $sec) {
-            $title = (string) ($sec['title'] ?? '');
+        $rawSections = is_array($lab->sections) ? $lab->sections : [];
+        $localizedSections = $lab->localizedSections();
+        foreach ($localizedSections as $idx => $sec) {
+            $origTitle = (string) ($rawSections[$idx]['title'] ?? ($sec['title'] ?? ''));
+            $title = (string) ($sec['title'] ?? $origTitle);
             $bodyHtml = $this->normalizeSectionBody((string) ($sec['bodyHtml'] ?? ''));
             $displayTitle = $title;
-            if ($isIdLocale) {
+            if ($isIdLocale && $displayTitle === $origTitle) {
                 $displayTitle = match (true) {
-                    preg_match('/^hint$/i', trim($title)) === 1 => 'Petunjuk',
-                    preg_match('/^solution$/i', trim($title)) === 1 => 'Solusi',
-                    preg_match('/community/i', $title) === 1 => 'Solusi Komunitas',
+                    preg_match('/^hint$/i', trim($origTitle)) === 1 => 'Petunjuk',
+                    preg_match('/^tip$/i', trim($origTitle)) === 1 => 'Tips',
+                    preg_match('/^passwords$/i', trim($origTitle)) === 1 => 'Daftar Kata Sandi',
+                    preg_match('/^solution$/i', trim($origTitle)) === 1 => 'Solusi',
+                    preg_match('/community/i', $origTitle) === 1 => 'Solusi komunitas',
                     default => $title,
                 };
             }
-            if (preg_match('/hint/i', $title)) {
+            if (preg_match('/\b(hint|tip)\b/i', $origTitle)) {
                 $hintSections[] = [
                     'title' => $displayTitle,
                     'normalizedBodyHtml' => $bodyHtml,
@@ -587,7 +601,7 @@ class AcademyController extends Controller
             } else {
                 $otherSections[] = [
                     'title' => $displayTitle,
-                    'iconClass' => preg_match('/community/i', $title) ? 'icon-bulbs' : 'icon-bulb',
+                    'iconClass' => preg_match('/community/i', $origTitle) ? 'icon-bulbs' : 'icon-bulb',
                     'normalizedBodyHtml' => $bodyHtml,
                 ];
             }
@@ -596,6 +610,7 @@ class AcademyController extends Controller
         $topicView = 'partials.topic-navs.'.$category->id;
         $topicAsideHtml = view()->exists($topicView) ? view($topicView)->render() : '';
         if ($topicAsideHtml !== '' && app()->getLocale() === 'id') {
+            $topicAsideHtml = \App\Services\PageLocalization::translateTopicNavHtml($category->id, $topicAsideHtml);
             $topicAsideHtml = str_replace(
                 'Back to all topics',
                 e(__('academy.labs.back_to_topics')),
@@ -606,7 +621,7 @@ class AcademyController extends Controller
         $pathSegments = array_values(array_filter(explode('/', $lab->href)));
         $breadcrumbs = [
             ['href' => '/web-security', 'name' => __('academy.labs.breadcrumb_academy')],
-            ['href' => $category->topic_route, 'name' => $category->title],
+            ['href' => $category->topic_route, 'name' => $category->localizedTitle()],
         ];
         if (count($pathSegments) >= 4) {
             $subSlug = $pathSegments[2];

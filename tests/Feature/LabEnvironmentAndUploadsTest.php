@@ -452,6 +452,70 @@ class LabEnvironmentAndUploadsTest extends TestCase
         $this->assertStringContainsString('class="notification-labsolved"', $wsXss);
     }
 
+    public function test_indonesian_and_english_file_upload_runtime_error_messages(): void
+    {
+        $phpPayload = '<'.'?php echo file_get_contents(\'/home/carlos/secret\'); ?'.'>';
+
+        $labContentType = Lab::where('href', 'like', '%content-type-restriction-bypass%')->firstOrFail();
+        $labBlacklist = Lab::where('href', 'like', '%extension-blacklist-bypass%')->firstOrFail();
+        $labObfuscated = Lab::where('href', 'like', '%obfuscated-file-extension%')->firstOrFail();
+        $labPolyglot = Lab::where('href', 'like', '%polyglot-web-shell-upload%')->firstOrFail();
+        $labRace = Lab::where('href', 'like', '%web-shell-upload-via-race-condition%')->firstOrFail();
+
+        $s2 = $this->launchUrl($labContentType->id);
+        $s4 = $this->launchUrl($labBlacklist->id);
+        $s5 = $this->launchUrl($labObfuscated->id);
+        $s6 = $this->launchUrl($labPolyglot->id);
+        $s7 = $this->launchUrl($labRace->id);
+
+        // Verify EN runtime errors first
+        $this->post($s2['url'].'/_locale', ['ui_locale' => 'en'])->assertRedirect($s2['url']);
+
+        $this->assertStringContainsString(
+            'Sorry, file type application/x-php is not allowed. Only image/jpeg and image/png are allowed.',
+            $this->postMultipartAvatar($s2['url'], 'exploit.php', 'application/x-php', $phpPayload)->assertStatus(403)->getContent()
+        );
+        $this->assertStringContainsString(
+            'Sorry, php files are not allowed.',
+            $this->postMultipartAvatar($s4['url'], 'exploit.php', 'application/x-php', $phpPayload)->assertStatus(403)->getContent()
+        );
+        $this->assertStringContainsString(
+            'Sorry, only JPG & PNG files are allowed.',
+            $this->postMultipartAvatar($s5['url'], 'exploit.php', 'application/x-php', $phpPayload)->assertStatus(403)->getContent()
+        );
+        $this->assertStringContainsString(
+            'Error: File is not a valid image.',
+            $this->postMultipartAvatar($s6['url'], 'polyglot.php', 'image/jpeg', $phpPayload)->assertStatus(403)->getContent()
+        );
+        $this->assertStringContainsString(
+            'Sorry, only JPG & PNG files are allowed',
+            $this->postMultipartAvatar($s7['url'], 'exploit.php', 'application/x-php', $phpPayload)->assertStatus(403)->getContent()
+        );
+
+        // Toggle active lab locale to ID and verify Indonesian runtime upload errors
+        $this->post($s2['url'].'/_locale', ['ui_locale' => 'id'])->assertRedirect($s2['url']);
+
+        $this->assertStringContainsString(
+            'Maaf, tipe file application/x-php tidak diizinkan. Hanya image/jpeg dan image/png yang diizinkan.',
+            $this->postMultipartAvatar($s2['url'], 'exploit.php', 'application/x-php', $phpPayload)->assertStatus(403)->getContent()
+        );
+        $this->assertStringContainsString(
+            'Maaf, file php tidak diizinkan.',
+            $this->postMultipartAvatar($s4['url'], 'exploit.php', 'application/x-php', $phpPayload)->assertStatus(403)->getContent()
+        );
+        $this->assertStringContainsString(
+            'Maaf, hanya file JPG dan PNG yang diizinkan.',
+            $this->postMultipartAvatar($s5['url'], 'exploit.php', 'application/x-php', $phpPayload)->assertStatus(403)->getContent()
+        );
+        $this->assertStringContainsString(
+            'Galat: File bukan gambar yang valid.',
+            $this->postMultipartAvatar($s6['url'], 'polyglot.php', 'image/jpeg', $phpPayload)->assertStatus(403)->getContent()
+        );
+        $raceIdContent = $this->postMultipartAvatar($s7['url'], 'exploit.php', 'application/x-php', $phpPayload)->assertStatus(403)->getContent();
+        $this->assertStringContainsString('Maaf, hanya file JPG dan PNG yang diizinkan', $raceIdContent);
+        $this->assertStringContainsString('Maaf, terjadi galat saat mengunggah file Anda.', $raceIdContent);
+    }
+
     private function postMultipartAvatar(string $labBasePath, string $filename, string $contentType, string $payload)
     {
         $boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW';

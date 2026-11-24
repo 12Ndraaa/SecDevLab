@@ -9,7 +9,7 @@
         <h3>{{ __('academy.labs.topic_categories') }}</h3>
         <ul>
             @foreach ($allCategories as $catNav)
-                <li><a href="#{{ $catNav->id }}">{{ $catNav->title }}</a></li>
+                <li><a href="#{{ $catNav->id }}">{{ $catNav->localizedTitle() }}</a></li>
             @endforeach
         </ul>
     </nav>
@@ -63,7 +63,7 @@
 <div id="all-labs">
     @forelse ($categories as $category)
         <div class="vla-section-head" style="margin-top:26px">
-            <h2 id="{{ $category->id }}">{{ $category->title }}</h2>
+            <h2 id="{{ $category->id }}">{{ $category->localizedTitle() }}</h2>
             <a href="/cve?category={{ $category->id }}" class="vla-badge vla-badge--muted">CVE &rarr;</a>
         </div>
         @foreach ($category->labs as $lab)

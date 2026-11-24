@@ -2,7 +2,7 @@
     <span>{{ __('academy.widgets.lab_badge') }}</span>
     <div class="flex-columns">
         <span class="{{ $lab->difficulty_class }}">{{ $lab->difficulty }}</span>
-        <a href="{{ $lab->href }}">{{ $lab->title }}</a>
+        <a href="{{ $lab->href }}">{{ $lab->localizedTitle() }}</a>
     </div>
     <span class="lab-status-icon">{{ $isSolved ? __('academy.widgets.solved') : __('academy.widgets.not_solved') }}</span>
 </div>

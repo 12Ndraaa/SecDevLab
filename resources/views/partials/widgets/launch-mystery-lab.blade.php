@@ -15,7 +15,7 @@
                 <select id="mystery-cat" class="form-select category" name="category">
                     <option value="ANY" selected>{{ __('academy.widgets.mystery_any') }}</option>
                     @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}">{{ $cat->title }}</option>
+                        <option value="{{ $cat->id }}">{{ $cat->localizedTitle() }}</option>
                     @endforeach
                 </select>
             </div>

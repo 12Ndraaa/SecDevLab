@@ -6,7 +6,7 @@
 <ul class="breadcrumb-list">
     <li><a href="/">{{ __('academy.nav.home') }}</a></li>
     <li><a href="/web-security/all-labs">{{ __('academy.nav.all_labs') }}</a></li>
-    <li><a href="{{ $lab->href }}">{{ $lab->title }}</a></li>
+    <li><a href="{{ $lab->href }}">{{ $lab->localizedTitle() }}</a></li>
     <li>{{ __('academy.control.breadcrumb') }}</li>
 </ul>
 
@@ -26,7 +26,7 @@
         </span>
     </div>
 
-    <h1 style="margin-bottom:8px">{{ $lab->title }}</h1>
+    <h1 style="margin-bottom:8px">{{ $lab->localizedTitle() }}</h1>
     <p class="vla-muted"><strong>{{ $archetype['label'] }}</strong>: {{ $archetype['description'] }}</p>
 
     <div class="vla-terminal-card" style="margin:18px 0">

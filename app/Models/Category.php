@@ -19,6 +19,15 @@ class Category extends Model
         'sort_order',
     ];
 
+    public function localizedTitle(?string $locale = null): string
+    {
+        return \App\Services\CatalogLocalization::categoryTitle(
+            (string) $this->id,
+            (string) $this->title,
+            $locale
+        );
+    }
+
     public function labs(): HasMany
     {
         return $this->hasMany(Lab::class, 'category_id', 'id')->orderBy('sort_order');

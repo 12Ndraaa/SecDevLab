@@ -32,7 +32,7 @@
         <select name="category">
             <option value="ALL">{{ __('academy.cve.all_categories') }}</option>
             @foreach ($categories as $cat)
-                <option value="{{ $cat->id }}" @selected($categoryId === $cat->id)>{{ $cat->title }}</option>
+                <option value="{{ $cat->id }}" @selected($categoryId === $cat->id)>{{ $cat->localizedTitle() }}</option>
             @endforeach
         </select>
         <button type="submit" class="vla-btn vla-btn--primary vla-btn--sm">{{ __('academy.labs.filter') }}</button>

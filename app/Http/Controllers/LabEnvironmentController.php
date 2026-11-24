@@ -344,7 +344,7 @@ class LabEnvironmentController extends Controller
         $result = $this->uploadService->processUpload($request, $lab, $session);
         if (! $result['ok']) {
             return response(
-                $result['errorBody'] ?? 'Upload forbidden',
+                $result['errorBody'] ?? __('lab_runtime.upload_forbidden'),
                 $result['status'],
                 array_merge($result['headers'], ['Content-Type' => 'text/plain; charset=utf-8'])
             );

@@ -72,7 +72,7 @@
                 <span class="vla-badge vla-badge--accent">{{ $cat->labs_count }} {{ __('academy.common.labs') }}</span>
                 <a href="/web-security/all-labs#{{ $cat->id }}" class="vla-muted-sm">{{ __('academy.common.catalog') }} &rarr;</a>
             </div>
-            <h3 style="margin-bottom:12px;font-size:1.05rem"><a href="{{ $cat->topic_route }}">{{ $cat->title }}</a></h3>
+            <h3 style="margin-bottom:12px;font-size:1.05rem"><a href="{{ $cat->topic_route }}">{{ $cat->localizedTitle() }}</a></h3>
             <div class="vla-btn-group">
                 <a href="{{ $cat->topic_route }}" class="vla-btn vla-btn--outline vla-btn--sm">{{ __('academy.nav.topics') }}</a>
                 <a href="/cve?category={{ $cat->id }}" class="vla-btn vla-btn--ghost vla-btn--sm">CVE</a>
@@ -99,7 +99,7 @@
             <p class="vla-muted-sm" style="margin:0 0 14px">{{ \Illuminate\Support\Str::limit($cve->summary, 140) }}</p>
             <div class="vla-badge-row" style="justify-content:space-between">
                 @if ($cve->category)
-                    <a href="/web-security/all-labs#{{ $cve->category->id }}" class="vla-badge vla-badge--accent">{{ $cve->category->title }}</a>
+                    <a href="/web-security/all-labs#{{ $cve->category->id }}" class="vla-badge vla-badge--accent">{{ $cve->category->localizedTitle() }}</a>
                 @else
                     <span class="vla-muted-sm">{{ __('academy.cve.uncategorized') }}</span>
                 @endif

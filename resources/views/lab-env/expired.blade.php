@@ -41,7 +41,7 @@
 ]) }}</div>
         </div>
 
-        <h1 style="margin:0 0 8px;color:var(--lw-heading);font-size:1.35rem">{{ $lab->title }}</h1>
+        <h1 style="margin:0 0 8px;color:var(--lw-heading);font-size:1.35rem">{{ $lab->localizedTitle($labUiLocale ?? app()->getLocale()) }}</h1>
         <p class="lw-muted" style="margin:0 0 18px">
             {{ __('academy.expired.relaunch_note', ['brand' => config('app.name') ?: 'SecDevLab']) }}
         </p>

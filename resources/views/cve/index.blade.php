@@ -36,7 +36,7 @@
             <option value="ALL">{{ __('academy.cve.all_categories') }}</option>
             <option value="UNCATEGORIZED" @selected($categoryId === 'UNCATEGORIZED')>{{ __('academy.cve.uncategorized') }}</option>
             @foreach ($categories as $cat)
-                <option value="{{ $cat->id }}" @selected($categoryId === $cat->id)>{{ $cat->title }}</option>
+                <option value="{{ $cat->id }}" @selected($categoryId === $cat->id)>{{ $cat->localizedTitle() }}</option>
             @endforeach
         </select>
         <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.84rem;font-weight:600;cursor:pointer">
@@ -78,7 +78,7 @@
 
             <div class="vla-badge-row" style="justify-content:space-between">
                 @if ($cve->category)
-                    <a href="/web-security/all-labs#{{ $cve->category->id }}" class="vla-badge vla-badge--accent">{{ $cve->category->title }}</a>
+                    <a href="/web-security/all-labs#{{ $cve->category->id }}" class="vla-badge vla-badge--accent">{{ $cve->category->localizedTitle() }}</a>
                 @else
                     <span class="vla-badge vla-badge--muted">{{ __('academy.cve.uncategorized') }}</span>
                 @endif

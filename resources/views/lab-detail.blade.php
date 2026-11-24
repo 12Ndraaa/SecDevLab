@@ -1,6 +1,6 @@
 @extends('layouts.academy')
 
-@section('title', __('academy.labs.lab_prefix').$lab->title.' | '.config('app.name'))
+@section('title', __('academy.labs.lab_prefix').$lab->localizedTitle().' | '.config('app.name'))
 
 @section('sidebar_left')
 @if (!empty($topicAsideHtml))
@@ -9,10 +9,10 @@
     <aside class="nav-lhs" id="tree-nav">
         <nav class="nav-lhs-scrollable">
             <a class="nav-back" href="/web-security/all-topics">&larr; {{ __('academy.labs.back_to_topics') }}</a>
-            <h3>{{ $category->title }}</h3>
+            <h3>{{ $category->localizedTitle() }}</h3>
             <ul>
-                <li><a href="{{ $category->topic_route }}">{{ $category->title }}</a></li>
-                <li><a href="/web-security/all-labs#{{ $category->id }}">{{ __('academy.labs.view_all_category_labs', ['category' => $category->title]) }}</a></li>
+                <li><a href="{{ $category->topic_route }}">{{ $category->localizedTitle() }}</a></li>
+                <li><a href="/web-security/all-labs#{{ $category->id }}">{{ __('academy.labs.view_all_category_labs', ['category' => $category->localizedTitle()]) }}</a></li>
             </ul>
         </nav>
     </aside>
@@ -31,7 +31,7 @@
 @endsection
 
 @section('content')
-<h1 class="heading-2">{{ __('academy.labs.lab_prefix') }}{{ $lab->title }}</h1>
+<h1 class="heading-2">{{ __('academy.labs.lab_prefix') }}{{ $lab->localizedTitle() }}</h1>
 
 <div class="vla-badge-row" style="justify-content:space-between;margin-bottom:16px">
     <div class="vla-badge-row">
@@ -104,7 +104,7 @@
 
 @if (isset($relatedCves) && $relatedCves->isNotEmpty())
     <div class="highlightedarea" style="margin-top:24px">
-        <h4 style="margin-bottom:10px">{{ __('academy.cve.title') }} ({{ $category->title }})</h4>
+        <h4 style="margin-bottom:10px">{{ __('academy.cve.title') }} ({{ $category->localizedTitle() }})</h4>
         <ul style="margin:0;padding-left:18px">
             @foreach ($relatedCves as $cve)
                 <li style="margin-bottom:6px">

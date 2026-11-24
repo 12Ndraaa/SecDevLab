@@ -1515,6 +1515,15 @@ pre code {
   color: var(--vla-text) !important;
 }
 
+.vla-learning-content .callout-large-orange,
+.vla-learning-content .learning-path-summary,
+.vla-learning-content .image-slider-white-quoteblock {
+  background: var(--vla-surface-2) !important;
+  color: var(--vla-text) !important;
+  border: 1px solid var(--vla-border) !important;
+  border-radius: 10px !important;
+}
+
 .vla-learning-content code,
 .section.theme-white code {
   display: inline !important;
@@ -2016,14 +2025,26 @@ pre code {
     display: inline-flex;
   }
 
+  .vla-mobile-toggle-input:checked + .vla-mobile-toggle-label {
+    background: var(--vla-accent-soft);
+    border-color: var(--vla-accent);
+    color: var(--vla-accent);
+  }
+
   .vla-nav {
     display: none;
     width: 100%;
     order: 4;
     flex-direction: column;
     align-items: stretch;
+    gap: 4px;
     padding-top: 10px;
+    padding-bottom: 4px;
     border-top: 1px solid var(--vla-border);
+  }
+
+  .vla-nav a {
+    padding: 9px 10px;
   }
 
   .vla-mobile-toggle-input:checked ~ .vla-nav {
@@ -2063,6 +2084,68 @@ pre code {
   .vla-field--span2 {
     grid-column: span 1;
   }
+
+  .vla-learning-content blockquote,
+  .vla-learning-content .blockquote {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 12px 14px;
+    text-align: left;
+  }
+
+  .vla-learning-content blockquote::before,
+  .vla-learning-content blockquote::after,
+  .vla-learning-content .blockquote::before,
+  .vla-learning-content .blockquote::after {
+    display: none;
+  }
+
+  .vla-learning-content .margin-left-large,
+  .vla-learning-content .margin-right-large {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .vla-learning-content table:not(.vla-table),
+  .vla-learning-content table.is-nonresponsive-table {
+    display: block;
+    max-width: 100%;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vla-learning-content img,
+  .vla-learning-content video,
+  .vla-learning-content iframe {
+    max-width: 100% !important;
+  }
+
+  .vla-learning-content img {
+    height: auto !important;
+  }
+
+  .vla-learning-content svg {
+    max-width: 100%;
+  }
+
+  .vla-learning-content video.is-thumbnail {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .vla-learning-content [class*="container-columns-"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vla-learning-content [class*="container-columns-"] > * {
+    max-width: 100% !important;
+    flex-basis: auto !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
 }
 
 @media (max-width: 640px) {
@@ -2072,6 +2155,33 @@ pre code {
     padding-right: 12px;
   }
 
+  .vla-topbar__inner {
+    gap: 8px 10px;
+  }
+
+  .vla-mobile-toggle-label {
+    order: 2;
+    margin-left: auto;
+    min-height: 36px;
+  }
+
+  .vla-actions {
+    order: 3;
+    width: 100%;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-left: 0;
+    padding-top: 8px;
+    border-top: 1px solid var(--vla-border);
+    gap: 6px;
+  }
+
+  .vla-auth-cluster {
+    margin-left: auto;
+    min-width: 0;
+  }
+
   .wrapper-large {
     padding: 16px 12px 36px !important;
   }
@@ -2079,6 +2189,20 @@ pre code {
   .wrapper-large .container-academy main > .section,
   .section.theme-white {
     padding: 18px 14px !important;
+  }
+
+  .vla-learning-content .wrapper {
+    padding: 12px 12px 32px !important;
+  }
+
+  .vla-learning-content .callout,
+  .vla-learning-content .highlightedarea,
+  .vla-learning-content .callout-large-orange,
+  .vla-learning-content .learning-path-summary,
+  .vla-learning-content .progress-cards {
+    max-width: 100%;
+    padding: 14px !important;
+    overflow-wrap: break-word;
   }
 
   .widgetcontainer-lab-link {
@@ -2105,19 +2229,12 @@ pre code {
     flex-shrink: 0;
   }
 
-  .vla-actions {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    margin-left: auto;
-    gap: 6px;
-  }
-
   .vla-hero {
     padding: 20px 16px;
   }
 
   .vla-account-pill__name {
-    max-width: 72px;
+    max-width: 96px;
   }
 
   .vla-cert-report-user {
@@ -2158,6 +2275,56 @@ pre code {
 
   .vla-card {
     padding: 16px 14px;
+  }
+
+  .vla-card a,
+  .vla-card code,
+  .vla-terminal-card__body code {
+    overflow-wrap: anywhere;
+  }
+
+  .vla-mono-chip,
+  .vla-badge {
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .vla-container .vla-btn,
+  .vla-instance-bar .vla-btn,
+  .vla-hero .vla-btn,
+  .button-orange,
+  .button-orange-small {
+    white-space: normal;
+    text-align: center;
+    height: auto;
+    min-height: 34px;
+  }
+
+  .vla-learning-content h1,
+  .vla-learning-content h2,
+  .vla-learning-content h3,
+  .vla-learning-content p,
+  .vla-learning-content li {
+    overflow-wrap: break-word;
+  }
+
+  .vla-learning-content code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .vla-learning-content pre,
+  .vla-learning-content .code-scrollable,
+  .vla-learning-content .code-box {
+    font-size: 0.78rem !important;
+    padding: 10px 12px !important;
+  }
+
+  .vla-table th,
+  .vla-table td {
+    padding: 9px 10px;
+    font-size: 0.82rem;
   }
 
   .vla-instance-bar {
@@ -2272,5 +2439,231 @@ pre code {
   .vla-table th {
     border-color: #CBD5E1 !important;
     color: #0F172A !important;
+  }
+}
+
+/* ==========================================================================
+   375px Mobile Audit Hardening (Responsive Tables, Grids, Certificates, Prose)
+   ========================================================================== */
+@media screen and (max-width: 760px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .vla-grid--2,
+  .vla-grid--3,
+  .vla-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vla-grid > *,
+  .vla-form-grid > *,
+  .vla-main,
+  .vla-container,
+  .vla-learning-content,
+  .vla-card {
+    min-width: 0;
+  }
+
+  .vla-field input,
+  .vla-field select,
+  .vla-field textarea,
+  .vla-filter-row input,
+  .vla-filter-row select {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .vla-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vla-learning-content table,
+  .section table {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vla-learning-content .container-columns,
+  .vla-learning-content [class*="container-columns-"] {
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .vla-learning-content .container-cards-white,
+  .vla-learning-content .container-cards-white-medium-space-between,
+  .vla-learning-content .container-cards-academy,
+  .vla-learning-content .progress-cards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .vla-learning-content .container-cards-white > *,
+  .vla-learning-content .container-cards-white-medium-space-between > *,
+  .vla-learning-content .container-cards-academy > *,
+  .vla-learning-content .progress-cards > *,
+  .vla-learning-content .container-columns > *,
+  .vla-learning-content [class*="container-columns-"] > *,
+  .vla-learning-content .container-columns-block > a {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    margin-right: 0;
+    box-sizing: border-box;
+  }
+
+  .vla-learning-content img,
+  .vla-learning-content svg,
+  .vla-learning-content iframe {
+    max-width: 100%;
+  }
+
+  .vla-learning-content iframe {
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+
+  .vla-learning-content pre,
+  .vla-learning-content .code-scrollable,
+  .vla-learning-content code.code-scrollable {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+
+  .vla-learning-content code:not(pre code):not(.code-scrollable) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .vla-subnav {
+    display: flex;
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vla-subnav a {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .vla-topbar {
+    max-width: 100%;
+  }
+
+  .vla-topbar__inner {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .vla-actions {
+    flex-wrap: wrap;
+    max-width: 100%;
+    gap: 6px;
+  }
+
+  .vla-account-dropdown__menu {
+    min-width: min(210px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+  }
+
+  .vla-section-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .vla-filter-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vla-hero {
+    padding: 20px 14px;
+  }
+
+  .vla-hero__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .vla-hero__actions .vla-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .vla-certificate-sheet {
+    padding: 20px 14px;
+  }
+
+  .vla-certificate-name {
+    display: inline-block;
+    max-width: 100%;
+    padding: 0 8px 8px;
+    font-size: clamp(1.25rem, 6vw, 1.75rem);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .vla-certificate-meta,
+  .vla-certificate-sig {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .vla-learning-content .callout-large-orange,
+  .vla-learning-content .image-slider-white-quoteblock,
+  .vla-learning-content .callout,
+  .vla-learning-content .widget-container {
+    padding: 16px 14px;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .vla-learning-content .expandable-progress-container-summary,
+  .vla-learning-content .expandable-container-label {
+    padding: 12px 14px;
+    font-size: 0.9375rem;
+    overflow-wrap: anywhere;
+  }
+
+  .vla-learning-content .widgetcontainer-lab-link {
+    max-width: 100%;
+    min-width: 0;
+    padding: 10px 12px;
+    gap: 8px;
+    border-radius: 14px;
+    flex-wrap: wrap;
+  }
+
+  .vla-learning-content .widgetcontainer-lab-link .flex-columns {
+    min-width: 0;
+    flex: 1 1 180px;
+  }
+
+  .vla-learning-content .widgetcontainer-lab-link .flex-columns > a {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }

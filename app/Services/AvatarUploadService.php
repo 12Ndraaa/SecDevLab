@@ -135,7 +135,7 @@ class AvatarUploadService
                     'ok' => false,
                     'status' => 403,
                     'headers' => $headers,
-                    'errorBody' => "Sorry, file type {$partContentType} is not allowed. Only image/jpeg and image/png are allowed.",
+                    'errorBody' => __('lab_runtime.upload_err_type', ['type' => $partContentType]),
                 ];
             }
             $baseName = $this->posixBasename($rawFilename);
@@ -161,7 +161,7 @@ class AvatarUploadService
                     'ok' => false,
                     'status' => 403,
                     'headers' => $headers,
-                    'errorBody' => 'Sorry, php files are not allowed.',
+                    'errorBody' => __('lab_runtime.upload_err_php'),
                 ];
             }
             if ($baseName === '.htaccess') {
@@ -186,7 +186,7 @@ class AvatarUploadService
                     'ok' => false,
                     'status' => 403,
                     'headers' => $headers,
-                    'errorBody' => 'Sorry, only JPG & PNG files are allowed.',
+                    'errorBody' => __('lab_runtime.upload_err_ext'),
                 ];
             }
             $parts = preg_split('/%00|\x00/i', $rawFilename);
@@ -199,7 +199,7 @@ class AvatarUploadService
                     'ok' => false,
                     'status' => 403,
                     'headers' => $headers,
-                    'errorBody' => 'Error: File is not a valid image.',
+                    'errorBody' => __('lab_runtime.upload_err_invalid_image'),
                 ];
             }
             $baseName = $this->posixBasename($rawFilename);
@@ -221,7 +221,7 @@ class AvatarUploadService
                     'ok' => false,
                     'status' => 403,
                     'headers' => $headers,
-                    'errorBody' => "Sorry, only JPG & PNG files are allowed\nSorry, there was an error uploading your file.",
+                    'errorBody' => __('lab_runtime.upload_err_race'),
                 ];
             }
         } else {

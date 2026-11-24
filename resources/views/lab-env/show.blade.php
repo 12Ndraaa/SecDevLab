@@ -5,12 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/content/fonts/fonts.css?v={{ @filemtime(public_path('content/fonts/fonts.css')) ?: '1' }}" rel="stylesheet">
     <link href="/content/lab-workbench.css?v={{ @filemtime(public_path('content/lab-workbench.css')) ?: '2' }}" rel="stylesheet">
-    <title>{{ $isMystery && !$revealMystery ? __('academy.workbench.mystery_title') : $lab->title }} | {{ config('app.name') ?: 'SecDevLab' }}</title>
+    <title>{{ $isMystery && !$revealMystery ? __('academy.workbench.mystery_title') : $lab->localizedTitle($labUiLocale ?? app()->getLocale()) }} | {{ config('app.name') ?: 'SecDevLab' }}</title>
 </head>
 <body class="lw-archetype--{{ $archetype }}">
 @php
     $activeLabLocale = $labUiLocale ?? app()->getLocale();
     $brandName = config('app.name') ?: 'SecDevLab';
+    $localizedLabTitle = $lab->localizedTitle($activeLabLocale);
+    $localizedCategoryTitle = $lab->category?->localizedTitle($activeLabLocale);
 @endphp
 <div id="academyLabHeader"
      class="sdl-command-header"
@@ -48,13 +50,13 @@
             </a>
 
             <div class="sdl-command-title">
-                <h2 id="banner-lab-title">{{ $isMystery && !$revealMystery ? __('academy.workbench.mystery_title') : $lab->title }}</h2>
+                <h2 id="banner-lab-title">{{ $isMystery && !$revealMystery ? __('academy.workbench.mystery_title') : $localizedLabTitle }}</h2>
             </div>
 
             <div class="sdl-action-group">
                 <span class="lw-pill lw-pill--{{ $archetypeMeta['tone'] }}">{{ $archetypeMeta['short'] }}</span>
                 @if ($lab->category)
-                    <a class="lw-pill" href="{{ $lab->category->topic_route }}">{{ $lab->category->title }}</a>
+                    <a class="lw-pill" href="{{ $lab->category->topic_route }}">{{ $localizedCategoryTitle }}</a>
                 @endif
                 <div class="widgetcontainer-lab-status {{ $autoSolved ? 'is-solved' : 'is-notsolved' }}" id="env-status-widget">
                     <span>{{ __('academy.workbench.status_lab') }}</span>
@@ -73,7 +75,7 @@
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         <span>{{ __('academy.labs.token_label') }} {{ substr((string) $session->instance_token, 0, 12) }}&hellip;</span>
                     </summary>
-                    <div class="ps-inline-details__panel" style="left:0;right:auto;min-width:min(340px, calc(100vw - 24px))">
+                    <div class="ps-inline-details__panel ps-inline-details__panel--left">
                         <div style="font-weight:700;margin-bottom:6px;color:var(--lw-heading)">{{ __('academy.workbench.token_popover_title') }}</div>
                         <div class="lw-mono" style="font-size:0.78rem;word-break:break-all;margin-bottom:8px">{{ $session->instance_token }}</div>
                         <div style="font-weight:700;margin-bottom:4px;color:var(--lw-heading)">{{ __('academy.workbench.target_url_popover') }}</div>
