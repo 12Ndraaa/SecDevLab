@@ -447,18 +447,6 @@ code {
   text-decoration: none !important;
 }
 
-.sdl-command-brand__badge {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: var(--lw-arch-btn-bg);
-  color: var(--lw-arch-btn-fg);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
 .sdl-command-brand__logo {
   display: block;
   height: 28px;

@@ -153,8 +153,10 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $this->assertStringContainsString('.lw-pill-switch', $workbenchCss);
         $this->assertStringContainsString('minmax(min(100%, 235px), 1fr)', $workbenchCss);
 
-        // Dark-mode archetype badge contrast uses button tokens instead of #FFFFFF
-        $this->assertStringContainsString('.sdl-command-brand__badge {', $workbenchCss);
+        // Dark-mode archetype button/highlight contrast uses token pairs and command-brand badge shield is removed
+        $this->assertStringNotContainsString('sdl-command-brand__badge', $workbenchCss);
+        $this->assertStringNotContainsString('sdl-command-brand__badge', (string) file_get_contents(resource_path('views/lab-env/show.blade.php')));
+        $this->assertStringNotContainsString('sdl-command-brand__badge', (string) file_get_contents(resource_path('views/lab-env/expired.blade.php')));
         $this->assertStringContainsString('background: var(--lw-arch-btn-bg);', $workbenchCss);
         $this->assertStringContainsString('color: var(--lw-arch-btn-fg);', $workbenchCss);
 
