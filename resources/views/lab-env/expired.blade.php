@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ $labUiLocale ?? app()->getLocale() }}" data-theme="{{ in_array($session->ui_theme, ['dark', 'light'], true) ? $session->ui_theme : 'light' }}">
+<html lang="{{ $labUiLocale ?? app()->getLocale() }}" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -13,8 +13,7 @@
     <div class="sdl-command-bar">
         <div class="sdl-command-bar__top">
             <a class="sdl-command-brand" href="/" aria-label="{{ config('app.name') ?: 'SecDevLab' }}">
-                <img src="/content/images/logos/secdevlab-logo-wide-light.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-light.png')) ?: '1' }}" alt="{{ config('app.name') ?: 'SecDevLab' }}" class="sdl-command-brand__logo sdl-command-brand__logo--light" height="28">
-                <img src="/content/images/logos/secdevlab-logo-wide-dark.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-dark.png')) ?: '1' }}" alt="{{ config('app.name') ?: 'SecDevLab' }}" class="sdl-command-brand__logo sdl-command-brand__logo--dark" height="28">
+                <img src="/content/images/logos/secdevlab-logo-wide-light.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-light.png')) ?: '1' }}" alt="{{ config('app.name') ?: 'SecDevLab' }}" class="sdl-command-brand__logo" height="28">
                 <span class="lw-sr-only">{{ config('app.name') ?: 'SecDevLab' }}</span>
             </a>
             <span class="lw-pill lw-pill--danger">{{ __('academy.expired.badge') }}</span>

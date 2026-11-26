@@ -34,9 +34,7 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         foreach ([
             'secdevlab-favicon.png',
             'secdevlab-logo-wide-light.png',
-            'secdevlab-logo-wide-dark.png',
             'secdevlab-icon-square-light.png',
-            'secdevlab-icon-square-dark.png',
             'secdevlab-mascot.png',
         ] as $asset) {
             $full = public_path('content/images/logos/'.$asset);
@@ -92,7 +90,21 @@ class LocalizationHeroAndUiAuditTest extends TestCase
             $html = $this->get($path)->assertOk()->getContent();
             $this->assertStringContainsString('/content/images/logos/secdevlab-favicon.png?v=', $html, "Missing custom SecDevLab favicon on {$path}");
             $this->assertStringContainsString('/content/images/logos/secdevlab-logo-wide-light.png?v=', $html, "Missing light logo on {$path}");
-            $this->assertStringContainsString('/content/images/logos/secdevlab-logo-wide-dark.png?v=', $html, "Missing dark logo on {$path}");
+            $this->assertStringContainsString('data-theme="light"', $html, "Expected light theme on {$path}");
+            $this->assertStringNotContainsString('data-theme="dark"', $html, "Unexpected dark theme on {$path}");
+            $this->assertStringNotContainsString('secdevlab-logo-wide-dark.png', $html, "Unexpected dark logo on {$path}");
+            $this->assertStringNotContainsString('/preferences/theme', $html, "Unexpected theme switcher on {$path}");
+            if (in_array($path, ['/users', '/users/register'], true)) {
+                $this->assertStringNotContainsString('<footer', $html, "Footer must be omitted on {$path}");
+                $this->assertStringNotContainsString('vla-footer', $html, "Footer class must be omitted on {$path}");
+            } else {
+                $this->assertStringContainsString('<footer class="vla-footer', $html, "Missing footer on {$path}");
+                $this->assertStringContainsString('https://github.com/12Ndraaa/SecDevLab', $html, "Missing GitHub link on {$path}");
+                $this->assertStringContainsString('https://www.instagram.com/axlendraa/', $html, "Missing Instagram link on {$path}");
+                $this->assertStringContainsString('https://www.linkedin.com/in/axlendra-haris-sanjaya-19b8a6372/', $html, "Missing LinkedIn link on {$path}");
+                $this->assertStringNotContainsString('Uji Kompetensi Keahlian', $html, "Old copyright text still present on {$path}");
+                $this->assertStringNotContainsString('Competency Project', $html, "Old copyright text still present on {$path}");
+            }
             foreach ($forbiddenAssets as $bad) {
                 $this->assertStringNotContainsStringIgnoringCase($bad, $html, "Unexpected legacy brand asset {$bad} on {$path}");
             }
@@ -188,15 +200,31 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $homeId = $this->get('/')->assertOk()->getContent();
         $this->assertStringContainsString('<html lang="id"', $homeId);
         $this->assertStringContainsString('Jelajahi Semua Lab', $homeId);
-        $this->assertStringContainsString('SECDEVLAB // SPESIFIKASI RUNTIME', $homeId);
-        $this->assertStringContainsString('Arketipe Lab  : 8 model target interaktif', $homeId);
         $this->assertStringContainsString('Katalog &rarr;', $homeId);
         $this->assertStringContainsString('poin', $homeId);
+        $this->assertStringContainsString('Tautan media sosial SecDevLab', $homeId);
         $this->assertStringNotContainsString('Explore All Labs', $homeId);
-        $this->assertStringNotContainsString('8 distinct interactive targets', $homeId);
         $this->assertStringNotContainsString('Catalog &rarr;', $homeId);
         $this->assertStringNotContainsString('Hands-On Cyber Security Training Platform', $homeId);
         $this->assertStringNotContainsString('ZERO-JS SSR // 8 ARCHETYPES', $homeId);
+
+        // Kali Linux hero terminal card MUST stay strictly in English even when ID locale is active
+        $this->assertStringContainsString('vla-terminal-card--kali', $homeId);
+        $this->assertStringContainsString('secdevlab@kali: ~/sandbox', $homeId);
+        $this->assertStringContainsString('secdevlab // kali', $homeId);
+        $this->assertStringContainsString('secdevlab㉿kali', $homeId);
+        $this->assertStringContainsString('target.open', $homeId);
+        $this->assertStringContainsString('--isolate=per-session', $homeId);
+        $this->assertStringContainsString('/lab/&lt;32-hex-token&gt;', $homeId);
+        $this->assertStringContainsString('Path=/lab/&lt;token&gt; SameSite=Lax', $homeId);
+        $this->assertStringContainsString("script-src 'none'; object-src 'none'", $homeId);
+        $this->assertStringContainsString('8 lab archetypes', $homeId);
+        $this->assertStringContainsString('273 labs in 31 topics', $homeId);
+        $this->assertStringNotContainsString('SPESIFIKASI RUNTIME', $homeId);
+        $this->assertStringNotContainsString('target.buka', $homeId);
+        $this->assertStringNotContainsString('Arketipe Lab', $homeId);
+        $this->assertStringNotContainsString('Lingkup Cookie', $homeId);
+        $this->assertStringNotContainsString('Katalog Siap', $homeId);
 
         // Check core Academy hub pages in ID
         $topicsId = $this->get('/web-security/all-topics')->assertOk()->getContent();
@@ -790,8 +818,16 @@ class LocalizationHeroAndUiAuditTest extends TestCase
         $this->assertStringContainsString('.vla-learning-content .heading1-white', $academyCss);
         $this->assertStringContainsString('.vla-learning-content .ps-breadcrumbs li a::after', $academyCss);
         $this->assertStringContainsString('.vla-learning-content .icon-arrow-right::before', $academyCss);
-        $this->assertStringContainsString('.vla-brand__logo--dark', $academyCss);
-        $this->assertStringContainsString('.sdl-command-brand__logo--dark', $workbenchCss);
+        $this->assertStringNotContainsString('.vla-brand__logo--dark', $academyCss);
+        $this->assertStringNotContainsString('.sdl-command-brand__logo--dark', $workbenchCss);
+        $this->assertStringNotContainsString('[data-theme="dark"]', $academyCss);
+        $this->assertStringNotContainsString('[data-theme="dark"]', $workbenchCss);
+        $this->assertStringContainsString('.vla-terminal-card--kali', $academyCss);
+        $this->assertStringContainsString('.vla-term-cursor', $academyCss);
+        $this->assertStringContainsString('.vla-footer__social', $academyCss);
+        $this->assertStringContainsString('footer.vla-footer .vla-footer__links', $academyCss);
+        $this->assertStringContainsString('grid-template-columns: auto 8.5ch minmax(0, 1fr);', $academyCss);
+        $this->assertMatchesRegularExpression('/\.vla-hero-grid\s*\{\s*grid-template-columns:\s*minmax\(0,\s*1fr\);/s', $academyCss);
 
         // Redesigned hub & certification & cheat-sheet routes drop legacy CSS & commercial links
         $redesignedRoutes = [
@@ -858,15 +894,21 @@ class LocalizationHeroAndUiAuditTest extends TestCase
             $this->assertStringContainsString('<html lang="id"', $stepHtml, "Missing Indonesian locale on {$stepRoute}");
         }
 
-        // Indonesian & Dark-theme rendering on key redesigned routes & XSS cheat sheet breadcrumb
-        $this->post('/preferences/theme', ['redirect_to' => '/web-security'])->assertRedirect('/web-security');
-        $darkHome = $this->get('/web-security')->assertOk()->getContent();
-        $this->assertStringContainsString('data-theme="dark"', $darkHome);
-        $this->assertStringContainsString('Platform pelatihan keamanan web praktis', $darkHome);
-        $this->assertStringContainsString('secdevlab-icon-square-dark.png', $darkHome);
+        // Indonesian & Light-only rendering on key redesigned routes & XSS cheat sheet breadcrumb
+        $lightHome = $this->get('/web-security')->assertOk()->getContent();
+        $this->assertStringContainsString('data-theme="light"', $lightHome);
+        $this->assertStringNotContainsString('data-theme="dark"', $lightHome);
+        $this->assertStringContainsString('Platform pelatihan keamanan web praktis', $lightHome);
+        $this->assertStringContainsString('secdevlab-icon-square-light.png', $lightHome);
+        $this->assertStringNotContainsString('secdevlab-icon-square-dark.png', $lightHome);
 
         $xssHtml = $this->get('/web-security/cross-site-scripting/cheat-sheet')->assertOk()->getContent();
         $this->assertStringContainsString('<span itemprop="name">SecDevLab</span>', $xssHtml);
-        $this->assertStringContainsString('data-theme="dark"', $xssHtml);
+        $this->assertStringContainsString('data-theme="light"', $xssHtml);
+        $this->assertStringNotContainsString('data-theme="dark"', $xssHtml);
+        $this->assertStringContainsString('<footer class="vla-footer', $xssHtml);
+        $this->assertStringContainsString('https://github.com/12Ndraaa/SecDevLab', $xssHtml);
+        $this->assertStringContainsString('https://www.instagram.com/axlendraa/', $xssHtml);
+        $this->assertStringContainsString('https://www.linkedin.com/in/axlendra-haris-sanjaya-19b8a6372/', $xssHtml);
     }
 }

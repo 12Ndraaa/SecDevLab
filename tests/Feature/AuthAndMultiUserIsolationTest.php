@@ -230,26 +230,67 @@ class AuthAndMultiUserIsolationTest extends TestCase
         $idHtml = $this->get('/')->assertOk()->getContent();
         $this->assertStringContainsString('<html lang="id"', $idHtml);
         $this->assertStringContainsString('Jelajahi Semua Lab', $idHtml);
+        $this->assertStringContainsString('data-theme="light"', $idHtml);
+        $this->assertStringNotContainsString('data-theme="dark"', $idHtml);
+        $this->assertStringNotContainsString('/preferences/theme', $idHtml);
 
-        // Switch theme to dark (Octo Code) and back to light
-        $this->post('/preferences/theme', ['redirect_to' => '/'])
-            ->assertRedirect('/');
-        $darkHtml = $this->get('/')->assertOk()->getContent();
-        $this->assertStringContainsString('data-theme="dark"', $darkHtml);
-        $this->assertStringNotContainsString('<script', strtolower($darkHtml));
+        // Light-only theme holds even if stale dark-theme session or cookie is sent, and /preferences/theme is 404
+        $this->post('/preferences/theme', ['redirect_to' => '/'])->assertNotFound();
+        $this->get('/preferences/theme')->assertNotFound();
 
-        $this->post('/preferences/theme', ['redirect_to' => '/'])
-            ->assertRedirect('/');
-        $lightHtml = $this->get('/')->assertOk()->getContent();
-        $this->assertStringContainsString('data-theme="light"', $lightHtml);
-        $this->assertStringNotContainsString('<script', strtolower($lightHtml));
+        $forcedRes = $this->withSession(['ui_theme' => 'dark'])
+            ->withUnencryptedCookie('secdevlab_theme', 'dark')
+            ->get('/');
+        $forcedRes->assertOk();
+        $forcedRes->assertCookieExpired('secdevlab_theme');
+        $forcedLightHtml = $forcedRes->getContent();
+        $this->assertStringContainsString('data-theme="light"', $forcedLightHtml);
+        $this->assertStringNotContainsString('data-theme="dark"', $forcedLightHtml);
+        $this->assertStringNotContainsString('<script', strtolower($forcedLightHtml));
+        $this->assertStringNotContainsString('[data-theme="dark"]', $academyCss);
 
-        // Verify Owner pill contrast fix (no vla-btn--accent wrapping vla-badge--orange)
+        // Footer social icons appear on Academy pages, omitted on Login & Register
+        $this->assertStringContainsString('<footer class="vla-footer', $defaultHtml);
+        $this->assertStringContainsString('https://github.com/12Ndraaa/SecDevLab', $defaultHtml);
+        $this->assertStringContainsString('https://www.instagram.com/axlendraa/', $defaultHtml);
+        $this->assertStringContainsString('https://www.linkedin.com/in/axlendra-haris-sanjaya-19b8a6372/', $defaultHtml);
+        $this->assertStringNotContainsString('Uji Kompetensi Keahlian', $idHtml);
+        $this->assertStringNotContainsString('Competency Project', $defaultHtml);
+
+        $loginHtml = $this->get('/users')->assertOk()->getContent();
+        $this->assertStringNotContainsString('<footer', $loginHtml);
+        $this->assertStringNotContainsString('vla-footer', $loginHtml);
+
+        $registerHtml = $this->get('/users/register')->assertOk()->getContent();
+        $this->assertStringNotContainsString('<footer', $registerHtml);
+        $this->assertStringNotContainsString('vla-footer', $registerHtml);
+
+        // Failed login & registration redirects also keep footer omitted
+        $failedLoginHtml = $this->from('/users')->followingRedirects()->post('/users', [
+            'email' => 'owner@secdevlab.local',
+            'password' => 'wrong-password',
+        ])->assertOk()->getContent();
+        $this->assertStringNotContainsString('<footer', $failedLoginHtml);
+        $this->assertStringNotContainsString('vla-footer', $failedLoginHtml);
+
+        $failedRegisterHtml = $this->from('/users/register')->followingRedirects()->post('/users/register', [
+            'name' => '',
+            'email' => 'bad-email',
+            'password' => '123',
+        ])->assertOk()->getContent();
+        $this->assertStringNotContainsString('<footer', $failedRegisterHtml);
+        $this->assertStringNotContainsString('vla-footer', $failedRegisterHtml);
+
+        // Verify Owner pill contrast fix & footer preserved on authenticated account page
         $owner = User::where('email', 'owner@secdevlab.local')->firstOrFail();
         $ownerHtml = $this->actingAs($owner)->get('/')->assertOk()->getContent();
         $this->assertStringContainsString('vla-account-pill', $ownerHtml);
         $this->assertStringContainsString('vla-role-pill--owner', $ownerHtml);
         $this->assertStringNotContainsString('vla-btn vla-btn--accent vla-btn--sm" href="/users/youraccount/personaldetails"', $ownerHtml);
+
+        $accountHtml = $this->actingAs($owner)->get('/users/youraccount/personaldetails')->assertOk()->getContent();
+        $this->assertStringContainsString('<footer class="vla-footer', $accountHtml);
+        $this->assertStringContainsString('https://github.com/12Ndraaa/SecDevLab', $accountHtml);
     }
 
     public function test_guest_is_redirected_to_users_login_when_accessing_launcher_or_account_and_legacy_lab_env_is_blocked(): void

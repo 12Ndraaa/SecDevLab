@@ -68,18 +68,9 @@ class LabEnvironmentController extends Controller
         $subRoute = strtolower((string) ($tailParts[0] ?? ''));
         $subAction = strtolower((string) ($tailParts[1] ?? ''));
 
-        // Non-sensitive display theme & locale toggles for the lab Command Bar
-        if ($subRoute === '_theme' && $request->isMethod('POST')) {
-            $nextTheme = $request->input('ui_theme');
-            if (! in_array($nextTheme, ['dark', 'light'], true)) {
-                $nextTheme = ($session->ui_theme === 'dark') ? 'light' : 'dark';
-            }
-            $session->ui_theme = $nextTheme;
-            $session->save();
-
-            return new Response('', 302, [
-                'Location' => $basePath !== '' ? $basePath : '/',
-            ]);
+        // Non-sensitive locale toggle for the lab Command Bar (_theme endpoint removed; light-only)
+        if ($subRoute === '_theme') {
+            abort(404);
         }
 
         if ($subRoute === '_locale' && $request->isMethod('POST')) {
@@ -658,7 +649,7 @@ class LabEnvironmentController extends Controller
             'basePath' => $basePath,
             'baseUrl' => $baseUrl,
             'urlMode' => $this->urlService->isSubdomainMode() ? 'subdomain' : 'path',
-            'labUiTheme' => in_array($session->ui_theme, ['dark', 'light'], true) ? $session->ui_theme : 'light',
+            'labUiTheme' => 'light',
             'labUiLocale' => $session->uiLocale(),
             'theme' => $theme,
             'isMystery' => $isMystery,

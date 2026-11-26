@@ -42,32 +42,6 @@ class PreferenceController extends Controller
         ));
     }
 
-    public function toggleTheme(Request $request): RedirectResponse
-    {
-        $requested = strtolower(trim((string) $request->input('theme', '')));
-        if (in_array($requested, ['dark', 'light'], true)) {
-            $next = $requested;
-        } else {
-            $current = (string) $request->session()->get('ui_theme', $request->cookie('secdevlab_theme', 'light'));
-            $next = $current === 'dark' ? 'light' : 'dark';
-        }
-
-        $request->session()->put('ui_theme', $next);
-        $request->session()->save();
-
-        return $this->safeBack($request)->withCookie(cookie(
-            'secdevlab_theme',
-            $next,
-            60 * 24 * 365,
-            '/',
-            null,
-            null,
-            true,
-            false,
-            'lax'
-        ));
-    }
-
     private function safeBack(Request $request): RedirectResponse
     {
         $redirect = trim((string) $request->input('redirect_to', ''));

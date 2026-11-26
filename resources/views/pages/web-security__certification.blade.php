@@ -43,14 +43,7 @@
                 <img
                     src="/content/images/logos/secdevlab-icon-square-light.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-icon-square-light.png')) ?: '1' }}"
                     alt="{{ $brand }}"
-                    class="sdl-brand-panel__art sdl-brand-panel__art--light"
-                    width="220"
-                    height="220"
-                >
-                <img
-                    src="/content/images/logos/secdevlab-icon-square-dark.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-icon-square-dark.png')) ?: '1' }}"
-                    alt="{{ $brand }}"
-                    class="sdl-brand-panel__art sdl-brand-panel__art--dark"
+                    class="sdl-brand-panel__art"
                     width="220"
                     height="220"
                 >

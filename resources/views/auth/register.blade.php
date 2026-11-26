@@ -1,6 +1,7 @@
 @extends('layouts.academy')
 
 @section('title', __('academy.auth.register_title').' | '.config('app.name'))
+@section('hide_footer', '1')
 
 @section('content')
 <div class="ps-auth-card">

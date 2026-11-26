@@ -320,9 +320,8 @@ class AcademyController extends Controller
 
         /** @var int $userId */
         $userId = (int) Auth::id();
-        $theme = (string) $request->session()->get('ui_theme', 'light');
         $locale = app()->getLocale();
-        $session = LabSession::forUserAndLab($userId, $lab->id, $theme, $locale);
+        $session = LabSession::forUserAndLab($userId, $lab->id, 'light', $locale);
 
         $target = $urlService->launchRedirectTarget($session, ['mystery' => 1], $request);
 
@@ -338,9 +337,8 @@ class AcademyController extends Controller
 
         /** @var int $userId */
         $userId = (int) Auth::id();
-        $theme = (string) $request->session()->get('ui_theme', 'light');
         $locale = app()->getLocale();
-        $session = LabSession::forUserAndLab($userId, $lab->id, $theme, $locale);
+        $session = LabSession::forUserAndLab($userId, $lab->id, 'light', $locale);
 
         $target = $urlService->launchRedirectTarget($session, [], $request);
 
@@ -381,9 +379,8 @@ class AcademyController extends Controller
             abort(403, __('academy.labs.forbidden_instance'));
         }
 
-        $theme = (string) $request->session()->get('ui_theme', 'light');
         $locale = app()->getLocale();
-        $session->resetState($theme, true, $locale);
+        $session->resetState('light', true, $locale);
 
         if ($request->input('return_to') === 'detail') {
             return redirect($session->lab->href)
@@ -426,10 +423,9 @@ class AcademyController extends Controller
 
         /** @var int $userId */
         $userId = (int) Auth::id();
-        $theme = (string) $request->session()->get('ui_theme', 'light');
         $locale = app()->getLocale();
-        $session = LabSession::forUserAndLab($userId, $lab->id, $theme, $locale);
-        $session->resetState($theme, true, $locale);
+        $session = LabSession::forUserAndLab($userId, $lab->id, 'light', $locale);
+        $session->resetState('light', true, $locale);
 
         if ($request->input('return_to') === 'detail') {
             return redirect($lab->href)
@@ -450,9 +446,8 @@ class AcademyController extends Controller
 
         /** @var int $userId */
         $userId = (int) Auth::id();
-        $theme = (string) $request->session()->get('ui_theme', 'light');
         $locale = app()->getLocale();
-        $session = LabSession::forUserAndLab($userId, $lab->id, $theme, $locale);
+        $session = LabSession::forUserAndLab($userId, $lab->id, 'light', $locale);
         $session->renewTtl();
 
         if ($request->input('return_to') === 'detail') {

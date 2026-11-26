@@ -22,9 +22,9 @@ Route::get('/leaderboard', [AcademyController::class, 'leaderboard'])->name('lea
 Route::get('/cve', [CveController::class, 'index'])->name('cve.index');
 Route::get('/cve/{slug}', [CveController::class, 'show'])->name('cve.show');
 
-// Zero-JS Session Preferences (Bilingual EN/ID & Pure-CSS Dark/Light Theme)
+// Zero-JS Session Preferences (Bilingual EN/ID; Light-only theme)
 Route::post('/preferences/locale', [PreferenceController::class, 'setLocale'])->name('preferences.locale');
-Route::post('/preferences/theme', [PreferenceController::class, 'toggleTheme'])->name('preferences.theme');
+Route::any('/preferences/theme', static fn () => abort(404));
 
 // 2. Multi-User Authentication Routes (/users/*)
 Route::get('/users', [AuthController::class, 'showLogin'])->name('login');

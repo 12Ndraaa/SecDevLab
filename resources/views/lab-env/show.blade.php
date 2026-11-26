@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ $labUiLocale ?? app()->getLocale() }}" data-theme="{{ $labUiTheme }}">
+<html lang="{{ $labUiLocale ?? app()->getLocale() }}" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -41,8 +41,7 @@
     <section class="sdl-command-bar">
         <div class="sdl-command-bar__top">
             <a class="sdl-command-brand" href="/" aria-label="{{ $brandName }}">
-                <img src="/content/images/logos/secdevlab-logo-wide-light.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-light.png')) ?: '1' }}" alt="{{ $brandName }}" class="sdl-command-brand__logo sdl-command-brand__logo--light" height="28">
-                <img src="/content/images/logos/secdevlab-logo-wide-dark.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-dark.png')) ?: '1' }}" alt="{{ $brandName }}" class="sdl-command-brand__logo sdl-command-brand__logo--dark" height="28">
+                <img src="/content/images/logos/secdevlab-logo-wide-light.png?v={{ @filemtime(public_path('content/images/logos/secdevlab-logo-wide-light.png')) ?: '1' }}" alt="{{ $brandName }}" class="sdl-command-brand__logo" height="28">
                 <span class="lw-sr-only">{{ $brandName }}</span>
             </a>
 
@@ -126,18 +125,6 @@
                         <button type="submit" name="ui_locale" value="en" class="{{ $activeLabLocale === 'en' ? 'is-active' : '' }}">EN</button>
                         <button type="submit" name="ui_locale" value="id" class="{{ $activeLabLocale === 'id' ? 'is-active' : '' }}">ID</button>
                     </div>
-                </form>
-
-                <form method="POST" action="{{ $basePath }}/_theme" style="display:inline;margin:0">
-                    <button type="submit" class="lw-btn" title="{{ __('academy.workbench.switch_theme') }}">
-                        @if ($labUiTheme === 'dark')
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
-                            <span>{{ __('academy.workbench.theme_light') }}</span>
-                        @else
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                            <span>{{ __('academy.workbench.theme_dark') }}</span>
-                        @endif
-                    </button>
                 </form>
 
                 <a class="lw-btn" href="{{ $lab->href }}">{{ __('academy.workbench.back_desc') }} &rarr;</a>

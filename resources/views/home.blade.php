@@ -25,18 +25,32 @@
             </div>
         </div>
 
-        <div class="vla-terminal-card" aria-label="{{ __('academy.home.spec_label') }}">
+        <div class="vla-terminal-card vla-terminal-card--kali" lang="en" aria-label="SecDevLab Kali sandbox runtime status">
             <div class="vla-terminal-card__bar">
-                <span class="vla-terminal-dots"><span></span><span></span><span></span></span>
-                <span>{{ __('academy.home.spec_header') }}</span>
+                <span class="vla-terminal-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+                <span class="vla-terminal-title">secdevlab@kali: ~/sandbox</span>
+                <span class="vla-terminal-shell">zsh</span>
             </div>
             <div class="vla-terminal-card__body">
-                <div><span class="vla-term-prompt">$</span> <span class="vla-term-cmd">{{ __('academy.home.spec_cmd') }}</span></div>
-                <div class="vla-term-ok">+ {{ __('academy.home.spec_capability') }}</div>
-                <div>+ {{ __('academy.home.spec_cookie') }}</div>
-                <div>+ {{ __('academy.home.spec_csp') }}</div>
-                <div>+ {{ __('academy.home.spec_archetypes') }}</div>
-                <div>+ {{ __('academy.home.spec_catalog', ['labs' => $labsCount, 'categories' => $categoriesCount]) }}</div>
+                <pre class="vla-kali-ascii" aria-hidden="true"><span class="vla-ansi-cyan">   __ __  ___   __    ____</span>  <span class="vla-ansi-red">secdevlab // kali</span>
+<span class="vla-ansi-cyan">  / //_/ / _ | / /   /  _/</span>  <span class="vla-ansi-muted">target  :</span> <span class="vla-ansi-amber">sandbox</span>
+<span class="vla-ansi-cyan"> / ,&lt;   / __ |/ /__ _/ /  </span>  <span class="vla-ansi-muted">shell   :</span> <span class="vla-ansi-cyan">zsh</span>
+<span class="vla-ansi-cyan">/_/|_| /_/ |_/____//___/  </span>  <span class="vla-ansi-muted">boot    :</span> <span class="vla-ansi-green">ok</span></pre>
+                <div class="vla-kali-prompt">
+                    <div><span class="vla-zsh-frame">┌──(</span><span class="vla-zsh-user">secdevlab㉿kali</span><span class="vla-zsh-frame">)-[</span><span class="vla-zsh-path">~/sandbox</span><span class="vla-zsh-frame">]</span></div>
+                    <div><span class="vla-zsh-frame">└─$</span> <span class="vla-term-cmd">target.open</span> <span class="vla-ansi-amber">--isolate=per-session</span></div>
+                </div>
+                <div class="vla-kali-output">
+                    <div class="vla-term-line"><span class="vla-ansi-green">[+]</span> <span class="vla-term-key">route</span> <span class="vla-term-val vla-ansi-cyan">/lab/&lt;32-hex-token&gt;</span></div>
+                    <div class="vla-term-line"><span class="vla-ansi-amber">[*]</span> <span class="vla-term-key">cookie</span> <span class="vla-term-val">Path=/lab/&lt;token&gt; SameSite=Lax</span></div>
+                    <div class="vla-term-line"><span class="vla-ansi-amber">[*]</span> <span class="vla-term-key">csp</span> <span class="vla-term-val">script-src 'none'; object-src 'none'</span></div>
+                    <div class="vla-term-line"><span class="vla-ansi-amber">[*]</span> <span class="vla-term-key">targets</span> <span class="vla-term-val">8 lab archetypes</span></div>
+                    <div class="vla-term-line"><span class="vla-ansi-green">[+]</span> <span class="vla-term-key">catalog</span> <span class="vla-term-val vla-ansi-green">{{ $labsCount }} labs in {{ $categoriesCount }} topics</span></div>
+                </div>
+                <div class="vla-kali-prompt vla-kali-prompt--idle" aria-hidden="true">
+                    <div><span class="vla-zsh-frame">┌──(</span><span class="vla-zsh-user">secdevlab㉿kali</span><span class="vla-zsh-frame">)-[</span><span class="vla-zsh-path">~/sandbox</span><span class="vla-zsh-frame">]</span></div>
+                    <div><span class="vla-zsh-frame">└─$</span> <span class="vla-term-cursor"></span></div>
+                </div>
             </div>
         </div>
     </div>

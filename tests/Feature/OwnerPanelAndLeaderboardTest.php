@@ -216,11 +216,11 @@ class OwnerPanelAndLeaderboardTest extends TestCase
             'status' => 'published',
         ])->assertSessionHasErrors('cve_id');
 
-        // Print stylesheet & dark-mode legacy contrast rules check
+        // Print stylesheet & light-only contrast rules check
         $css = file_get_contents(public_path('content/academy-modern.css'));
         $this->assertStringContainsString('@media print', $css);
         $this->assertStringContainsString('[data-theme="light"]', $css);
-        $this->assertStringContainsString('[data-theme="dark"]', $css);
+        $this->assertStringNotContainsString('[data-theme="dark"]', $css);
         $this->assertStringContainsString('.container-cards-white-medium-space-between', $css);
 
         // Dynamic Owner-created category topic route renders 200 OK instead of 404

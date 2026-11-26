@@ -85,11 +85,12 @@ class RailwayDeploymentReadinessTest extends TestCase
             $redirectRes->headers->get('Location')
         );
 
-        $themeRes = $this->withServerVariables($proxyHeaders)->post('/preferences/theme', [
+        $prefRes = $this->withServerVariables($proxyHeaders)->post('/preferences/locale', [
+            'locale' => 'id',
             'redirect_to' => '/cve',
         ]);
-        $themeRes->assertStatus(302);
-        $this->assertSame('https://secdevlab.up.railway.app/cve', $themeRes->headers->get('Location'));
+        $prefRes->assertStatus(302);
+        $this->assertSame('https://secdevlab.up.railway.app/cve', $prefRes->headers->get('Location'));
     }
 
     public function test_force_scheme_https_enforces_https_urls_when_enabled(): void

@@ -101,7 +101,6 @@ class AuthController extends Controller
     public function logout(Request $request): RedirectResponse
     {
         $savedLocale = (string) $request->session()->get('locale', $request->cookie('secdevlab_locale', ''));
-        $savedTheme = (string) $request->session()->get('ui_theme', $request->cookie('secdevlab_theme', ''));
 
         Auth::logout();
         $request->session()->invalidate();
@@ -109,9 +108,6 @@ class AuthController extends Controller
 
         if (in_array($savedLocale, ['en', 'id'], true)) {
             $request->session()->put('locale', $savedLocale);
-        }
-        if (in_array($savedTheme, ['dark', 'light'], true)) {
-            $request->session()->put('ui_theme', $savedTheme);
         }
         $request->session()->save();
 

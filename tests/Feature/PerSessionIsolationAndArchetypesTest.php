@@ -277,24 +277,31 @@ class PerSessionIsolationAndArchetypesTest extends TestCase
             $this->assertStringContainsString(e($resolver->meta($lab)['short']), $html);
             $this->assertStringNotContainsString('<script', strtolower($html));
             $this->assertStringNotContainsString('logoAcademy.svg', $html);
-            $this->assertMatchesRegularExpression('/data-theme="(dark|light)"/', $html);
+            $this->assertStringContainsString('data-theme="light"', $html);
+            $this->assertStringNotContainsString('data-theme="dark"', $html);
+            $this->assertStringNotContainsString('/_theme', $html);
         }
 
         // All 8 archetypes must be exercised across the 31 categories
         $this->assertCount(8, $seenArchetypes);
 
-        // Test Light (default) / Dark toggle inside lab instance (Zero-JS POST _theme)
+        // Verify Light-only mode inside lab instance (no _theme toggle, _theme endpoint 404, stale dark DB row forced to light)
         $aiLab = Lab::where('category_id', 'web-llm-attacks')->firstOrFail();
         $aiUrl = $this->launchPath($this->alice, $aiLab->id);
         $this->assertStringContainsString('data-theme="light"', $this->get($aiUrl)->assertOk()->getContent());
-        $this->post($aiUrl.'/_theme')->assertRedirect($aiUrl);
-        $this->assertStringContainsString('data-theme="dark"', $this->get($aiUrl)->assertOk()->getContent());
-        $this->post($aiUrl.'/_theme')->assertRedirect($aiUrl);
-        $this->assertStringContainsString('data-theme="light"', $this->get($aiUrl)->assertOk()->getContent());
+        $this->post($aiUrl.'/_theme')->assertNotFound();
 
-        // Verify lab-workbench.css supports Dark/Light themes, all 8 distinct archetypes, contrast tokens, and styled file upload without JS
+        $aiSession = LabSession::findByToken(substr($aiUrl, 5));
+        $this->assertNotNull($aiSession);
+        $aiSession->ui_theme = 'dark';
+        $aiSession->save();
+        $forcedLightLabHtml = $this->get($aiUrl)->assertOk()->getContent();
+        $this->assertStringContainsString('data-theme="light"', $forcedLightLabHtml);
+        $this->assertStringNotContainsString('data-theme="dark"', $forcedLightLabHtml);
+
+        // Verify lab-workbench.css supports Light-only theme, all 8 distinct archetypes, contrast tokens, and styled file upload without JS
         $labCss = (string) file_get_contents(public_path('content/lab-workbench.css'));
-        $this->assertStringContainsString('[data-theme="dark"]', $labCss);
+        $this->assertStringNotContainsString('[data-theme="dark"]', $labCss);
         $this->assertStringContainsString('[data-theme="light"]', $labCss);
         $this->assertStringContainsString('--lw-arch-btn-bg:', $labCss);
         $this->assertStringContainsString('--lw-solved-bg:', $labCss);

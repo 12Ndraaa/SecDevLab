@@ -99,7 +99,7 @@ class LabSession extends Model
     public static function forUserAndLab(int $userId, string $labId, ?string $uiTheme = null, ?string $uiLocale = null): self
     {
         $normalizedLabId = strtolower($labId);
-        $theme = in_array($uiTheme, ['dark', 'light'], true) ? $uiTheme : 'light';
+        $theme = 'light';
         $resolvedLocale = in_array($uiLocale, ['en', 'id'], true)
             ? $uiLocale
             : (string) Cache::get("secdevlab_user_locale:{$userId}", '');
@@ -117,10 +117,10 @@ class LabSession extends Model
                 || empty($existing->session_secrets)
                 || $existing->isExpired()
             ) {
-                $existing->resetState($uiTheme, true, $uiLocale);
+                $existing->resetState($theme, true, $uiLocale);
             } else {
-                if ($uiTheme && in_array($uiTheme, ['dark', 'light'], true) && $existing->ui_theme !== $uiTheme) {
-                    $existing->ui_theme = $uiTheme;
+                if ($existing->ui_theme !== 'light') {
+                    $existing->ui_theme = 'light';
                     $existing->save();
                 }
                 if ($uiLocale && in_array($uiLocale, ['en', 'id'], true) && $existing->uiLocale() !== $uiLocale) {
@@ -291,9 +291,7 @@ class LabSession extends Model
             'chat_history' => [],
             'exploit_state' => null,
             'workbench_state' => $preservedLocale !== 'en' ? ['_ui_locale' => $preservedLocale] : null,
-            'ui_theme' => in_array($uiTheme, ['dark', 'light'], true)
-                ? $uiTheme
-                : ($this->ui_theme ?: 'light'),
+            'ui_theme' => 'light',
         ]);
         $this->save();
 

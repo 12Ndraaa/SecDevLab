@@ -69,25 +69,15 @@ class SetLocaleAndTheme
         App::setLocale($locale);
         Carbon::setLocale($locale);
 
-        $theme = '';
         if ($hasSession && $request->session()->has('ui_theme')) {
-            $theme = (string) $request->session()->get('ui_theme', '');
+            $request->session()->forget('ui_theme');
         }
-        if (! in_array($theme, ['dark', 'light'], true)) {
-            $cookieTheme = (string) $request->cookie('secdevlab_theme', '');
-            if (in_array($cookieTheme, ['dark', 'light'], true)) {
-                $theme = $cookieTheme;
-                if ($hasSession) {
-                    $request->session()->put('ui_theme', $theme);
-                }
-            }
-        }
-        if (! in_array($theme, ['dark', 'light'], true)) {
-            $theme = 'light';
+        if ($request->cookies->has('secdevlab_theme')) {
+            Cookie::queue(Cookie::forget('secdevlab_theme'));
         }
 
         View::share('uiLocale', $locale);
-        View::share('uiTheme', $theme);
+        View::share('uiTheme', 'light');
 
         return $next($request);
     }
